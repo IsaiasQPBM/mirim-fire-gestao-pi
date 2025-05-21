@@ -1,4 +1,5 @@
 
+import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -15,42 +16,47 @@ import UserEdit from "./pages/users/UserEdit";
 import UserProfile from "./pages/users/UserProfile";
 import UserPermissions from "./pages/users/UserPermissions";
 
+// Create a new QueryClient instance
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<Login />} />
+const App = () => {
+  return (
+    <React.StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<Login />} />
 
-          {/* Protected routes with dashboard layout */}
-          <Route element={<DashboardLayout />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/students" element={<PlaceholderPage />} />
-            <Route path="/courses" element={<PlaceholderPage />} />
-            <Route path="/calendar" element={<PlaceholderPage />} />
-            <Route path="/settings" element={<PlaceholderPage />} />
-            <Route path="/grades" element={<PlaceholderPage />} />
-            <Route path="/schedule" element={<PlaceholderPage />} />
-            
-            {/* User management routes */}
-            <Route path="/users" element={<UsersList />} />
-            <Route path="/users/create" element={<UserCreate />} />
-            <Route path="/users/:id/edit" element={<UserEdit />} />
-            <Route path="/users/:id" element={<UserProfile />} />
-            <Route path="/users/:id/permissions" element={<UserPermissions />} />
-          </Route>
+              {/* Protected routes with dashboard layout */}
+              <Route element={<DashboardLayout />}>
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/students" element={<PlaceholderPage />} />
+                <Route path="/courses" element={<PlaceholderPage />} />
+                <Route path="/calendar" element={<PlaceholderPage />} />
+                <Route path="/settings" element={<PlaceholderPage />} />
+                <Route path="/grades" element={<PlaceholderPage />} />
+                <Route path="/schedule" element={<PlaceholderPage />} />
+                
+                {/* User management routes */}
+                <Route path="/users" element={<UsersList />} />
+                <Route path="/users/create" element={<UserCreate />} />
+                <Route path="/users/:id/edit" element={<UserEdit />} />
+                <Route path="/users/:id" element={<UserProfile />} />
+                <Route path="/users/:id/permissions" element={<UserPermissions />} />
+              </Route>
 
-          {/* Catch all route */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+              {/* Catch all route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </React.StrictMode>
+  );
+};
 
 export default App;
