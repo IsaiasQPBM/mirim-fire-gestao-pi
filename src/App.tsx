@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -15,6 +14,22 @@ import UserCreate from "./pages/users/UserCreate";
 import UserEdit from "./pages/users/UserEdit";
 import UserProfile from "./pages/users/UserProfile";
 import UserPermissions from "./pages/users/UserPermissions";
+
+// Curriculum management imports
+import CoursesList from "./pages/curriculum/CoursesList";
+import CourseCreate from "./pages/curriculum/CourseCreate";
+import CourseEdit from "./pages/curriculum/CourseEdit";
+import CourseView from "./pages/curriculum/CourseView";
+import DisciplinesList from "./pages/curriculum/DisciplinesList";
+import DisciplineCreate from "./pages/curriculum/DisciplineCreate";
+import DisciplineEdit from "./pages/curriculum/DisciplineEdit";
+import ClassesList from "./pages/curriculum/ClassesList";
+import ClassCreate from "./pages/curriculum/ClassCreate";
+import ClassEdit from "./pages/curriculum/ClassEdit";
+import ClassView from "./pages/curriculum/ClassView";
+import Calendar from "./pages/curriculum/Calendar";
+import CurriculumView from "./pages/curriculum/CurriculumView";
+import LessonPlanning from "./pages/curriculum/LessonPlanning";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -35,8 +50,24 @@ const App = () => {
               <Route element={<DashboardLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/students" element={<PlaceholderPage />} />
-                <Route path="/courses" element={<PlaceholderPage />} />
-                <Route path="/calendar" element={<PlaceholderPage />} />
+                
+                {/* Curriculum Management Routes */}
+                <Route path="/courses" element={<CoursesList />} />
+                <Route path="/courses/create" element={<CourseCreate />} />
+                <Route path="/courses/:id/edit" element={<CourseEdit />} />
+                <Route path="/courses/:id" element={<CourseView />} />
+                <Route path="/disciplines" element={<DisciplinesList />} />
+                <Route path="/disciplines/create" element={<DisciplineCreate />} />
+                <Route path="/disciplines/:id/edit" element={<DisciplineEdit />} />
+                <Route path="/classes" element={<ClassesList />} />
+                <Route path="/classes/create" element={<ClassCreate />} />
+                <Route path="/classes/:id/edit" element={<ClassEdit />} />
+                <Route path="/classes/:id" element={<ClassView />} />
+                <Route path="/calendar" element={<Calendar />} />
+                <Route path="/curriculum" element={<CurriculumView />} />
+                <Route path="/lessons/planning" element={<LessonPlanning />} />
+                
+                {/* Other existing routes */}
                 <Route path="/settings" element={<PlaceholderPage />} />
                 <Route path="/grades" element={<PlaceholderPage />} />
                 <Route path="/schedule" element={<PlaceholderPage />} />

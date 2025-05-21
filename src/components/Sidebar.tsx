@@ -12,6 +12,10 @@ import {
   Shield, 
   LogIn,
   UserCog,
+  BookPlus,
+  CalendarDays,
+  ListOrdered,
+  PenLine,
 } from 'lucide-react';
 import CBMEPILogo from './CBMEPILogo';
 
@@ -48,22 +52,31 @@ const Sidebar: React.FC<SidebarProps> = ({
 
     if (role === 'admin') {
       items.push(
-        { name: 'Gerenciar Usuários', icon: UserCog, path: '/users', roles: ['admin'] }
+        { name: 'Gerenciar Usuários', icon: UserCog, path: '/users', roles: ['admin'] },
+        { name: 'Gerenciar Cursos', icon: BookOpen, path: '/courses', roles: ['admin'] },
+        { name: 'Gerenciar Disciplinas', icon: BookPlus, path: '/disciplines', roles: ['admin'] },
+        { name: 'Gerenciar Turmas', icon: Users, path: '/classes', roles: ['admin'] },
+        { name: 'Calendário Acadêmico', icon: CalendarDays, path: '/calendar', roles: ['admin'] },
+        { name: 'Grade Curricular', icon: ListOrdered, path: '/curriculum', roles: ['admin'] }
       );
     }
 
     if (role === 'admin' || role === 'instructor') {
       items.push(
         { name: 'Alunos', icon: Users, path: '/students', roles: ['admin', 'instructor'] },
-        { name: 'Disciplinas', icon: BookOpen, path: '/courses', roles: ['admin', 'instructor'] },
-        { name: 'Calendário', icon: Calendar, path: '/calendar', roles: ['admin', 'instructor'] }
+        { name: role === 'instructor' ? 'Minhas Disciplinas' : 'Disciplinas', icon: BookOpen, path: '/disciplines', roles: ['admin', 'instructor'] },
+        { name: role === 'instructor' ? 'Minhas Turmas' : 'Turmas', icon: Users, path: '/classes', roles: ['admin', 'instructor'] },
+        { name: 'Calendário', icon: Calendar, path: '/calendar', roles: ['admin', 'instructor'] },
+        { name: 'Planejamento de Aulas', icon: PenLine, path: '/lessons/planning', roles: ['admin', 'instructor'] }
       );
     }
 
     if (role === 'student') {
       items.push(
         { name: 'Notas', icon: BookOpen, path: '/grades', roles: ['student'] },
-        { name: 'Cronograma', icon: Calendar, path: '/schedule', roles: ['student'] }
+        { name: 'Cronograma', icon: Calendar, path: '/schedule', roles: ['student'] },
+        { name: 'Meus Cursos', icon: BookOpen, path: '/courses', roles: ['student'] },
+        { name: 'Calendário', icon: CalendarDays, path: '/calendar', roles: ['student'] }
       );
     }
 
