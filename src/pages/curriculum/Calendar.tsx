@@ -54,9 +54,29 @@ const Calendar: React.FC = () => {
     setSelectedDateEvents(filteredEvents);
   }, [date, events]);
 
-  // Function to get event dates
+  // Function to get dates with events as a Set (for the modifiers)
   const getEventDates = () => {
-    return events.map(event => new Date(event.startDate));
+    const eventDates = events.map(event => {
+      const date = new Date(event.startDate);
+      // Reset time part for comparison
+      date.setHours(0, 0, 0, 0);
+      return date;
+    });
+    return eventDates;
+  };
+
+  // Create a modifier for days that have events
+  const modifiers = {
+    hasEvent: getEventDates(),
+  };
+
+  // Create styles for the modifiers to highlight days with events
+  const modifiersStyles = {
+    hasEvent: { 
+      fontWeight: 'bold',
+      textDecoration: 'underline',
+      backgroundColor: 'rgba(255, 87, 34, 0.1)' // Slight orange background
+    }
   };
 
   // Function to get badge color based on event type
@@ -127,7 +147,8 @@ const Calendar: React.FC = () => {
                     selected={date}
                     onSelect={(date) => date && setDate(date)}
                     className="rounded-md border"
-                    highlightedDates={getEventDates()}
+                    modifiers={modifiers}
+                    modifiersStyles={modifiersStyles}
                   />
                   
                   <div className="mt-4 space-y-2">
