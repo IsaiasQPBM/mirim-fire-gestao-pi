@@ -31,6 +31,18 @@ import Calendar from "./pages/curriculum/Calendar";
 import CurriculumView from "./pages/curriculum/CurriculumView";
 import LessonPlanning from "./pages/curriculum/LessonPlanning";
 
+// Pedagogical monitoring imports
+import ObservationsList from "./pages/pedagogical/ObservationsList";
+import ObservationCreate from "./pages/pedagogical/ObservationCreate";
+import StudentDashboard from "./pages/pedagogical/StudentDashboard";
+import AssessmentsList from "./pages/pedagogical/AssessmentsList";
+import AssessmentCreate from "./pages/pedagogical/AssessmentCreate";
+import AssessmentEdit from "./pages/pedagogical/AssessmentEdit";
+import AssessmentView from "./pages/pedagogical/AssessmentView";
+import QuestionBank from "./pages/pedagogical/QuestionBank";
+import AssessmentTake from "./pages/pedagogical/AssessmentTake";
+import ResultsView from "./pages/pedagogical/ResultsView";
+
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
 
@@ -66,6 +78,18 @@ const App = () => {
                 <Route path="/calendar" element={<Calendar />} />
                 <Route path="/curriculum" element={<CurriculumView />} />
                 <Route path="/lessons/planning" element={<LessonPlanning />} />
+                
+                {/* Pedagogical Monitoring Routes */}
+                <Route path="/pedagogical/observations" element={<ObservationsList />} />
+                <Route path="/pedagogical/observations/create" element={<ObservationCreate />} />
+                <Route path="/pedagogical/student/:id" element={<StudentDashboard />} />
+                <Route path="/pedagogical/assessments" element={<AssessmentsList />} />
+                <Route path="/pedagogical/assessments/create" element={<AssessmentCreate />} />
+                <Route path="/pedagogical/assessments/:id/edit" element={<AssessmentEdit />} />
+                <Route path="/pedagogical/assessments/:id" element={<AssessmentView />} />
+                <Route path="/pedagogical/questionbank" element={<QuestionBank />} />
+                <Route path="/pedagogical/assessments/:id/take" element={<AssessmentTake />} />
+                <Route path="/pedagogical/results/:id" element={<ResultsView />} />
                 
                 {/* Other existing routes */}
                 <Route path="/settings" element={<PlaceholderPage />} />
