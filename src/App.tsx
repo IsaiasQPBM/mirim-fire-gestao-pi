@@ -9,6 +9,11 @@ import Dashboard from "./pages/Dashboard";
 import PlaceholderPage from "./pages/PlaceholderPage";
 import NotFound from "./pages/NotFound";
 import DashboardLayout from "./components/DashboardLayout";
+import UsersList from "./pages/users/UsersList";
+import UserCreate from "./pages/users/UserCreate";
+import UserEdit from "./pages/users/UserEdit";
+import UserProfile from "./pages/users/UserProfile";
+import UserPermissions from "./pages/users/UserPermissions";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +36,13 @@ const App = () => (
             <Route path="/settings" element={<PlaceholderPage />} />
             <Route path="/grades" element={<PlaceholderPage />} />
             <Route path="/schedule" element={<PlaceholderPage />} />
+            
+            {/* User management routes */}
+            <Route path="/users" element={<UsersList />} />
+            <Route path="/users/create" element={<UserCreate />} />
+            <Route path="/users/:id/edit" element={<UserEdit />} />
+            <Route path="/users/:id" element={<UserProfile />} />
+            <Route path="/users/:id/permissions" element={<UserPermissions />} />
           </Route>
 
           {/* Catch all route */}

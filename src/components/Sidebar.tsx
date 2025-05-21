@@ -11,6 +11,7 @@ import {
   Settings,
   Shield, 
   LogIn,
+  UserCog,
 } from 'lucide-react';
 import CBMEPILogo from './CBMEPILogo';
 
@@ -44,6 +45,12 @@ const Sidebar: React.FC<SidebarProps> = ({
     const items = [
       { name: 'Dashboard', icon: Home, path: '/dashboard', roles: ['admin', 'instructor', 'student'] },
     ];
+
+    if (role === 'admin') {
+      items.push(
+        { name: 'Gerenciar Usuários', icon: UserCog, path: '/users', roles: ['admin'] }
+      );
+    }
 
     if (role === 'admin' || role === 'instructor') {
       items.push(
