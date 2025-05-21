@@ -43,6 +43,15 @@ import QuestionBank from "./pages/pedagogical/QuestionBank";
 import AssessmentTake from "./pages/pedagogical/AssessmentTake";
 import ResultsView from "./pages/pedagogical/ResultsView";
 
+// Reports imports
+import ReportsDashboard from "./pages/reports/ReportsDashboard";
+import StudentBulletin from "./pages/reports/StudentBulletin";
+
+// Communication imports
+import MessagesInbox from "./pages/communication/MessagesInbox";
+import ComposeMessage from "./pages/communication/ComposeMessage";
+import AnnouncementsList from "./pages/communication/AnnouncementsList";
+
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
 
@@ -90,11 +99,28 @@ const App = () => {
                 <Route path="/pedagogical/questionbank" element={<QuestionBank />} />
                 <Route path="/pedagogical/assessments/:id/take" element={<AssessmentTake />} />
                 <Route path="/pedagogical/results/:id" element={<ResultsView />} />
-                
+
+                {/* Reports Routes */}
+                <Route path="/reports" element={<ReportsDashboard />} />
+                <Route path="/reports/student-bulletin" element={<StudentBulletin />} />
+                <Route path="/reports/class-performance" element={<PlaceholderPage title="Desempenho por Turma" />} />
+                <Route path="/reports/approval-stats" element={<PlaceholderPage title="Estatísticas de Aprovação" />} />
+                <Route path="/reports/attendance" element={<PlaceholderPage title="Relatório de Frequência" />} />
+                <Route path="/reports/comparative" element={<PlaceholderPage title="Análise Comparativa" />} />
+
+                {/* Communication Routes */}
+                <Route path="/communication/messages" element={<MessagesInbox />} />
+                <Route path="/communication/messages/new" element={<ComposeMessage />} />
+                <Route path="/communication/announcements" element={<AnnouncementsList />} />
+                <Route path="/communication/announcements/new" element={<PlaceholderPage title="Novo Comunicado" />} />
+                <Route path="/notifications" element={<PlaceholderPage title="Todas as Notificações" />} />
+
                 {/* Other existing routes */}
                 <Route path="/settings" element={<PlaceholderPage />} />
                 <Route path="/grades" element={<PlaceholderPage />} />
                 <Route path="/schedule" element={<PlaceholderPage />} />
+                <Route path="/help" element={<PlaceholderPage title="Sistema de Ajuda" />} />
+                <Route path="/profile" element={<PlaceholderPage title="Perfil do Usuário" />} />
                 
                 {/* User management routes */}
                 <Route path="/users" element={<UsersList />} />

@@ -1,14 +1,35 @@
 
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
-import { Users, BookOpen, Calendar, Shield } from 'lucide-react';
+import { 
+  Users, 
+  BookOpen, 
+  Calendar, 
+  Shield, 
+  MessageSquare, 
+  Bell, 
+  FileText, 
+  Megaphone,
+  HelpCircle
+} from 'lucide-react';
 import Header from '@/components/Header';
+import { AnimatedContainer } from '@/components/ui/animated-container';
+import { Button } from '@/components/ui/button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { useToast } from '@/hooks/use-toast';
 
 const Dashboard: React.FC = () => {
   const [userRole, setUserRole] = useState<string>('');
   const [userName, setUserName] = useState<string>('');
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     // In a real app, this would check authentication status
@@ -22,36 +43,70 @@ const Dashboard: React.FC = () => {
 
     setUserRole(storedUserRole);
     setUserName(storedUserName);
-  }, [navigate]);
+
+    // Demo welcome toast
+    toast({
+      title: "Bem-vindo de volta!",
+      description: `Olá ${storedUserName}, você tem 3 novas notificações.`,
+      duration: 5000,
+    });
+  }, [navigate, toast]);
 
   // Mock data for dashboard cards
   const getCardData = () => {
     if (userRole === 'admin') {
       return [
-        { title: 'Total de Alunos', value: '120', icon: Users, color: 'bg-blue-100 text-blue-600' },
-        { title: 'Disciplinas Ativas', value: '8', icon: BookOpen, color: 'bg-green-100 text-green-600' },
-        { title: 'Instrutores', value: '12', icon: Shield, color: 'bg-purple-100 text-purple-600' },
-        { title: 'Eventos do Mês', value: '5', icon: Calendar, color: 'bg-orange-100 text-orange-600' }
+        { title: 'Total de Alunos', value: '120', icon: Users, color: 'bg-blue-100 text-blue-600', link: '/students' },
+        { title: 'Disciplinas Ativas', value: '8', icon: BookOpen, color: 'bg-green-100 text-green-600', link: '/disciplines' },
+        { title: 'Instrutores', value: '12', icon: Shield, color: 'bg-purple-100 text-purple-600', link: '/users' },
+        { title: 'Eventos do Mês', value: '5', icon: Calendar, color: 'bg-orange-100 text-orange-600', link: '/calendar' }
       ];
     } else if (userRole === 'instructor') {
       return [
-        { title: 'Seus Alunos', value: '45', icon: Users, color: 'bg-blue-100 text-blue-600' },
-        { title: 'Suas Disciplinas', value: '3', icon: BookOpen, color: 'bg-green-100 text-green-600' },
-        { title: 'Avaliações Pendentes', value: '12', icon: BookOpen, color: 'bg-red-100 text-red-600' },
-        { title: 'Próxima Aula', value: 'Hoje, 14h', icon: Calendar, color: 'bg-orange-100 text-orange-600' }
+        { title: 'Seus Alunos', value: '45', icon: Users, color: 'bg-blue-100 text-blue-600', link: '/students' },
+        { title: 'Suas Disciplinas', value: '3', icon: BookOpen, color: 'bg-green-100 text-green-600', link: '/disciplines' },
+        { title: 'Avaliações Pendentes', value: '12', icon: BookOpen, color: 'bg-red-100 text-red-600', link: '/pedagogical/assessments' },
+        { title: 'Próxima Aula', value: 'Hoje, 14h', icon: Calendar, color: 'bg-orange-100 text-orange-600', link: '/calendar' }
       ];
     } else {
       // Student role
       return [
-        { title: 'Suas Disciplinas', value: '6', icon: BookOpen, color: 'bg-green-100 text-green-600' },
-        { title: 'Média Geral', value: '8.5', icon: BookOpen, color: 'bg-blue-100 text-blue-600' },
-        { title: 'Tarefas Pendentes', value: '3', icon: BookOpen, color: 'bg-red-100 text-red-600' },
-        { title: 'Próxima Aula', value: 'Hoje, 14h', icon: Calendar, color: 'bg-orange-100 text-orange-600' }
+        { title: 'Suas Disciplinas', value: '6', icon: BookOpen, color: 'bg-green-100 text-green-600', link: '/courses' },
+        { title: 'Média Geral', value: '8.5', icon: BookOpen, color: 'bg-blue-100 text-blue-600', link: '/grades' },
+        { title: 'Tarefas Pendentes', value: '3', icon: BookOpen, color: 'bg-red-100 text-red-600', link: '/schedule' },
+        { title: 'Próxima Aula', value: 'Hoje, 14h', icon: Calendar, color: 'bg-orange-100 text-orange-600', link: '/calendar' }
+      ];
+    }
+  };
+
+  const getQuickActions = () => {
+    if (userRole === 'admin') {
+      return [
+        { title: 'Novo Comunicado', icon: Megaphone, color: 'bg-amber-100 text-amber-600', link: '/communication/announcements/new' },
+        { title: 'Nova Mensagem', icon: MessageSquare, color: 'bg-violet-100 text-violet-600', link: '/communication/messages/new' },
+        { title: 'Gerar Relatório', icon: FileText, color: 'bg-emerald-100 text-emerald-600', link: '/reports' },
+        { title: 'Ver Notificações', icon: Bell, color: 'bg-rose-100 text-rose-600', link: '/notifications' }
+      ];
+    } else if (userRole === 'instructor') {
+      return [
+        { title: 'Nova Avaliação', icon: FileText, color: 'bg-amber-100 text-amber-600', link: '/pedagogical/assessments/create' },
+        { title: 'Nova Mensagem', icon: MessageSquare, color: 'bg-violet-100 text-violet-600', link: '/communication/messages/new' },
+        { title: 'Ver Notificações', icon: Bell, color: 'bg-rose-100 text-rose-600', link: '/notifications' },
+        { title: 'Boletim de Aluno', icon: FileText, color: 'bg-emerald-100 text-emerald-600', link: '/reports/student-bulletin' }
+      ];
+    } else {
+      // Student role
+      return [
+        { title: 'Ver Mensagens', icon: MessageSquare, color: 'bg-violet-100 text-violet-600', link: '/communication/messages' },
+        { title: 'Comunicados', icon: Megaphone, color: 'bg-amber-100 text-amber-600', link: '/communication/announcements' },
+        { title: 'Cronograma', icon: Calendar, color: 'bg-green-100 text-green-600', link: '/schedule' },
+        { title: 'Meu Boletim', icon: FileText, color: 'bg-emerald-100 text-emerald-600', link: '/reports/student-bulletin' }
       ];
     }
   };
 
   const cardData = getCardData();
+  const quickActions = getQuickActions();
 
   const getWelcomeMessage = () => {
     const hour = new Date().getHours();
@@ -71,7 +126,7 @@ const Dashboard: React.FC = () => {
       <Header title="Dashboard" userRole={userRole} userName={userName} />
       
       <main className="flex-1 p-6 overflow-y-auto">
-        <div className="mb-6">
+        <AnimatedContainer animation="fadeIn" className="mb-6">
           <h2 className="text-2xl font-bold text-cbmepi-black">{getWelcomeMessage()}</h2>
           <p className="text-gray-600">
             {userRole === 'admin' 
@@ -80,29 +135,81 @@ const Dashboard: React.FC = () => {
                 ? 'Aqui está o resumo das suas atividades como instrutor.' 
                 : 'Aqui está o resumo das suas atividades como aluno do Pelotão Mirim.'}
           </p>
-        </div>
+        </AnimatedContainer>
+        
+        {/* Quick Actions */}
+        <AnimatedContainer animation="slideUp" delay="short" className="mb-8">
+          <h3 className="text-lg font-medium mb-4 flex items-center">
+            Ações Rápidas
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="ml-1 h-5 w-5">
+                    <HelpCircle className="h-4 w-4 text-gray-400" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Acesso rápido às funcionalidades mais utilizadas</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {quickActions.map((action, index) => (
+              <Link to={action.link} key={action.title}>
+                <Card className="shadow-sm hover:shadow-md transition-shadow cursor-pointer h-full">
+                  <CardContent className="p-4 flex flex-col items-center justify-center text-center h-full">
+                    <div className={`p-3 rounded-full ${action.color} mb-3`}>
+                      <action.icon size={24} />
+                    </div>
+                    <p className="font-medium text-sm">{action.title}</p>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </AnimatedContainer>
         
         {/* Dashboard Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {cardData.map((card, index) => (
-            <Card key={index} className="shadow-md hover:shadow-lg transition-shadow">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg flex items-center justify-between">
-                  {card.title}
-                  <div className={`p-2 rounded-full ${card.color}`}>
-                    <card.icon size={20} />
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold">{card.value}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <AnimatedContainer animation="slideUp" delay="medium" className="mb-8">
+          <h3 className="text-lg font-medium mb-4 flex items-center">
+            Resumo Geral
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="ml-1 h-5 w-5">
+                    <HelpCircle className="h-4 w-4 text-gray-400" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Informações importantes sobre o sistema</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            {cardData.map((card, index) => (
+              <Link to={card.link} key={index}>
+                <Card className="shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg flex items-center justify-between">
+                      {card.title}
+                      <div className={`p-2 rounded-full ${card.color}`}>
+                        <card.icon size={20} />
+                      </div>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-3xl font-bold">{card.value}</p>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </AnimatedContainer>
         
         {/* Role-specific content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <AnimatedContainer animation="slideUp" delay="long" className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main content card */}
           <Card className="lg:col-span-2 shadow-md">
             <CardHeader>
@@ -112,6 +219,24 @@ const Dashboard: React.FC = () => {
                   : userRole === 'instructor' 
                     ? 'Suas Próximas Atividades'
                     : 'Seu Progresso Acadêmico'}
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="icon" className="ml-1 h-5 w-5">
+                        <HelpCircle className="h-4 w-4 text-gray-400" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>
+                        {userRole === 'admin' 
+                          ? 'Visualização gráfica dos dados do sistema' 
+                          : userRole === 'instructor' 
+                            ? 'Calendário de atividades agendadas'
+                            : 'Acompanhamento do seu desempenho acadêmico'}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -158,7 +283,7 @@ const Dashboard: React.FC = () => {
               </div>
             </CardContent>
           </Card>
-        </div>
+        </AnimatedContainer>
       </main>
     </div>
   );

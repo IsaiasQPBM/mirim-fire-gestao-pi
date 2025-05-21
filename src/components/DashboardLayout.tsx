@@ -23,6 +23,18 @@ const DashboardLayout: React.FC = () => {
     // Set user data
     setUserRole(storedUserRole as 'admin' | 'instructor' | 'student');
     setUserName(storedUserName);
+
+    // Set userId if not already set
+    if (!localStorage.getItem('userId')) {
+      // Default userId based on role
+      if (storedUserRole === 'admin') {
+        localStorage.setItem('userId', 'user-1');
+      } else if (storedUserRole === 'instructor') {
+        localStorage.setItem('userId', 'user-2');
+      } else {
+        localStorage.setItem('userId', 'user-3');
+      }
+    }
   }, [navigate]);
 
   // Don't render until we have user role
