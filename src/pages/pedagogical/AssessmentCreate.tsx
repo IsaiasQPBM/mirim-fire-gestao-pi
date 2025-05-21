@@ -1,11 +1,12 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { SaveIcon, Plus, Trash2, ArrowLeft, Search } from 'lucide-react';
+import { SaveIcon, Plus, Trash2, ArrowLeft, Search, CheckCircle } from 'lucide-react';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -26,7 +27,28 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { toast } from '@/hooks/use-toast';
 import { useForm } from 'react-hook-form';
-import { Question, mockQuestions } from '@/data/pedagogicalTypes';
+import { 
+  Question, 
+  mockQuestions, 
+  QuestionType, 
+  DifficultyLevel 
+} from '@/data/pedagogicalTypes';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+
+interface Class {
+  id: string;
+  name: string;
+  courseId: string;
+  startDate: string;
+  endDate: string;
+}
 
 interface FormValues {
   title: string;
