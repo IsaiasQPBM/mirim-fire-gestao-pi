@@ -1,27 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Trash2, Save, CheckCircle } from 'lucide-react';
+import { SaveIcon, Plus, Trash2, ArrowLeft, Search } from 'lucide-react';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -32,24 +16,17 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
 import { toast } from '@/hooks/use-toast';
 import { useForm } from 'react-hook-form';
-import { Class } from '@/data/curriculumTypes';
-import { mockQuestions, Question, QuestionType, DifficultyLevel } from '@/data/pedagogicalTypes';
+import { Question, mockQuestions } from '@/data/pedagogicalTypes';
 
 interface FormValues {
   title: string;
@@ -496,11 +473,12 @@ const AssessmentCreate = () => {
                     variant="outline" 
                     onClick={() => navigate('/pedagogical/assessments')}
                   >
+                    <ArrowLeft className="mr-2 h-4 w-4" />
                     Cancelar
                   </Button>
                   <div className="space-x-2">
                     <Button type="submit" onClick={() => form.setValue('isPublished', false)}>
-                      <Save className="mr-2 h-4 w-4" />
+                      <SaveIcon className="mr-2 h-4 w-4" />
                       Salvar Rascunho
                     </Button>
                     <Button type="submit" onClick={() => form.setValue('isPublished', true)}>
