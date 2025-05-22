@@ -21,7 +21,8 @@ import {
   Users,
   FileText,
   CheckCircle,
-  X
+  X,
+  GraduationCap
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
