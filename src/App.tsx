@@ -47,11 +47,16 @@ import DashboardLayout from './components/DashboardLayout';
 function App() {
   return (
     <Routes>
+      {/* Public routes */}
       <Route path="/" element={<Index />} />
       <Route path="/login" element={<Login />} />
       
+      {/* Protected routes with DashboardLayout */}
       <Route element={<DashboardLayout />}>
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/profile" element={<PlaceholderPage title="Perfil do Usuário" />} />
+        <Route path="/help" element={<PlaceholderPage title="Ajuda do Sistema" />} />
+        <Route path="/settings" element={<PlaceholderPage title="Configurações" />} />
         
         {/* Users */}
         <Route path="/users" element={<UsersList />} />
@@ -104,8 +109,17 @@ function App() {
         
         {/* Placeholders for missing pages */}
         <Route path="/placeholder" element={<PlaceholderPage />} />
+        
+        {/* Placeholders for common sections that might be missing */}
+        <Route path="/courses" element={<PlaceholderPage title="Cursos" />} />
+        <Route path="/disciplines" element={<PlaceholderPage title="Disciplinas" />} />
+        <Route path="/classes" element={<PlaceholderPage title="Turmas" />} />
+        <Route path="/schedule" element={<PlaceholderPage title="Cronograma" />} />
+        <Route path="/grades" element={<PlaceholderPage title="Notas" />} />
+        <Route path="/calendar" element={<PlaceholderPage title="Calendário" />} />
       </Route>
-      
+
+      {/* 404 route */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
