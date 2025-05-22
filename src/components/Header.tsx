@@ -1,9 +1,8 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Menu } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   Sheet,
   SheetContent,
@@ -11,6 +10,7 @@ import {
 } from '@/components/ui/sheet';
 import GlobalNavigation from './GlobalNavigation';
 import NotificationsPanel from './NotificationsPanel';
+import GlobalSearch from './GlobalSearch';
 
 interface HeaderProps {
   title: string;
@@ -19,14 +19,7 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ title, userRole, userName }) => {
-  const [searchQuery, setSearchQuery] = useState('');
   const userId = localStorage.getItem('userId') || 'user-1'; // Default to user-1 if not found
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    // In a real app, we would redirect to search results
-    console.log('Searching for:', searchQuery);
-  };
 
   return (
     <div className="flex flex-col">
@@ -65,15 +58,13 @@ const Header: React.FC<HeaderProps> = ({ title, userRole, userName }) => {
         
         <div className="flex items-center gap-4">
           {/* Search bar - only visible on larger screens */}
-          <div className="hidden md:flex items-center relative rounded-md border border-input bg-white focus-within:ring-1 focus-within:ring-primary">
-            <Search size={18} className="absolute left-3 text-gray-400" />
-            <Input 
-              type="search"
-              placeholder="Pesquisar..." 
-              className="pl-10 border-none rounded-md bg-transparent w-64 h-9" 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+          <div className="hidden md:block w-64">
+            <GlobalSearch />
+          </div>
+          
+          {/* Mobile search icon */}
+          <div className="md:hidden">
+            <GlobalSearch variant="minimal" />
           </div>
           
           {/* Notifications icon */}

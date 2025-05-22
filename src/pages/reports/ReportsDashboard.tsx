@@ -1,14 +1,26 @@
+
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { FileCog, FileText, Download, Calendar, BarChartHorizontal, PieChart, Users } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { FileCog, FileText, Download, Calendar, BarChartHorizontal, PieChart, Users, Info } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { reportTypes } from '@/data/communicationTypes';
+import { useToast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const ReportsDashboard: React.FC = () => {
   const [userRole, setUserRole] = useState<string>(localStorage.getItem('userRole') || '');
   const [userName, setUserName] = useState<string>(localStorage.getItem('userName') || '');
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   // Filter report types based on user role
   const filteredReports = userRole === 'student' 
@@ -32,11 +44,27 @@ const ReportsDashboard: React.FC = () => {
     }
   };
 
+  const handleReportSelection = (reportId: string) => {
+    // Some reports may not be fully implemented yet
+    const implementedReports = ['student-bulletin'];
+    
+    if (!implementedReports.includes(reportId)) {
+      toast({
+        title: "Funcionalidade em desenvolvimento",
+        description: "Este relatório estará disponível em breve.",
+        variant: "default",
+      });
+      return;
+    }
+    
+    navigate(`/reports/${reportId}`);
+  };
+
   return (
     <div className="flex flex-col h-screen bg-gray-50">
       <Header title="Relatórios" userRole={userRole} userName={userName} />
       
-      <main className="flex-1 p-6 overflow-y-auto">
+      <main className="flex-1 p-4 md:p-6 overflow-y-auto">
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-cbmepi-black">Central de Relatórios</h2>
           <p className="text-gray-600">
@@ -44,15 +72,24 @@ const ReportsDashboard: React.FC = () => {
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {filteredReports.map((report) => (
             <Card key={report.id} className="shadow-md hover:shadow-lg transition-shadow">
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
                   <CardTitle className="text-lg">{report.name}</CardTitle>
-                  <div className="p-2 rounded-full bg-gray-100">
-                    {getReportIcon(report.icon)}
-                  </div>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="p-2 rounded-full bg-gray-100">
+                          {getReportIcon(report.icon)}
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-sm">{report.description}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
                 <CardDescription>{report.description}</CardDescription>
               </CardHeader>
@@ -62,12 +99,13 @@ const ReportsDashboard: React.FC = () => {
                 </div>
               </CardContent>
               <CardFooter>
-                <Link to={`/reports/${report.id}`} className="w-full">
-                  <Button className="w-full">
-                    <FileText className="mr-2 h-4 w-4" />
-                    Gerar Relatório
-                  </Button>
-                </Link>
+                <Button 
+                  className="w-full"
+                  onClick={() => handleReportSelection(report.id)}
+                >
+                  <FileText className="mr-2 h-4 w-4" />
+                  Gerar Relatório
+                </Button>
               </CardFooter>
             </Card>
           ))}

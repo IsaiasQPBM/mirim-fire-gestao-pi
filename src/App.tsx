@@ -14,6 +14,7 @@ import UserCreate from "./pages/users/UserCreate";
 import UserEdit from "./pages/users/UserEdit";
 import UserProfile from "./pages/users/UserProfile";
 import UserPermissions from "./pages/users/UserPermissions";
+import HelpSystem from "./components/HelpSystem";
 
 // Curriculum management imports
 import CoursesList from "./pages/curriculum/CoursesList";
@@ -132,6 +133,11 @@ const App = () => {
 
               {/* Catch all route */}
               <Route path="*" element={<NotFound />} />
+            </Routes>
+            {/* Global Help System - available on all routes except login */}
+            <Routes>
+              <Route path="/" element={null} />
+              <Route path="/*" element={<HelpSystem />} />
             </Routes>
           </BrowserRouter>
         </TooltipProvider>
