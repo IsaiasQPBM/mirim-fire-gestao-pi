@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -18,7 +17,7 @@ import {
   SlidersHorizontal
 } from 'lucide-react';
 import { Student, mockStudents, StudentStatus } from '@/data/studentTypes';
-import { Class, mockClasses } from '@/data/mockCurriculumData';
+import { mockClasses } from '@/data/mockCurriculumData';
 import { Course } from '@/data/curriculumTypes';
 import StudentCard from '@/components/students/StudentCard';
 import Header from '@/components/Header';

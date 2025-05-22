@@ -63,6 +63,7 @@ export interface AttendanceRecord {
 }
 
 export interface StudentAcademicRecord {
+  studentId: string; // Added studentId property
   courseId: string;
   courseName: string;
   status: 'in_progress' | 'completed' | 'dropped';
@@ -80,6 +81,7 @@ export interface StudentAcademicRecord {
 
 export interface TimelineEvent {
   id: string;
+  studentId: string; // Added studentId property
   date: string;
   title: string;
   description: string;
