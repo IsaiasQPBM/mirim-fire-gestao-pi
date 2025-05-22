@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { 
@@ -16,6 +16,8 @@ import {
   CalendarDays,
   ListOrdered,
   PenLine,
+  MessageSquare,
+  FileText,
 } from 'lucide-react';
 import CBMEPILogo from './CBMEPILogo';
 
@@ -35,6 +37,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   setIsCollapsed 
 }) => {
   const [collapsed, setCollapsed] = useState(isCollapsed);
+  const location = useLocation();
 
   const toggleSidebar = () => {
     const newValue = !collapsed;
@@ -57,7 +60,8 @@ const Sidebar: React.FC<SidebarProps> = ({
         { name: 'Gerenciar Disciplinas', icon: BookPlus, path: '/disciplines', roles: ['admin'] },
         { name: 'Gerenciar Turmas', icon: Users, path: '/classes', roles: ['admin'] },
         { name: 'Calendário Acadêmico', icon: CalendarDays, path: '/calendar', roles: ['admin'] },
-        { name: 'Grade Curricular', icon: ListOrdered, path: '/curriculum', roles: ['admin'] }
+        { name: 'Grade Curricular', icon: ListOrdered, path: '/curriculum', roles: ['admin'] },
+        { name: 'Relatórios', icon: FileText, path: '/reports', roles: ['admin'] }
       );
     }
 
@@ -67,7 +71,8 @@ const Sidebar: React.FC<SidebarProps> = ({
         { name: role === 'instructor' ? 'Minhas Disciplinas' : 'Disciplinas', icon: BookOpen, path: '/disciplines', roles: ['admin', 'instructor'] },
         { name: role === 'instructor' ? 'Minhas Turmas' : 'Turmas', icon: Users, path: '/classes', roles: ['admin', 'instructor'] },
         { name: 'Calendário', icon: Calendar, path: '/calendar', roles: ['admin', 'instructor'] },
-        { name: 'Planejamento de Aulas', icon: PenLine, path: '/lessons/planning', roles: ['admin', 'instructor'] }
+        { name: 'Planejamento de Aulas', icon: PenLine, path: '/lessons/planning', roles: ['admin', 'instructor'] },
+        { name: 'Comunicações', icon: MessageSquare, path: '/communications/messages', roles: ['admin', 'instructor'] }
       );
     }
 
@@ -76,7 +81,8 @@ const Sidebar: React.FC<SidebarProps> = ({
         { name: 'Notas', icon: BookOpen, path: '/grades', roles: ['student'] },
         { name: 'Cronograma', icon: Calendar, path: '/schedule', roles: ['student'] },
         { name: 'Meus Cursos', icon: BookOpen, path: '/courses', roles: ['student'] },
-        { name: 'Calendário', icon: CalendarDays, path: '/calendar', roles: ['student'] }
+        { name: 'Calendário', icon: CalendarDays, path: '/calendar', roles: ['student'] },
+        { name: 'Mensagens', icon: MessageSquare, path: '/communications/messages', roles: ['student'] }
       );
     }
 
@@ -90,6 +96,11 @@ const Sidebar: React.FC<SidebarProps> = ({
   };
 
   const navigationItems = getNavigationItems(userRole);
+
+  // Check if a navigation item is active
+  const isActive = (path: string) => {
+    return location.pathname === path || location.pathname.startsWith(`${path}/`);
+  };
 
   return (
     <div 
@@ -119,13 +130,16 @@ const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Navigation Links */}
-      <div className="flex-1 py-4">
+      <div className="flex-1 py-4 overflow-y-auto">
         {navigationItems.map((item) => (
           <Link
             key={item.name}
             to={item.path}
             className={cn(
-              'flex items-center px-4 py-3 mx-2 rounded-md hover:bg-sidebar-accent text-sidebar-foreground',
+              'flex items-center px-4 py-3 mx-2 rounded-md text-sidebar-foreground',
+              isActive(item.path) 
+                ? 'bg-cbmepi-orange text-white' 
+                : 'hover:bg-sidebar-accent',
               collapsed ? 'justify-center' : 'justify-start'
             )}
           >

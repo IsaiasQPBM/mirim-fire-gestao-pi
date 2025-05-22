@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import { cn } from '@/lib/utils';
 import RouteLogger from './RouteLogger';
@@ -11,6 +11,7 @@ const DashboardLayout: React.FC = () => {
   const [userRole, setUserRole] = useState<'admin' | 'instructor' | 'student'>('student');
   const [userName, setUserName] = useState<string>('');
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -38,7 +39,18 @@ const DashboardLayout: React.FC = () => {
         localStorage.setItem('userId', 'user-3');
       }
     }
-  }, [navigate]);
+
+    // Check if we need to redirect due to a direct path access
+    if (location.pathname === '/disciplines') {
+      // This is already supported by our direct route
+    } else if (location.pathname === '/classes') {
+      // This is already supported by our direct route
+    } else if (location.pathname === '/courses') {
+      // This is already supported by our direct route
+    } else if (location.pathname === '/lessons/planning') {
+      // This is already supported by our direct route
+    }
+  }, [navigate, location]);
 
   const handleRouteChange = (path: string, timestamp: number) => {
     // Log route changes for analytics

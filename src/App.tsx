@@ -86,6 +86,15 @@ function App() {
         <Route path="/curriculum/lessons" element={<LessonPlanning />} />
         <Route path="/curriculum/calendar" element={<Calendar />} />
         
+        {/* Direct access routes to match sidebar links */}
+        <Route path="/disciplines" element={<DisciplinesList />} />
+        <Route path="/disciplines/create" element={<DisciplineCreate />} />
+        <Route path="/disciplines/:id/edit" element={<DisciplineEdit />} />
+        <Route path="/classes" element={<ClassesList />} />
+        <Route path="/courses" element={<CoursesList />} />
+        <Route path="/lessons/planning" element={<LessonPlanning />} />
+        <Route path="/calendar" element={<Calendar />} />
+        
         {/* Pedagogical */}
         <Route path="/pedagogical/assessments" element={<AssessmentsList />} />
         <Route path="/pedagogical/assessments/create" element={<AssessmentCreate />} />
@@ -111,12 +120,8 @@ function App() {
         <Route path="/placeholder" element={<PlaceholderPage />} />
         
         {/* Placeholders for common sections that might be missing */}
-        <Route path="/courses" element={<PlaceholderPage title="Cursos" />} />
-        <Route path="/disciplines" element={<PlaceholderPage title="Disciplinas" />} />
-        <Route path="/classes" element={<PlaceholderPage title="Turmas" />} />
         <Route path="/schedule" element={<PlaceholderPage title="Cronograma" />} />
         <Route path="/grades" element={<PlaceholderPage title="Notas" />} />
-        <Route path="/calendar" element={<PlaceholderPage title="Calendário" />} />
       </Route>
 
       {/* 404 route */}

@@ -1,15 +1,19 @@
+
 import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 
 interface RouteLoggerProps {
   onRouteChange?: (path: string, timestamp: number) => void;
 }
 
 /**
- * Component that logs route changes and 404 attempts
+ * Component that logs route changes, 404 attempts and monitors route integrity
  */
 const RouteLogger: React.FC<RouteLoggerProps> = ({ onRouteChange }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   
   useEffect(() => {
     // Get current timestamp
@@ -41,6 +45,26 @@ const RouteLogger: React.FC<RouteLoggerProps> = ({ onRouteChange }) => {
       }
       
       localStorage.setItem('notFoundLog', JSON.stringify(notFoundLog));
+
+      // If the path is expected to exist but doesn't, try to redirect to the closest matching route
+      if (location.pathname.startsWith('/curriculum/')) {
+        // Extract the resource type (like 'disciplines', 'classes')
+        const segments = location.pathname.split('/');
+        if (segments.length >= 3) {
+          const resource = segments[2];
+          // Check if there's a direct route available
+          if (['disciplines', 'classes', 'courses'].includes(resource)) {
+            // Redirect to the direct route
+            const directPath = `/${resource}`;
+            toast({
+              title: "Redirecionamento",
+              description: `A página não foi encontrada. Redirecionando para ${directPath}`,
+              variant: "default",
+            });
+            setTimeout(() => navigate(directPath), 1500);
+          }
+        }
+      }
     }
     
     // Call the callback if provided
@@ -53,8 +77,14 @@ const RouteLogger: React.FC<RouteLoggerProps> = ({ onRouteChange }) => {
       (window as any).get404Logs = () => {
         return JSON.parse(localStorage.getItem('notFoundLog') || '[]');
       };
+      
+      // Add a function to clear 404 logs
+      (window as any).clear404Logs = () => {
+        localStorage.setItem('notFoundLog', JSON.stringify([]));
+        return "404 logs cleared";
+      };
     }
-  }, [location, onRouteChange]);
+  }, [location, onRouteChange, navigate, toast]);
 
   // This component doesn't render anything
   return null;
