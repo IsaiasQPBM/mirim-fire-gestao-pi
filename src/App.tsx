@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -15,6 +16,10 @@ import UserEdit from "./pages/users/UserEdit";
 import UserProfile from "./pages/users/UserProfile";
 import UserPermissions from "./pages/users/UserPermissions";
 import HelpSystem from "./components/HelpSystem";
+
+// Students module imports
+import StudentsList from "./pages/students/StudentsList";
+import StudentDetail from "./pages/students/StudentDetail";
 
 // Curriculum management imports
 import CoursesList from "./pages/curriculum/CoursesList";
@@ -71,7 +76,10 @@ const App = () => {
               {/* Protected routes with dashboard layout */}
               <Route element={<DashboardLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/students" element={<PlaceholderPage />} />
+                
+                {/* Students Module Routes */}
+                <Route path="/students" element={<StudentsList />} />
+                <Route path="/students/:id" element={<StudentDetail />} />
                 
                 {/* Curriculum Management Routes */}
                 <Route path="/courses" element={<CoursesList />} />
