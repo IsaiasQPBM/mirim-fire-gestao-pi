@@ -9,7 +9,7 @@ import {
   BookOpen,
   User, 
   Download as DownloadIcon,
-  FileData
+  FileIcon
 } from 'lucide-react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import Header from '@/components/Header';
@@ -119,7 +119,7 @@ const StudentBulletin: React.FC = () => {
                   Exportar PDF
                 </Button>
                 <Button variant="outline" className="flex-1" onClick={handleExportExcel}>
-                  <FileData className="mr-2 h-4 w-4" />
+                  <FileIcon className="mr-2 h-4 w-4" />
                   Exportar Excel
                 </Button>
               </div>

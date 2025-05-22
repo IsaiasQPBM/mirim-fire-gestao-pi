@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FileCog, FileText, Download, Calendar, ChartBarHorizontal, PieChart, Users } from 'lucide-react';
+import { FileCog, FileText, Download, Calendar, BarChartHorizontal, PieChart, Users } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
@@ -23,7 +22,7 @@ const ReportsDashboard: React.FC = () => {
       case 'users':
         return <Users className="h-6 w-6 text-purple-500" />;
       case 'chart-bar':
-        return <ChartBarHorizontal className="h-6 w-6 text-green-500" />;
+        return <BarChartHorizontal className="h-6 w-6 text-green-500" />;
       case 'calendar':
         return <Calendar className="h-6 w-6 text-orange-500" />;
       case 'chart-pie':
