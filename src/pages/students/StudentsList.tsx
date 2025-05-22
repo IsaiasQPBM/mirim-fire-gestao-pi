@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -141,11 +142,8 @@ const StudentsList: React.FC = () => {
   };
   
   const handleAddStudent = () => {
-    toast({
-      title: "Função em desenvolvimento",
-      description: "A criação de novos alunos estará disponível em breve.",
-      variant: "default",
-    });
+    // Navigate to the student registration page
+    navigate('/students/new');
   };
 
   // Pagination
