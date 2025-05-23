@@ -1,7 +1,9 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { coursesService, type Course } from '@/services/coursesService';
 import { useToast } from '@/hooks/use-toast';
+import { cacheService } from '@/services/cacheService';
+import { supabase } from '@/integrations/supabase/client';
 
 export function useCourses() {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -9,9 +11,23 @@ export function useCourses() {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const fetchCourses = async () => {
+  // Método para buscar todos os cursos com cache
+  const fetchCourses = useCallback(async (ignoreCache = false) => {
     try {
       setLoading(true);
+      
+      // Verificar cache primeiro
+      const cacheKey = 'courses_list';
+      if (!ignoreCache) {
+        const cachedCourses = cacheService.get<Course[]>(cacheKey);
+        if (cachedCourses) {
+          setCourses(cachedCourses);
+          setError(null);
+          setLoading(false);
+          return;
+        }
+      }
+      
       const { data, error } = await coursesService.getAll();
       
       if (error) {
@@ -24,6 +40,9 @@ export function useCourses() {
       } else {
         setCourses(data || []);
         setError(null);
+        
+        // Armazenar no cache por 5 minutos
+        cacheService.set(cacheKey, data || [], 5 * 60 * 1000);
       }
     } catch (err: any) {
       setError(err.message);
@@ -35,8 +54,9 @@ export function useCourses() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
+  // Criar curso
   const createCourse = async (courseData: any) => {
     try {
       const { data, error } = await coursesService.create(courseData);
@@ -51,7 +71,12 @@ export function useCourses() {
       }
 
       if (data) {
+        // Atualizar lista local para UI imediata
         setCourses(prev => [...prev, data]);
+        
+        // Invalidar cache
+        cacheService.remove('courses_list');
+        
         toast({
           title: 'Curso criado com sucesso',
         });
@@ -68,6 +93,7 @@ export function useCourses() {
     }
   };
 
+  // Atualizar curso
   const updateCourse = async (id: string, updates: any) => {
     try {
       const { data, error } = await coursesService.update(id, updates);
@@ -82,9 +108,15 @@ export function useCourses() {
       }
 
       if (data) {
+        // Atualizar lista local para UI imediata
         setCourses(prev => prev.map(course => 
           course.id === id ? data : course
         ));
+        
+        // Invalidar cache
+        cacheService.remove('courses_list');
+        cacheService.remove(`course_${id}`);
+        
         toast({
           title: 'Curso atualizado com sucesso',
         });
@@ -101,6 +133,7 @@ export function useCourses() {
     }
   };
 
+  // Excluir curso
   const deleteCourse = async (id: string) => {
     try {
       const { error } = await coursesService.delete(id);
@@ -114,7 +147,13 @@ export function useCourses() {
         return { success: false, error };
       }
 
+      // Atualizar lista local para UI imediata
       setCourses(prev => prev.filter(course => course.id !== id));
+      
+      // Invalidar cache
+      cacheService.remove('courses_list');
+      cacheService.remove(`course_${id}`);
+      
       toast({
         title: 'Curso excluído com sucesso',
       });
@@ -130,9 +169,99 @@ export function useCourses() {
     }
   };
 
+  // Buscar um curso específico por ID
+  const getCourse = async (id: string, ignoreCache = false) => {
+    try {
+      const cacheKey = `course_${id}`;
+      
+      // Verificar cache primeiro
+      if (!ignoreCache) {
+        const cachedCourse = cacheService.get<Course>(cacheKey);
+        if (cachedCourse) {
+          return { data: cachedCourse, error: null };
+        }
+      }
+      
+      const { data, error } = await coursesService.getById(id);
+      
+      if (!error && data) {
+        // Armazenar no cache por 5 minutos
+        cacheService.set(cacheKey, data, 5 * 60 * 1000);
+      }
+      
+      return { data, error };
+    } catch (err: any) {
+      return { data: null, error: err.message };
+    }
+  };
+
+  // Configurar inscrição em tempo real para alterações na tabela de cursos
   useEffect(() => {
     fetchCourses();
-  }, []);
+    
+    // Configurar inscrição em tempo real
+    const channel = supabase
+      .channel('public:courses')
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'courses' 
+        }, 
+        (payload) => {
+          console.log('Realtime update on courses table:', payload);
+          
+          // Refresh dos dados quando houver alterações
+          fetchCourses(true); // Ignorar cache
+          
+          // Mostrar notificação
+          if (payload.eventType === 'INSERT') {
+            toast({
+              title: 'Novo curso adicionado',
+              description: 'Um novo curso foi adicionado ao sistema.',
+            });
+          } else if (payload.eventType === 'UPDATE') {
+            toast({
+              title: 'Curso atualizado',
+              description: 'Um curso foi atualizado no sistema.',
+            });
+          } else if (payload.eventType === 'DELETE') {
+            toast({
+              title: 'Curso removido',
+              description: 'Um curso foi removido do sistema.',
+            });
+          }
+        }
+      )
+      .subscribe();
+    
+    // Limpar inscrição quando o componente for desmontado
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchCourses]);
+
+  // Obter apenas cursos ativos
+  const getActiveCourses = async () => {
+    try {
+      const cacheKey = 'active_courses_list';
+      const cachedCourses = cacheService.get<Course[]>(cacheKey);
+      
+      if (cachedCourses) {
+        return { data: cachedCourses, error: null };
+      }
+      
+      const { data, error } = await coursesService.getActiveCourses();
+      
+      if (!error && data) {
+        cacheService.set(cacheKey, data, 5 * 60 * 1000);
+      }
+      
+      return { data, error };
+    } catch (err: any) {
+      return { data: null, error: err.message };
+    }
+  };
 
   return {
     courses,
@@ -142,5 +271,7 @@ export function useCourses() {
     createCourse,
     updateCourse,
     deleteCourse,
+    getCourse,
+    getActiveCourses,
   };
 }
