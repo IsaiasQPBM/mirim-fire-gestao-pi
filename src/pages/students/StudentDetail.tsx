@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
@@ -12,6 +11,14 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { 
   User, 
   Phone, 
@@ -150,6 +157,21 @@ const StudentDetail: React.FC = () => {
     return (
       <div className="p-6">
         <Header title="Perfil do Aluno" userRole={userRole} userName={userName} />
+        <Breadcrumb className="mb-6">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/students">Alunos</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Aluno não encontrado</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
         <div className="mt-8 text-center">
           <h2 className="text-xl font-bold text-red-600">Aluno não encontrado</h2>
           <p className="mt-2">O aluno que você está procurando não existe.</p>
@@ -168,6 +190,21 @@ const StudentDetail: React.FC = () => {
     return (
       <div className="p-6">
         <Header title="Perfil do Aluno" userRole={userRole} userName={userName} />
+        <Breadcrumb className="mb-6">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/students">Alunos</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Acesso Restrito</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
         <div className="mt-8 text-center">
           <h2 className="text-xl font-bold text-red-600">Acesso Restrito</h2>
           <p className="mt-2">Você não tem permissão para visualizar este perfil.</p>
@@ -192,6 +229,22 @@ const StudentDetail: React.FC = () => {
       <Header title="Perfil do Aluno" userRole={userRole} userName={userName} />
       
       <div className="max-w-7xl mx-auto mt-6">
+        <Breadcrumb className="mb-6">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/students">Alunos</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{student.fullName}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
         <Card className="overflow-hidden border-t-4 border-t-cbmepi-orange shadow-md">
           <div className="bg-gradient-to-r from-cbmepi-orange to-cbmepi-red h-32 relative">
             {['admin', 'instructor'].includes(userRole) && (

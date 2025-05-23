@@ -19,6 +19,7 @@ import CourseCreate from './pages/curriculum/CourseCreate';
 import CourseEdit from './pages/curriculum/CourseEdit';
 import CurriculumView from './pages/curriculum/CurriculumView';
 import DisciplinesList from './pages/curriculum/DisciplinesList';
+import DisciplineView from './pages/curriculum/DisciplineView';
 import DisciplineCreate from './pages/curriculum/DisciplineCreate';
 import DisciplineEdit from './pages/curriculum/DisciplineEdit';
 import LessonPlanning from './pages/curriculum/LessonPlanning';
@@ -82,6 +83,7 @@ function App() {
         <Route path="/curriculum/courses/:id/edit" element={<CourseEdit />} />
         <Route path="/curriculum/disciplines" element={<DisciplinesList />} />
         <Route path="/curriculum/disciplines/create" element={<DisciplineCreate />} />
+        <Route path="/curriculum/disciplines/:id" element={<DisciplineView />} />
         <Route path="/curriculum/disciplines/:id/edit" element={<DisciplineEdit />} />
         <Route path="/curriculum/lessons" element={<LessonPlanning />} />
         <Route path="/curriculum/calendar" element={<Calendar />} />
@@ -89,9 +91,16 @@ function App() {
         {/* Direct access routes to match sidebar links */}
         <Route path="/disciplines" element={<DisciplinesList />} />
         <Route path="/disciplines/create" element={<DisciplineCreate />} />
+        <Route path="/disciplines/:id" element={<DisciplineView />} />
         <Route path="/disciplines/:id/edit" element={<DisciplineEdit />} />
         <Route path="/classes" element={<ClassesList />} />
+        <Route path="/classes/create" element={<ClassCreate />} />
+        <Route path="/classes/:id" element={<ClassView />} />
+        <Route path="/classes/:id/edit" element={<ClassEdit />} />
         <Route path="/courses" element={<CoursesList />} />
+        <Route path="/courses/create" element={<CourseCreate />} />
+        <Route path="/courses/:id" element={<CourseView />} />
+        <Route path="/courses/:id/edit" element={<CourseEdit />} />
         <Route path="/lessons/planning" element={<LessonPlanning />} />
         <Route path="/calendar" element={<Calendar />} />
         

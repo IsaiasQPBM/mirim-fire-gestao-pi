@@ -8,7 +8,15 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { PlusCircle, Search, Users, Calendar, MapPin } from 'lucide-react';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { PlusCircle, Search, Users, Calendar, MapPin, Eye, Edit } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 const ClassesList: React.FC = () => {
@@ -82,6 +90,11 @@ const ClassesList: React.FC = () => {
     navigate(`/classes/${classId}`);
   };
 
+  const handleEditClass = (classId: string, event: React.MouseEvent) => {
+    event.stopPropagation();
+    navigate(`/classes/${classId}/edit`);
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
@@ -107,6 +120,18 @@ const ClassesList: React.FC = () => {
       
       <main className="flex-1 p-6 overflow-y-auto">
         <div className="max-w-7xl mx-auto">
+          <Breadcrumb className="mb-6">
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Turmas</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center space-x-2">
               <Users className="h-6 w-6 text-cbmepi-red" />
@@ -221,19 +246,32 @@ const ClassesList: React.FC = () => {
                         Horários: {classItem.timeSchedule}
                       </span>
                       
-                      {isAdmin && (
+                      <div className="flex space-x-2">
                         <Button 
                           variant="outline" 
-                          size="sm" 
+                          size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
-                            navigate(`/classes/${classItem.id}/edit`);
+                            handleViewClass(classItem.id);
                           }}
                           className="text-cbmepi-orange border-cbmepi-orange hover:bg-cbmepi-orange hover:text-white"
                         >
-                          Editar
+                          <Eye className="mr-1 h-4 w-4" />
+                          Ver
                         </Button>
-                      )}
+                        
+                        {isAdmin && (
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={(e) => handleEditClass(classItem.id, e)}
+                            className="text-gray-600 border-gray-300 hover:bg-gray-100"
+                          >
+                            <Edit className="mr-1 h-4 w-4" />
+                            Editar
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
