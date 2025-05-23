@@ -5,56 +5,34 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import { Target, Heart, Users, Shield } from 'lucide-react';
 import CBMEPILogo from '@/components/CBMEPILogo';
 import InfoCard from '@/components/InfoCard';
 import Footer from '@/components/Footer';
 
 const Login: React.FC = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+  const { signIn } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Mock login functionality - in a real app, you would call an API here
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const { error } = await signIn(email, password);
       
-      // Simple validation
-      if (username && password) {
-        // Mock roles for demonstration
-        let role = 'student';
-        
-        if (username.includes('admin')) {
-          role = 'admin';
-        } else if (username.includes('instrutor')) {
-          role = 'instructor';
-        }
-        
-        // In a real app, we'd store these in a secure way
-        localStorage.setItem('userName', username);
-        localStorage.setItem('userRole', role);
-        
-        toast({
-          title: 'Login realizado com sucesso',
-          description: `Bem-vindo ao Sistema de Gestão do Projeto Bombeiro Mirim.`,
-        });
-        
+      if (!error) {
         navigate('/dashboard');
-      } else {
-        toast({
-          variant: 'destructive',
-          title: 'Erro no login',
-          description: 'Usuário ou senha incorretos. Tente novamente.',
-        });
       }
-    }, 1000);
+    } catch (error) {
+      console.error('Login error:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const infoCards = [
@@ -100,13 +78,13 @@ const Login: React.FC = () => {
               <CardContent>
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="username">Usuário</Label>
+                    <Label htmlFor="email">Email</Label>
                     <Input
-                      id="username"
-                      type="text"
-                      placeholder="Digite seu usuário"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
+                      id="email"
+                      type="email"
+                      placeholder="Digite seu email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                       required
                       className="border-[#F5A623] focus:ring-[#F5A623] focus:border-[#F5A623]"
                     />
