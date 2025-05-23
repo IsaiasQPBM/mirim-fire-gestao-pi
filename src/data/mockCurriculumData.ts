@@ -1,4 +1,3 @@
-
 import { Course, Discipline, Class, Lesson, CalendarEvent } from './curriculumTypes';
 
 export const mockCourses: Course[] = [
@@ -57,6 +56,8 @@ export const mockDisciplines: Discipline[] = [
     description: "História, valores e estrutura do Corpo de Bombeiros Militar do Piauí.",
     theoryHours: 20,
     practiceHours: 0,
+    workload: 20,
+    status: 'active',
     isActive: true,
     createdAt: "2023-01-16T08:30:00Z",
     updatedAt: "2023-01-16T08:30:00Z"
@@ -69,6 +70,8 @@ export const mockDisciplines: Discipline[] = [
     description: "Conceitos básicos e práticas iniciais de primeiros socorros.",
     theoryHours: 15,
     practiceHours: 25,
+    workload: 40,
+    status: 'active',
     isActive: true,
     createdAt: "2023-01-17T09:45:00Z",
     updatedAt: "2023-01-17T09:45:00Z"
@@ -81,6 +84,8 @@ export const mockDisciplines: Discipline[] = [
     description: "Princípios de prevenção e comportamento seguro em relação ao fogo.",
     theoryHours: 10,
     practiceHours: 20,
+    workload: 30,
+    status: 'active',
     isActive: true,
     createdAt: "2023-01-18T10:15:00Z",
     updatedAt: "2023-01-18T10:15:00Z"
@@ -93,6 +98,8 @@ export const mockDisciplines: Discipline[] = [
     description: "Disciplina, movimentos básicos de marcha e formação.",
     theoryHours: 5,
     practiceHours: 25,
+    workload: 30,
+    status: 'active',
     isActive: true,
     createdAt: "2023-01-19T11:00:00Z",
     updatedAt: "2023-01-19T11:00:00Z"
@@ -105,6 +112,8 @@ export const mockDisciplines: Discipline[] = [
     description: "Identificação e classificação de diferentes tipos de incêndio.",
     theoryHours: 15,
     practiceHours: 10,
+    workload: 25,
+    status: 'active',
     isActive: true,
     createdAt: "2023-02-11T08:00:00Z",
     updatedAt: "2023-02-11T08:00:00Z"
@@ -117,6 +126,8 @@ export const mockDisciplines: Discipline[] = [
     description: "Conhecimento e manuseio básico de equipamentos de combate a incêndio.",
     theoryHours: 10,
     practiceHours: 25,
+    workload: 35,
+    status: 'active',
     isActive: true,
     createdAt: "2023-02-12T09:30:00Z",
     updatedAt: "2023-02-12T09:30:00Z"
@@ -129,6 +140,8 @@ export const mockDisciplines: Discipline[] = [
     description: "Técnicas de avaliação primária e secundária de vítimas.",
     theoryHours: 12,
     practiceHours: 8,
+    workload: 20,
+    status: 'active',
     isActive: true,
     createdAt: "2023-03-06T08:15:00Z",
     updatedAt: "2023-03-06T08:15:00Z"
@@ -141,6 +154,8 @@ export const mockDisciplines: Discipline[] = [
     description: "Procedimentos de Ressuscitação Cardiopulmonar para leigos.",
     theoryHours: 10,
     practiceHours: 20,
+    workload: 30,
+    status: 'active',
     isActive: true,
     createdAt: "2023-03-07T10:00:00Z",
     updatedAt: "2023-03-07T10:00:00Z"
@@ -160,6 +175,7 @@ export const mockClasses: Class[] = [
     status: "active",
     studentIds: ["student1", "student2", "student3", "student4", "student5"],
     instructorIds: ["instructor1", "instructor2"],
+    disciplineIds: ["disc1", "disc2", "disc3", "disc4"],
     createdAt: "2023-02-15T14:30:00Z",
     updatedAt: "2023-02-15T14:30:00Z"
   },
@@ -175,6 +191,7 @@ export const mockClasses: Class[] = [
     status: "active",
     studentIds: ["student1", "student3", "student6", "student7"],
     instructorIds: ["instructor2", "instructor3"],
+    disciplineIds: ["disc5", "disc6"],
     createdAt: "2023-03-20T10:45:00Z",
     updatedAt: "2023-03-20T10:45:00Z"
   },
@@ -190,6 +207,7 @@ export const mockClasses: Class[] = [
     status: "upcoming",
     studentIds: ["student2", "student4", "student8", "student9", "student10"],
     instructorIds: ["instructor1", "instructor4"],
+    disciplineIds: ["disc7", "disc8"],
     createdAt: "2023-04-05T09:20:00Z",
     updatedAt: "2023-04-05T09:20:00Z"
   }

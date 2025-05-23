@@ -1,4 +1,3 @@
-
 export interface Course {
   id: string;
   name: string;
@@ -19,6 +18,8 @@ export interface Discipline {
   description: string;
   theoryHours: number;
   practiceHours: number;
+  workload: number; // Total hours (theory + practice)
+  status: 'active' | 'inactive' | 'draft';
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -36,6 +37,7 @@ export interface Class {
   status: 'active' | 'upcoming' | 'concluded';
   studentIds: string[];
   instructorIds: string[];
+  disciplineIds: string[]; // List of discipline IDs for this class
   createdAt: string;
   updatedAt: string;
 }
