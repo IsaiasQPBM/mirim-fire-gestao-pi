@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
+import Footer from './Footer';
 import { cn } from '@/lib/utils';
 import RouteLogger from './RouteLogger';
 import { useToast } from '@/hooks/use-toast';
@@ -76,24 +77,31 @@ const DashboardLayout: React.FC = () => {
   if (!userRole) return null;
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="min-h-screen flex flex-col">
       {/* Route logger for analytics */}
       <RouteLogger onRouteChange={handleRouteChange} />
       
-      {/* Sidebar */}
-      <Sidebar 
-        userRole={userRole} 
-        userName={userName}
-        isCollapsed={isCollapsed}
-        setIsCollapsed={setIsCollapsed}
-      />
-      
-      {/* Main Content */}
-      <div className={cn(
-        "flex-1 overflow-y-auto transition-all duration-300",
-        isCollapsed ? 'ml-16' : 'ml-64'
-      )}>
-        <Outlet />
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar */}
+        <Sidebar 
+          userRole={userRole} 
+          userName={userName}
+          isCollapsed={isCollapsed}
+          setIsCollapsed={setIsCollapsed}
+        />
+        
+        {/* Main Content */}
+        <div className={cn(
+          "flex-1 flex flex-col transition-all duration-300",
+          isCollapsed ? 'ml-16' : 'ml-64'
+        )}>
+          <main className="flex-1 overflow-y-auto bg-gray-50">
+            <Outlet />
+          </main>
+          
+          {/* Footer */}
+          <Footer />
+        </div>
       </div>
     </div>
   );

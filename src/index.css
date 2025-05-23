@@ -14,7 +14,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 3.9%;
  
-    --primary: 0 0% 9%;
+    --primary: 37 85% 55%; /* New orange #F5A623 */
     --primary-foreground: 0 0% 98%;
  
     --secondary: 0 0% 96.1%;
@@ -23,7 +23,7 @@
     --muted: 0 0% 96.1%;
     --muted-foreground: 0 0% 45.1%;
  
-    --accent: 0 0% 96.1%;
+    --accent: 37 85% 55%; /* New orange #F5A623 */
     --accent-foreground: 0 0% 9%;
  
     --destructive: 0 84.2% 60.2%;
@@ -31,20 +31,20 @@
 
     --border: 0 0% 89.8%;
     --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
+    --ring: 37 85% 55%; /* New orange #F5A623 */
  
     --radius: 0.5rem;
 
     --sidebar: 0 0% 100%;
     --sidebar-foreground: 0 0% 3.9%;
     --sidebar-border: 0 0% 89.8%;
-    --sidebar-primary: 24 100% 60%; /* Orange */
+    --sidebar-primary: 37 85% 55%; /* New orange #F5A623 */
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 0 0% 96.1%;
 
-    --cbmepi-orange: #f59e0b;
-    --cbmepi-red: #ea384c;
-    --cbmepi-black: #222222;
+    --cbmepi-orange: #F5A623; /* Updated orange */
+    --cbmepi-red: #B71C1C;
+    --cbmepi-black: #212121;
   }
  
   .dark {
@@ -57,8 +57,8 @@
     --popover: 0 0% 3.9%;
     --popover-foreground: 0 0% 98%;
  
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
+    --primary: 37 85% 55%; /* New orange #F5A623 */
+    --primary-foreground: 0 0% 98%;
  
     --secondary: 0 0% 14.9%;
     --secondary-foreground: 0 0% 98%;
@@ -74,12 +74,12 @@
  
     --border: 0 0% 14.9%;
     --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
+    --ring: 37 85% 55%; /* New orange #F5A623 */
 
     --sidebar: 0 0% 3.9%;
     --sidebar-foreground: 0 0% 98%;
     --sidebar-border: 0 0% 14.9%;
-    --sidebar-primary: 24 100% 60%; /* Orange */
+    --sidebar-primary: 37 85% 55%; /* New orange #F5A623 */
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 0 0% 14.9%;
   }
@@ -91,6 +91,25 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Updated gradient utilities for new orange */
+@layer utilities {
+  .bg-gradient-cbmepi {
+    background: linear-gradient(135deg, #F5A623 0%, #E8941A 100%);
+  }
+  
+  .border-gradient-cbmepi {
+    border: 2px solid;
+    border-image: linear-gradient(135deg, #F5A623, #E8941A) 1;
+  }
+  
+  .text-gradient-cbmepi {
+    background: linear-gradient(135deg, #F5A623, #E8941A);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 }
 
@@ -120,8 +139,16 @@
   animation-delay: 100ms;
 }
 
+.animation-delay-200 {
+  animation-delay: 200ms;
+}
+
 .animation-delay-300 {
   animation-delay: 300ms;
+}
+
+.animation-delay-400 {
+  animation-delay: 400ms;
 }
 
 .animation-delay-500 {
@@ -139,6 +166,23 @@
 
 .animation-duration-1000 {
   animation-duration: 1000ms;
+}
+
+/* Hover effects for interactive elements */
+.hover-scale {
+  transition: transform 0.2s ease-in-out;
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+.hover-glow {
+  transition: box-shadow 0.3s ease-in-out;
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 20px rgba(245, 166, 35, 0.4);
 }
 
 /* Animation keyframes */
@@ -193,4 +237,16 @@
     transform: scale(1);
     opacity: 1;
   }
+}
+
+/* Custom button styles */
+.btn-gradient-cbmepi {
+  background: linear-gradient(135deg, #F5A623 0%, #E8941A 100%);
+  transition: all 0.3s ease;
+}
+
+.btn-gradient-cbmepi:hover {
+  background: linear-gradient(135deg, #E8941A 0%, #D6831A 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(245, 166, 35, 0.3);
 }
