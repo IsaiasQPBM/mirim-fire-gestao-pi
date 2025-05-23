@@ -22,17 +22,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
+  // Helper function to create AuthUser from user and profile data
+  const createAuthUser = (user: User, profileData: any): AuthUser | null => {
+    if (!profileData) return null;
+    
+    return {
+      id: user.id,
+      email: user.email || '',
+      full_name: profileData.full_name,
+      role: profileData.role,
+      status: profileData.status
+    };
+  };
+
   useEffect(() => {
     // Verificar usuário atual
-    authService.getCurrentUser().then(({ user, profile }) => {
+    authService.getCurrentUser().then(({ user, profile: profileData }) => {
       setUser(user);
-      setProfile(profile);
       
-      // Manter compatibilidade com localStorage para transição
-      if (user && profile) {
-        localStorage.setItem('userId', user.id);
-        localStorage.setItem('userName', profile.full_name);
-        localStorage.setItem('userRole', profile.role);
+      if (user && profileData) {
+        const authUser = createAuthUser(user, profileData);
+        setProfile(authUser);
+        
+        // Manter compatibilidade com localStorage para transição
+        if (authUser) {
+          localStorage.setItem('userId', user.id);
+          localStorage.setItem('userName', authUser.full_name);
+          localStorage.setItem('userRole', authUser.role);
+        }
       }
       
       setLoading(false);
@@ -45,13 +62,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         if (session?.user) {
           setUser(session.user);
-          const profile = await authService.getProfile(session.user.id);
-          setProfile(profile);
+          const profileData = await authService.getProfile(session.user.id);
           
-          if (profile) {
-            localStorage.setItem('userId', session.user.id);
-            localStorage.setItem('userName', profile.full_name);
-            localStorage.setItem('userRole', profile.role);
+          if (profileData) {
+            const authUser = createAuthUser(session.user, profileData);
+            setProfile(authUser);
+            
+            if (authUser) {
+              localStorage.setItem('userId', session.user.id);
+              localStorage.setItem('userName', authUser.full_name);
+              localStorage.setItem('userRole', authUser.role);
+            }
           }
         } else {
           setUser(null);
@@ -70,7 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      const { user, profile, error } = await authService.signIn({ email, password });
+      const { user, profile: profileData, error } = await authService.signIn({ email, password });
       
       if (error) {
         toast({
@@ -81,13 +102,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { error };
       }
 
-      if (user && profile) {
+      if (user && profileData) {
         setUser(user);
-        setProfile(profile);
-        toast({
-          title: 'Login realizado com sucesso',
-          description: `Bem-vindo, ${profile.full_name}!`,
-        });
+        const authUser = createAuthUser(user, profileData);
+        setProfile(authUser);
+        
+        if (authUser) {
+          toast({
+            title: 'Login realizado com sucesso',
+            description: `Bem-vindo, ${authUser.full_name}!`,
+          });
+        }
       }
 
       return { error: null };
@@ -166,7 +191,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (data) {
-        setProfile(data);
+        const authUser = createAuthUser(user, data);
+        setProfile(authUser);
         toast({
           title: 'Perfil atualizado com sucesso',
         });
