@@ -9,21 +9,19 @@ export class AdminUserMigration {
 
   async createAdminUser(): Promise<ExecutionResult> {
     try {
-      // Use type assertion to avoid infinite type instantiation
-      const query = supabase
+      // Simplify the query to avoid type inference issues
+      const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('email', 'erisman@admin.com')
         .maybeSingle();
-      
-      const result = await query as any;
 
-      if (result.error) {
-        this.logger.logOperation('Create', 'AdminUser', false, undefined, String(result.error.message));
-        return { success: false, message: 'Erro ao verificar usuário existente: ' + String(result.error.message) };
+      if (error) {
+        this.logger.logOperation('Create', 'AdminUser', false, undefined, error.message);
+        return { success: false, message: 'Erro ao verificar usuário existente: ' + error.message };
       }
 
-      if (result.data) {
+      if (data) {
         this.logger.logOperation('Create', 'AdminUser', true, 'Admin user already exists');
         return { success: true, message: 'Usuário administrador já existe' };
       }
