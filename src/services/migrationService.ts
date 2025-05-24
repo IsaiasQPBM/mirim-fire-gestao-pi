@@ -18,12 +18,12 @@ interface MigrationResult {
   total: number;
   success: number;
   failed: number;
-  details: Array<{
+  details: {
     id: string;
     newId?: string;
     status: string;
     reason?: string;
-  }>;
+  }[];
 }
 
 interface ExecutionResult {
@@ -90,12 +90,12 @@ class MigrationService {
     }
   }
 
-  async migrateCourses(coursesData: any[]): Promise<MigrationResult> {
-    const results: MigrationResult = {
+  async migrateCourses(coursesData: any[]) {
+    const results = {
       total: coursesData.length,
       success: 0,
       failed: 0,
-      details: []
+      details: [] as { id: string; newId?: string; status: string; reason?: string }[]
     };
 
     for (const course of coursesData) {
@@ -145,12 +145,12 @@ class MigrationService {
     };
   }
 
-  async migrateClasses(classesData: any[], courseMappings: Record<string, string>): Promise<MigrationResult> {
-    const results: MigrationResult = {
+  async migrateClasses(classesData: any[], courseMappings: Record<string, string>) {
+    const results = {
       total: classesData.length,
       success: 0,
       failed: 0,
-      details: []
+      details: [] as { id: string; newId?: string; status: string; reason?: string }[]
     };
 
     for (const classItem of classesData) {
