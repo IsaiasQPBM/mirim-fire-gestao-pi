@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { authService } from './authService';
 import { coursesService } from './coursesService';
@@ -14,16 +13,18 @@ interface MigrationLog {
   error?: string;
 }
 
+interface MigrationDetailItem {
+  id: string;
+  newId?: string;
+  status: string;
+  reason?: string;
+}
+
 interface MigrationResult {
   total: number;
   success: number;
   failed: number;
-  details: {
-    id: string;
-    newId?: string;
-    status: string;
-    reason?: string;
-  }[];
+  details: MigrationDetailItem[];
 }
 
 interface ExecutionResult {
@@ -90,18 +91,22 @@ class MigrationService {
     }
   }
 
-  async migrateCourses(coursesData: any[]) {
-    const results = {
+  async migrateCourses(coursesData: any[]): Promise<MigrationResult> {
+    const results: MigrationResult = {
       total: coursesData.length,
       success: 0,
       failed: 0,
-      details: [] as { id: string; newId?: string; status: string; reason?: string }[]
+      details: []
     };
 
     for (const course of coursesData) {
       if (!this.validateData(course, 'Course')) {
         results.failed++;
-        results.details.push({ id: course.id, status: 'failed', reason: 'Validation failed' });
+        results.details.push({ 
+          id: course.id || 'unknown', 
+          status: 'failed', 
+          reason: 'Validation failed' 
+        });
         continue;
       }
 
@@ -120,23 +125,35 @@ class MigrationService {
         if (error) {
           this.logOperation('Migrate', 'Course', false, `Failed to migrate course: ${course.name}`, error);
           results.failed++;
-          results.details.push({ id: course.id, status: 'failed', reason: error });
+          results.details.push({ 
+            id: course.id || 'unknown', 
+            status: 'failed', 
+            reason: error 
+          });
         } else {
           this.logOperation('Migrate', 'Course', true, `Course migrated: ${course.name} -> ${data.id}`);
           results.success++;
-          results.details.push({ id: course.id, newId: data.id, status: 'success' });
+          results.details.push({ 
+            id: course.id || 'unknown', 
+            newId: data.id, 
+            status: 'success' 
+          });
         }
       } catch (err: any) {
         this.logOperation('Migrate', 'Course', false, `Failed to migrate course: ${course.name}`, err.message);
         results.failed++;
-        results.details.push({ id: course.id, status: 'failed', reason: err.message });
+        results.details.push({ 
+          id: course.id || 'unknown', 
+          status: 'failed', 
+          reason: err.message 
+        });
       }
     }
 
     return results;
   }
 
-  async migrateDisciplines(disciplinesData: any[], courseMappings: Record<string, string>) {
+  async migrateDisciplines(disciplinesData: any[], courseMappings: Record<string, string>): Promise<MigrationResult> {
     return {
       total: disciplinesData.length,
       success: 0,
@@ -145,18 +162,22 @@ class MigrationService {
     };
   }
 
-  async migrateClasses(classesData: any[], courseMappings: Record<string, string>) {
-    const results = {
+  async migrateClasses(classesData: any[], courseMappings: Record<string, string>): Promise<MigrationResult> {
+    const results: MigrationResult = {
       total: classesData.length,
       success: 0,
       failed: 0,
-      details: [] as { id: string; newId?: string; status: string; reason?: string }[]
+      details: []
     };
 
     for (const classItem of classesData) {
       if (!this.validateData(classItem, 'Class')) {
         results.failed++;
-        results.details.push({ id: classItem.id, status: 'failed', reason: 'Validation failed' });
+        results.details.push({ 
+          id: classItem.id || 'unknown', 
+          status: 'failed', 
+          reason: 'Validation failed' 
+        });
         continue;
       }
 
@@ -164,7 +185,11 @@ class MigrationService {
       if (!newCourseId) {
         this.logOperation('Migrate', 'Class', false, `No course mapping found for: ${classItem.courseId}`);
         results.failed++;
-        results.details.push({ id: classItem.id, status: 'failed', reason: 'Course mapping not found' });
+        results.details.push({ 
+          id: classItem.id || 'unknown', 
+          status: 'failed', 
+          reason: 'Course mapping not found' 
+        });
         continue;
       }
 
@@ -184,16 +209,28 @@ class MigrationService {
         if (error) {
           this.logOperation('Migrate', 'Class', false, `Failed to migrate class: ${classItem.name}`, error);
           results.failed++;
-          results.details.push({ id: classItem.id, status: 'failed', reason: error });
+          results.details.push({ 
+            id: classItem.id || 'unknown', 
+            status: 'failed', 
+            reason: error 
+          });
         } else {
           this.logOperation('Migrate', 'Class', true, `Class migrated: ${classItem.name} -> ${data.id}`);
           results.success++;
-          results.details.push({ id: classItem.id, newId: data.id, status: 'success' });
+          results.details.push({ 
+            id: classItem.id || 'unknown', 
+            newId: data.id, 
+            status: 'success' 
+          });
         }
       } catch (err: any) {
         this.logOperation('Migrate', 'Class', false, `Failed to migrate class: ${classItem.name}`, err.message);
         results.failed++;
-        results.details.push({ id: classItem.id, status: 'failed', reason: err.message });
+        results.details.push({ 
+          id: classItem.id || 'unknown', 
+          status: 'failed', 
+          reason: err.message 
+        });
       }
     }
 
