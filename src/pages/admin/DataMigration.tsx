@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { migrationService } from '@/services/migrationService';
+import { migrationService } from '@/services/migration/migrationService';
 import { useAuth } from '@/hooks/useAuth';
 import { Loader2, Database, Check, AlertTriangle, Upload } from 'lucide-react';
 
