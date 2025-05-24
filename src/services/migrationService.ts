@@ -14,18 +14,16 @@ interface MigrationLog {
   error?: string;
 }
 
-interface MigrationDetail {
-  id: string;
-  newId?: string;
-  status: 'success' | 'failed';
-  reason?: string;
-}
-
 interface MigrationResult {
   total: number;
   success: number;
   failed: number;
-  details: MigrationDetail[];
+  details: Array<{
+    id: string;
+    newId?: string;
+    status: string;
+    reason?: string;
+  }>;
 }
 
 interface ExecutionResult {
@@ -138,7 +136,7 @@ class MigrationService {
     return results;
   }
 
-  async migrateDisciplines(disciplinesData: any[], courseMappings: Record<string, string>): Promise<MigrationResult> {
+  async migrateDisciplines(disciplinesData: any[], courseMappings: Record<string, string>) {
     return {
       total: disciplinesData.length,
       success: 0,
