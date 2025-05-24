@@ -14,16 +14,18 @@ interface MigrationLog {
   error?: string;
 }
 
+interface MigrationDetail {
+  id: string;
+  newId?: string;
+  status: 'success' | 'failed';
+  reason?: string;
+}
+
 interface MigrationResult {
   total: number;
   success: number;
   failed: number;
-  details: Array<{
-    id: string;
-    newId?: string;
-    status: 'success' | 'failed';
-    reason?: string;
-  }>;
+  details: MigrationDetail[];
 }
 
 interface ExecutionResult {
