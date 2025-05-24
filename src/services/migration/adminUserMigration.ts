@@ -9,12 +9,14 @@ export class AdminUserMigration {
 
   async createAdminUser(): Promise<ExecutionResult> {
     try {
-      // Simplified query with explicit type handling
-      const result = await supabase
+      // Use type assertion to avoid infinite type instantiation
+      const query = supabase
         .from('profiles')
         .select('*')
         .eq('email', 'erisman@admin.com')
         .maybeSingle();
+      
+      const result = await query as any;
 
       if (result.error) {
         this.logger.logOperation('Create', 'AdminUser', false, undefined, String(result.error.message));
