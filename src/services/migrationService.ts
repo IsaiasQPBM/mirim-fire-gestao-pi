@@ -5,7 +5,6 @@ import { coursesService } from './coursesService';
 import { classesService } from './classesService';
 import { toast } from '@/hooks/use-toast';
 
-// Interface simplificada para log de migração
 interface MigrationLog {
   timestamp: string;
   operation: string;
@@ -15,7 +14,6 @@ interface MigrationLog {
   error?: string;
 }
 
-// Interface para resultados de migração
 interface MigrationResult {
   total: number;
   success: number;
@@ -28,7 +26,6 @@ interface MigrationResult {
   }>;
 }
 
-// Interface para resultado final
 interface ExecutionResult {
   success: boolean;
   message: string;
@@ -37,7 +34,6 @@ interface ExecutionResult {
 class MigrationService {
   private logs: MigrationLog[] = [];
 
-  // Método para registrar logs
   private logOperation(operation: string, entity: string, success: boolean, details?: string, error?: string): MigrationLog {
     const log: MigrationLog = {
       timestamp: new Date().toISOString(),
@@ -53,7 +49,6 @@ class MigrationService {
     return log;
   }
 
-  // Método para validar dados antes da migração
   private validateData(data: any, entity: string): boolean {
     if (!data) {
       this.logOperation('Validation', entity, false, 'Data is null or undefined');
@@ -62,10 +57,8 @@ class MigrationService {
     return true;
   }
 
-  // Método para criar o usuário administrador
   async createAdminUser(): Promise<ExecutionResult> {
     try {
-      // Verificar se o administrador já existe
       const { data: existingUser } = await supabase
         .from('profiles')
         .select('*')
@@ -77,7 +70,6 @@ class MigrationService {
         return { success: true, message: 'Usuário administrador já existe' };
       }
 
-      // Criar usuário administrador
       const result = await authService.signUp({
         email: 'erisman@admin.com',
         password: 'admin',
@@ -98,7 +90,6 @@ class MigrationService {
     }
   }
 
-  // Método para migrar dados de cursos
   async migrateCourses(coursesData: any[]): Promise<MigrationResult> {
     const results: MigrationResult = {
       total: coursesData.length,
@@ -115,7 +106,6 @@ class MigrationService {
       }
 
       try {
-        // Mapeamento do objeto antigo para o novo formato
         const courseData = {
           name: course.name,
           description: course.description || null,
@@ -125,7 +115,6 @@ class MigrationService {
           is_active: course.is_active !== undefined ? course.is_active : true
         };
 
-        // Inserir no Supabase via serviço
         const { data, error } = await coursesService.create(courseData);
 
         if (error) {
@@ -147,9 +136,7 @@ class MigrationService {
     return results;
   }
 
-  // Método para migrar dados de disciplinas (placeholder)
   async migrateDisciplines(disciplinesData: any[], courseMappings: Record<string, string>): Promise<MigrationResult> {
-    // Implementação similar à migrateCourses, adaptada para disciplinas
     return {
       total: disciplinesData.length,
       success: 0,
@@ -158,7 +145,6 @@ class MigrationService {
     };
   }
 
-  // Método para migrar dados de turmas
   async migrateClasses(classesData: any[], courseMappings: Record<string, string>): Promise<MigrationResult> {
     const results: MigrationResult = {
       total: classesData.length,
@@ -174,7 +160,6 @@ class MigrationService {
         continue;
       }
 
-      // Verificar se temos o mapeamento do curso
       const newCourseId = courseMappings[classItem.courseId];
       if (!newCourseId) {
         this.logOperation('Migrate', 'Class', false, `No course mapping found for: ${classItem.courseId}`);
@@ -184,7 +169,6 @@ class MigrationService {
       }
 
       try {
-        // Mapeamento do objeto antigo para o novo formato
         const classData = {
           name: classItem.name,
           course_id: newCourseId,
@@ -195,7 +179,6 @@ class MigrationService {
           status: classItem.status
         };
 
-        // Inserir no Supabase via serviço
         const { data, error } = await classesService.create(classData);
 
         if (error) {
@@ -217,7 +200,6 @@ class MigrationService {
     return results;
   }
 
-  // Método principal para executar toda a migração
   async executeMigration(data: any) {
     const results = {
       adminUser: await this.createAdminUser(),
@@ -230,7 +212,6 @@ class MigrationService {
     };
 
     try {
-      // Se temos dados de cursos para migrar
       if (data.courses && data.courses.length > 0) {
         const coursesResult = await this.migrateCourses(data.courses);
         results.courses = {
@@ -238,7 +219,6 @@ class MigrationService {
           message: `Migrados ${coursesResult.success} de ${coursesResult.total} cursos`
         };
 
-        // Criar mapeamento de IDs antigos para novos
         const courseMappings: Record<string, string> = {};
         coursesResult.details.forEach(detail => {
           if (detail.status === 'success' && detail.newId) {
@@ -246,7 +226,6 @@ class MigrationService {
           }
         });
 
-        // Migrar disciplinas se temos cursos migrados
         if (data.disciplines && data.disciplines.length > 0) {
           const disciplinesResult = await this.migrateDisciplines(data.disciplines, courseMappings);
           results.disciplines = {
@@ -255,7 +234,6 @@ class MigrationService {
           };
         }
 
-        // Migrar turmas se temos cursos migrados
         if (data.classes && data.classes.length > 0) {
           const classesResult = await this.migrateClasses(data.classes, courseMappings);
           results.classes = {
@@ -279,12 +257,10 @@ class MigrationService {
     }
   }
 
-  // Método para exportar logs
   getLogs(): MigrationLog[] {
     return this.logs;
   }
 
-  // Método para limpar logs
   clearLogs(): void {
     this.logs = [];
   }

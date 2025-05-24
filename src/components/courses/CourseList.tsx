@@ -11,10 +11,10 @@ import { BookOpen, Clock, Users, RefreshCw } from 'lucide-react';
 interface Course {
   id: string;
   name: string;
-  description?: string;
-  objectives?: string;
+  description?: string | null;
+  objectives?: string | null;
   total_hours: number;
-  prerequisites?: string;
+  prerequisites?: string[] | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -117,10 +117,10 @@ const CourseList: React.FC = () => {
                   <span>{course.total_hours}h total</span>
                 </div>
                 
-                {course.prerequisites && (
+                {course.prerequisites && course.prerequisites.length > 0 && (
                   <div className="text-sm">
                     <span className="font-medium text-gray-700">Pré-requisitos:</span>
-                    <p className="text-gray-600 mt-1">{course.prerequisites}</p>
+                    <p className="text-gray-600 mt-1">{course.prerequisites.join(', ')}</p>
                   </div>
                 )}
                 
