@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -6,12 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { migrationService } from '@/services/migration/migrationService';
 import { useAuth } from '@/hooks/useAuth';
-import { Loader2, Database, Check, AlertTriangle, Upload } from 'lucide-react';
+import { Loader2, Database, Check, AlertTriangle, Upload, UserCog, Search, UserPlus, Alert } from 'lucide-react';
 
 const DataMigration: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [migrationResults, setMigrationResults] = useState<any>(null);
   const [fileData, setFileData] = useState<any>(null);
+  const [adminDiagnosisResult, setAdminDiagnosisResult] = useState<MigrationResult | null>(null);
+  const [isRunningAdminDiagnosis, setIsRunningAdminDiagnosis] = useState(false);
+  const [isRunningAdminMigration, setIsRunningAdminMigration] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const { profile } = useAuth();
@@ -103,9 +105,136 @@ const DataMigration: React.FC = () => {
     }
   };
 
+  const runAdminDiagnosis = async () => {
+    setIsRunningAdminDiagnosis(true);
+    setAdminDiagnosisResult(null);
+    
+    try {
+      const result = await migrationService.diagnoseAdminUser();
+      setAdminDiagnosisResult(result);
+      
+      toast({
+        variant: result.success ? 'default' : 'destructive',
+        title: result.success ? 'Diagnóstico Completo' : 'Problema Detectado',
+        description: result.message,
+      });
+    } catch (error) {
+      console.error('Erro no diagnóstico:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Erro no diagnóstico',
+        description: 'Falha ao executar diagnóstico do administrador.',
+      });
+    } finally {
+      setIsRunningAdminDiagnosis(false);
+    }
+  };
+
+  const runAdminUserMigration = async () => {
+    setIsRunningAdminMigration(true);
+    
+    try {
+      const result = await migrationService.runAdminUserMigration();
+      setAdminDiagnosisResult(result);
+      
+      toast({
+        variant: result.success ? 'default' : 'destructive',
+        title: result.success ? 'Administrador Configurado' : 'Erro na Configuração',
+        description: result.message,
+      });
+    } catch (error) {
+      console.error('Erro na migração do admin:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Erro na migração',
+        description: 'Falha ao criar/atualizar usuário administrador.',
+      });
+    } finally {
+      setIsRunningAdminMigration(false);
+    }
+  };
+
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto p-6 space-y-6">
       <h1 className="text-2xl font-bold mb-6">Migração de Dados para Supabase</h1>
+
+      {/* Admin User Management Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <UserCog className="w-5 h-5" />
+            Gerenciamento do Usuário Administrador
+          </CardTitle>
+          <CardDescription>
+            Configure e diagnostique problemas com o usuário administrador principal do sistema.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <Button
+              onClick={runAdminDiagnosis}
+              disabled={isRunningAdminDiagnosis}
+              variant="outline"
+              className="h-auto p-4 flex flex-col items-center gap-2"
+            >
+              {isRunningAdminDiagnosis ? (
+                <Loader2 className="w-6 h-6 animate-spin" />
+              ) : (
+                <Search className="w-6 h-6" />
+              )}
+              <span className="font-medium">Diagnosticar Admin</span>
+              <span className="text-sm text-muted-foreground text-center">
+                Verificar status e problemas do usuário administrador
+              </span>
+            </Button>
+
+            <Button
+              onClick={runAdminUserMigration}
+              disabled={isRunningAdminMigration}
+              variant="outline"
+              className="h-auto p-4 flex flex-col items-center gap-2"
+            >
+              {isRunningAdminMigration ? (
+                <Loader2 className="w-6 h-6 animate-spin" />
+              ) : (
+                <UserPlus className="w-6 h-6" />
+              )}
+              <span className="font-medium">Criar/Reparar Admin</span>
+              <span className="text-sm text-muted-foreground text-center">
+                Criar ou reparar o usuário administrador
+              </span>
+            </Button>
+          </div>
+
+          {/* Admin diagnosis results */}
+          {adminDiagnosisResult && (
+            <Alert className={adminDiagnosisResult.success ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
+              <AlertTriangle className={`w-4 h-4 ${adminDiagnosisResult.success ? 'text-green-600' : 'text-red-600'}`} />
+              <AlertTitle className={adminDiagnosisResult.success ? 'text-green-800' : 'text-red-800'}>
+                {adminDiagnosisResult.success ? 'Diagnóstico Completo' : 'Problema Detectado'}
+              </AlertTitle>
+              <AlertDescription className={adminDiagnosisResult.success ? 'text-green-700' : 'text-red-700'}>
+                {adminDiagnosisResult.message}
+                {adminDiagnosisResult.duration && (
+                  <div className="mt-2 text-sm">
+                    Tempo de execução: {adminDiagnosisResult.duration}ms
+                  </div>
+                )}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <h4 className="font-medium text-blue-800 mb-2">Credenciais do Administrador:</h4>
+            <div className="space-y-1 text-sm text-blue-700">
+              <p><strong>Email:</strong> erisman@admin.com</p>
+              <p><strong>Senha:</strong> admin</p>
+              <p><strong>Perfil:</strong> Administrador Sistema</p>
+              <p><strong>Permissões:</strong> Acesso total ao sistema</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>

@@ -1,4 +1,3 @@
-
 import type { MigrationResults } from './types';
 import { MigrationLogger } from './logger';
 import { AdminUserMigration } from './adminUserMigration';
@@ -6,12 +5,20 @@ import { CoursesMigration } from './coursesMigration';
 import { ClassesMigration } from './classesMigration';
 import { DisciplinesMigration } from './disciplinesMigration';
 
-class MigrationService {
-  private logger = new MigrationLogger();
-  private adminUserMigration = new AdminUserMigration(this.logger);
-  private coursesMigration = new CoursesMigration(this.logger);
-  private classesMigration = new ClassesMigration(this.logger);
-  private disciplinesMigration = new DisciplinesMigration(this.logger);
+export class MigrationService {
+  private logger: MigrationLogger;
+  private coursesMigration: CoursesMigration;
+  private disciplinesMigration: DisciplinesMigration;
+  private classesMigration: ClassesMigration;
+  private adminUserMigration: AdminUserMigration;
+
+  constructor() {
+    this.logger = new MigrationLogger();
+    this.coursesMigration = new CoursesMigration(this.logger);
+    this.disciplinesMigration = new DisciplinesMigration(this.logger);
+    this.classesMigration = new ClassesMigration(this.logger);
+    this.adminUserMigration = new AdminUserMigration(this.logger);
+  }
 
   async createAdminUser() {
     return this.adminUserMigration.createAdminUser();
@@ -92,6 +99,102 @@ class MigrationService {
 
   clearLogs() {
     this.logger.clearLogs();
+  }
+
+  async runAdminUserMigration(): Promise<MigrationResult> {
+    const startTime = Date.now();
+    this.logger.logStart('Admin User Migration');
+
+    try {
+      const result = await this.adminUserMigration.createAdminUser();
+      
+      const duration = Date.now() - startTime;
+      
+      if (result.success) {
+        this.logger.logComplete('Admin User Migration', duration);
+        return {
+          success: true,
+          message: result.message,
+          duration,
+          operations: this.logger.getOperations()
+        };
+      } else {
+        this.logger.logError('Admin User Migration', result.message);
+        return {
+          success: false,
+          message: result.message,
+          duration,
+          operations: this.logger.getOperations(),
+          error: result.message
+        };
+      }
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.logError('Admin User Migration', errorMessage);
+      
+      return {
+        success: false,
+        message: 'Erro crítico na migração do usuário administrador',
+        duration,
+        operations: this.logger.getOperations(),
+        error: errorMessage
+      };
+    }
+  }
+
+  async diagnoseAdminUser(): Promise<MigrationResult> {
+    const startTime = Date.now();
+    
+    try {
+      const result = await this.adminUserMigration.diagnoseAdminUser();
+      const duration = Date.now() - startTime;
+      
+      return {
+        success: result.success,
+        message: result.message,
+        duration,
+        operations: this.logger.getOperations()
+      };
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      
+      return {
+        success: false,
+        message: 'Erro no diagnóstico: ' + errorMessage,
+        duration,
+        operations: this.logger.getOperations(),
+        error: errorMessage
+      };
+    }
+  }
+
+  async resetAdminPassword(): Promise<MigrationResult> {
+    const startTime = Date.now();
+    
+    try {
+      const result = await this.adminUserMigration.resetAdminPassword();
+      const duration = Date.now() - startTime;
+      
+      return {
+        success: result.success,
+        message: result.message,
+        duration,
+        operations: this.logger.getOperations()
+      };
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      
+      return {
+        success: false,
+        message: 'Erro no reset: ' + errorMessage,
+        duration,
+        operations: this.logger.getOperations(),
+        error: errorMessage
+      };
+    }
   }
 }
 

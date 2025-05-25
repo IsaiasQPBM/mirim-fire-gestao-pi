@@ -1,38 +1,152 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
-import { Target, Heart, Users, Shield } from 'lucide-react';
+import { Target, Heart, Users, Shield, AlertCircle, RefreshCw, Wrench } from 'lucide-react';
 import CBMEPILogo from '@/components/CBMEPILogo';
 import InfoCard from '@/components/InfoCard';
 import Footer from '@/components/Footer';
+import { useToast } from '@/hooks/use-toast';
+import { MigrationService } from '@/services/migration/migrationService';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn } = useAuth();
+  const [isDiagnosing, setIsDiagnosing] = useState(false);
+  const [isCreatingAdmin, setIsCreatingAdmin] = useState(false);
+  const [showAdminTools, setShowAdminTools] = useState(false);
+  const { signIn, user } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const migrationService = new MigrationService();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
+    console.log('🔐 Tentativa de login:', { email, password: '***' });
+    
     try {
       const { error } = await signIn(email, password);
       
       if (!error) {
+        console.log('✅ Login bem-sucedido, redirecionando...');
+        toast({
+          title: "Login realizado com sucesso",
+          description: "Bem-vindo ao sistema!",
+        });
         navigate('/dashboard');
+      } else {
+        console.error('❌ Erro no login:', error);
+        
+        // Show specific error messages
+        let errorMessage = 'Erro no login';
+        if (error.includes('Invalid login credentials')) {
+          errorMessage = 'Email ou senha incorretos. Verifique suas credenciais.';
+        } else if (error.includes('Email not confirmed')) {
+          errorMessage = 'Email não confirmado. Verifique sua caixa de entrada.';
+        } else if (error.includes('Too many requests')) {
+          errorMessage = 'Muitas tentativas. Aguarde alguns minutos e tente novamente.';
+        }
+        
+        toast({
+          variant: 'destructive',
+          title: 'Erro no login',
+          description: errorMessage,
+        });
+
+        // Show admin tools if it's the admin email
+        if (email === 'erisman@admin.com') {
+          setShowAdminTools(true);
+        }
       }
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('💥 Erro crítico no login:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Erro crítico',
+        description: 'Erro inesperado durante o login. Tente novamente.',
+      });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleDiagnoseAdmin = async () => {
+    setIsDiagnosing(true);
+    
+    try {
+      console.log('🔍 Iniciando diagnóstico do administrador...');
+      const result = await migrationService.diagnoseAdminUser();
+      
+      toast({
+        variant: result.success ? 'default' : 'destructive',
+        title: result.success ? 'Diagnóstico Completo' : 'Problema Detectado',
+        description: result.message,
+      });
+      
+      console.log('📊 Resultado do diagnóstico:', result);
+    } catch (error) {
+      console.error('💥 Erro no diagnóstico:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Erro no diagnóstico',
+        description: 'Falha ao executar diagnóstico do administrador.',
+      });
+    } finally {
+      setIsDiagnosing(false);
+    }
+  };
+
+  const handleCreateAdmin = async () => {
+    setIsCreatingAdmin(true);
+    
+    try {
+      console.log('👑 Criando usuário administrador...');
+      const result = await migrationService.runAdminUserMigration();
+      
+      toast({
+        variant: result.success ? 'default' : 'destructive',
+        title: result.success ? 'Administrador Configurado' : 'Erro na Configuração',
+        description: result.message,
+      });
+      
+      console.log('📊 Resultado da criação:', result);
+      
+      if (result.success) {
+        // Try to auto-login after creation
+        setTimeout(() => {
+          setEmail('erisman@admin.com');
+          setPassword('admin');
+        }, 1000);
+      }
+    } catch (error) {
+      console.error('💥 Erro na criação do admin:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Erro na criação',
+        description: 'Falha ao criar usuário administrador.',
+      });
+    } finally {
+      setIsCreatingAdmin(false);
+    }
+  };
+
+  const handleQuickAdminLogin = () => {
+    setEmail('erisman@admin.com');
+    setPassword('admin');
   };
 
   const infoCards = [
@@ -42,7 +156,7 @@ const Login: React.FC = () => {
       icon: Target
     },
     {
-      title: "Nossos Valores",
+      title: "Nossos Valores", 
       description: "Disciplina, respeito, solidariedade, coragem e responsabilidade social são os pilares que norteiam nossa formação.",
       icon: Heart
     },
@@ -110,7 +224,70 @@ const Login: React.FC = () => {
                   >
                     {isLoading ? 'Entrando...' : 'Entrar'}
                   </Button>
+
+                  {/* Quick admin login button */}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full border-[#F5A623] text-[#F5A623] hover:bg-[#F5A623] hover:text-white"
+                    onClick={handleQuickAdminLogin}
+                  >
+                    🚀 Login Rápido Admin
+                  </Button>
                 </form>
+
+                {/* Admin diagnostic tools */}
+                {showAdminTools && (
+                  <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div className="flex items-center gap-2 mb-3">
+                      <AlertCircle className="w-5 h-5 text-yellow-600" />
+                      <h3 className="font-semibold text-yellow-800">Ferramentas de Diagnóstico Admin</h3>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        onClick={handleDiagnoseAdmin}
+                        disabled={isDiagnosing}
+                      >
+                        {isDiagnosing ? (
+                          <>
+                            <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                            Diagnosticando...
+                          </>
+                        ) : (
+                          <>
+                            🔍 Diagnosticar Problema
+                          </>
+                        )}
+                      </Button>
+                      
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        onClick={handleCreateAdmin}
+                        disabled={isCreatingAdmin}
+                      >
+                        {isCreatingAdmin ? (
+                          <>
+                            <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                            Configurando...
+                          </>
+                        ) : (
+                          <>
+                            <Wrench className="w-4 h-4 mr-2" />
+                            Criar/Reparar Admin
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </CardContent>
               
               <CardFooter className="flex justify-center border-t pt-4">
