@@ -157,6 +157,16 @@ const DataMigration: React.FC = () => {
     }
   };
 
+  // Verificar se o usuário é um administrador
+  if (profile?.role !== 'admin') {
+    navigate('/dashboard');
+    toast({
+      variant: 'destructive',
+      title: 'Acesso negado',
+      description: 'Você não tem permissão para acessar esta página.',
+    });
+  }
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <h1 className="text-2xl font-bold mb-6">Migração de Dados para Supabase</h1>
