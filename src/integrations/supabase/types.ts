@@ -595,6 +595,7 @@ export type Database = {
         Row: {
           birth_date: string | null
           created_at: string
+          email: string | null
           full_name: string
           id: string
           phone: string | null
@@ -605,6 +606,7 @@ export type Database = {
         Insert: {
           birth_date?: string | null
           created_at?: string
+          email?: string | null
           full_name: string
           id: string
           phone?: string | null
@@ -615,6 +617,7 @@ export type Database = {
         Update: {
           birth_date?: string | null
           created_at?: string
+          email?: string | null
           full_name?: string
           id?: string
           phone?: string | null
@@ -632,6 +635,10 @@ export type Database = {
       get_user_role: {
         Args: { user_id: string }
         Returns: string
+      }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
       }
     }
     Enums: {

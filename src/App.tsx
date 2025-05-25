@@ -25,6 +25,13 @@ import ClassView from '@/pages/curriculum/ClassView';
 import ClassCreate from '@/pages/curriculum/ClassCreate';
 import ClassEdit from '@/pages/curriculum/ClassEdit';
 
+// Páginas de Usuários
+import UsersList from '@/pages/users/UsersList';
+import UserView from '@/pages/users/UserView';
+import UserCreate from '@/pages/users/UserCreate';
+import UserEdit from '@/pages/users/UserEdit';
+import UserPermissions from '@/pages/users/UserPermissions';
+
 function App() {
   return (
     <AuthProvider>
@@ -51,6 +58,13 @@ function App() {
             <Route path="classes/:id" element={<ClassView />} />
             <Route path="classes/create" element={<ClassCreate />} />
             <Route path="classes/:id/edit" element={<ClassEdit />} />
+            
+            {/* Rotas de Usuários */}
+            <Route path="users" element={<UsersList />} />
+            <Route path="users/:id" element={<UserView />} />
+            <Route path="users/create" element={<UserCreate />} />
+            <Route path="users/:id/edit" element={<UserEdit />} />
+            <Route path="users/:id/permissions" element={<UserPermissions />} />
             
             {/* Outras rotas */}
             <Route path="*" element={<NotFound />} />
