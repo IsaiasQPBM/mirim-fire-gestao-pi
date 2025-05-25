@@ -3,6 +3,12 @@ import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { ChevronRight, Home } from 'lucide-react';
 
+interface Breadcrumb {
+  name: string;
+  path: string;
+  icon?: React.ForwardRefExoticComponent<any>;
+}
+
 const BreadcrumbNavigation: React.FC = () => {
   const location = useLocation();
   const pathnames = location.pathname.split('/').filter((x) => x);
@@ -19,8 +25,8 @@ const BreadcrumbNavigation: React.FC = () => {
     permissions: 'Permissões',
   };
 
-  const generateBreadcrumbs = () => {
-    const breadcrumbs = [
+  const generateBreadcrumbs = (): Breadcrumb[] => {
+    const breadcrumbs: Breadcrumb[] = [
       {
         name: 'Início',
         path: '/dashboard',
