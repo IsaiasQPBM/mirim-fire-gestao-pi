@@ -1,4 +1,4 @@
-import type { MigrationResults } from './types';
+import type { MigrationResults, ExecutionResult } from './types';
 import { MigrationLogger } from './logger';
 import { AdminUserMigration } from './adminUserMigration';
 import { CoursesMigration } from './coursesMigration';
@@ -101,7 +101,7 @@ export class MigrationService {
     this.logger.clearLogs();
   }
 
-  async runAdminUserMigration(): Promise<MigrationResult> {
+  async runAdminUserMigration(): Promise<ExecutionResult> {
     const startTime = Date.now();
     this.logger.logStart('Admin User Migration');
 
@@ -143,7 +143,7 @@ export class MigrationService {
     }
   }
 
-  async diagnoseAdminUser(): Promise<MigrationResult> {
+  async diagnoseAdminUser(): Promise<ExecutionResult> {
     const startTime = Date.now();
     
     try {
@@ -170,7 +170,7 @@ export class MigrationService {
     }
   }
 
-  async resetAdminPassword(): Promise<MigrationResult> {
+  async resetAdminPassword(): Promise<ExecutionResult> {
     const startTime = Date.now();
     
     try {

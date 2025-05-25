@@ -1,17 +1,20 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { migrationService } from '@/services/migration/migrationService';
 import { useAuth } from '@/hooks/useAuth';
-import { Loader2, Database, Check, AlertTriangle, Upload, UserCog, Search, UserPlus, Alert } from 'lucide-react';
+import type { ExecutionResult } from '@/services/migration/types';
+import { Loader2, Database, Check, AlertTriangle, Upload, UserCog, Search, UserPlus } from 'lucide-react';
 
 const DataMigration: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [migrationResults, setMigrationResults] = useState<any>(null);
   const [fileData, setFileData] = useState<any>(null);
-  const [adminDiagnosisResult, setAdminDiagnosisResult] = useState<MigrationResult | null>(null);
+  const [adminDiagnosisResult, setAdminDiagnosisResult] = useState<ExecutionResult | null>(null);
   const [isRunningAdminDiagnosis, setIsRunningAdminDiagnosis] = useState(false);
   const [isRunningAdminMigration, setIsRunningAdminMigration] = useState(false);
   const { toast } = useToast();

@@ -25,6 +25,9 @@ export interface MigrationResult {
 export interface ExecutionResult {
   success: boolean;
   message: string;
+  duration?: number;
+  operations?: MigrationLog[];
+  error?: string;
 }
 
 export interface MigrationResults {

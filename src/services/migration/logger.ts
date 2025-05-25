@@ -19,7 +19,23 @@ export class MigrationLogger {
     return log;
   }
 
+  logStart(operation: string): void {
+    this.logOperation('Start', operation, true, `Starting ${operation}`);
+  }
+
+  logComplete(operation: string, duration?: number): void {
+    this.logOperation('Complete', operation, true, `Completed in ${duration}ms`);
+  }
+
+  logError(operation: string, error: string): void {
+    this.logOperation('Error', operation, false, undefined, error);
+  }
+
   getLogs(): MigrationLog[] {
+    return this.logs;
+  }
+
+  getOperations(): MigrationLog[] {
     return this.logs;
   }
 
