@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { 
   Card, 
   CardContent, 
@@ -25,46 +25,26 @@ import {
   Eye
 } from 'lucide-react';
 import Header from '@/components/Header';
-import { getUserById, User as UserType } from '@/data/userTypes';
+import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 const UserProfile: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [user, setUser] = useState<UserType | null>(null);
-  const userRole = localStorage.getItem('userRole') as 'admin' | 'instructor' | 'student' || 'student';
-  const userName = localStorage.getItem('userName') || '';
-  const [loading, setLoading] = useState(true);
+  const { user, profile, loading } = useAuth();
+  const [profileLoading, setProfileLoading] = useState(true);
   
   useEffect(() => {
-    if (id) {
-      // In a real app, this would be an API call
-      const foundUser = getUserById(id);
-      
-      if (foundUser) {
-        setUser(foundUser);
-      }
-      
-      setLoading(false);
-    }
-  }, [id]);
-  
-  // Access control
-  const canAccessUserProfile = () => {
-    // Admins can see all profiles
-    if (userRole === 'admin') return true;
-    
-    // Instructors can only see student profiles
-    if (userRole === 'instructor' && user?.role === 'student') return true;
-    
-    // Students can only see their own profile
-    if (userRole === 'student' && userName === user?.fullName) return true;
-    
-    return false;
-  };
+    // Simular carregamento do perfil
+    const timer = setTimeout(() => {
+      setProfileLoading(false);
+    }, 1000);
 
-  if (loading) {
+    return () => clearTimeout(timer);
+  }, []);
+  
+  // Se ainda está carregando a autenticação
+  if (loading || profileLoading) {
     return (
       <div className="p-6 flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cbmepi-orange"></div>
@@ -72,36 +52,19 @@ const UserProfile: React.FC = () => {
     );
   }
   
-  if (!user) {
+  // Se não há usuário autenticado
+  if (!user || !profile) {
     return (
       <div className="p-6">
-        <Header title="Perfil do Usuário" userRole={userRole} userName={userName} />
-        <div className="mt-8 text-center">
-          <h2 className="text-xl font-bold text-red-600">Usuário não encontrado</h2>
-          <p className="mt-2">O usuário que você está procurando não existe.</p>
-          <Button 
-            className="mt-4 bg-cbmepi-orange hover:bg-cbmepi-orange/90"
-            onClick={() => navigate('/users')}
-          >
-            Voltar para Lista de Usuários
-          </Button>
-        </div>
-      </div>
-    );
-  }
-  
-  if (!canAccessUserProfile()) {
-    return (
-      <div className="p-6">
-        <Header title="Perfil do Usuário" userRole={userRole} userName={userName} />
+        <Header title="Meu Perfil" userRole="student" userName="" />
         <div className="mt-8 text-center">
           <h2 className="text-xl font-bold text-red-600">Acesso Restrito</h2>
-          <p className="mt-2">Você não tem permissão para visualizar este perfil.</p>
+          <p className="mt-2">Você precisa estar logado para ver seu perfil.</p>
           <Button 
             className="mt-4 bg-cbmepi-orange hover:bg-cbmepi-orange/90"
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate('/login')}
           >
-            Voltar para Dashboard
+            Fazer Login
           </Button>
         </div>
       </div>
@@ -119,7 +82,8 @@ const UserProfile: React.FC = () => {
     inactive: 'bg-red-100 text-red-800 border-red-300'
   };
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'Não informado';
     try {
       return format(new Date(dateString), 'dd/MM/yyyy');
     } catch (e) {
@@ -148,11 +112,9 @@ const UserProfile: React.FC = () => {
   const renderUserActivity = () => {
     // Mock activities
     const activities = [
-      { date: '2023-06-15T10:30:00', action: 'Login no sistema' },
-      { date: '2023-06-14T15:45:00', action: 'Alteração de dados pessoais' },
-      { date: '2023-06-10T09:15:00', action: 'Visualizou notas' },
-      { date: '2023-06-05T14:20:00', action: 'Logout do sistema' },
-      { date: '2023-06-02T11:10:00', action: 'Login no sistema' },
+      { date: new Date().toISOString(), action: 'Login no sistema' },
+      { date: new Date(Date.now() - 86400000).toISOString(), action: 'Visualizou dashboard' },
+      { date: new Date(Date.now() - 172800000).toISOString(), action: 'Atualizou perfil' },
     ];
 
     return (
@@ -172,65 +134,46 @@ const UserProfile: React.FC = () => {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <Header title="Perfil do Usuário" userRole={userRole} userName={userName} />
+      <Header title="Meu Perfil" userRole={profile.role} userName={profile.full_name} />
       
       <div className="max-w-5xl mx-auto mt-6">
         <Card className="overflow-hidden border-t-4 border-t-cbmepi-orange shadow-md">
           <div className="bg-gradient-to-r from-cbmepi-orange to-cbmepi-red h-32 relative">
-            {userRole === 'admin' && (
-              <div className="absolute top-4 right-4 flex gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="bg-white hover:bg-gray-100"
-                  onClick={() => navigate(`/users/${id}/edit`)}
-                >
-                  <Edit size={16} className="mr-1" />
-                  Editar
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="bg-white hover:bg-gray-100"
-                  onClick={() => navigate(`/users/${id}/permissions`)}
-                >
-                  <Key size={16} className="mr-1" />
-                  Permissões
-                </Button>
-              </div>
-            )}
+            <div className="absolute top-4 right-4 flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="bg-white hover:bg-gray-100"
+                onClick={() => navigate('/dashboard')}
+              >
+                <Eye size={16} className="mr-1" />
+                Dashboard
+              </Button>
+            </div>
             
             <div className="absolute -bottom-16 left-6 w-32 h-32 rounded-full bg-cbmepi-orange text-white flex items-center justify-center text-4xl font-bold border-4 border-white">
-              {user.profileImage ? (
-                <img 
-                  src={user.profileImage} 
-                  alt={user.fullName} 
-                  className="w-full h-full object-cover rounded-full" 
-                />
-              ) : (
-                getInitials(user.fullName)
-              )}
+              {getInitials(profile.full_name)}
             </div>
           </div>
           
           <CardContent className="pt-20 pb-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <h2 className="text-2xl font-bold text-cbmepi-black">{user.fullName}</h2>
+                <h2 className="text-2xl font-bold text-cbmepi-black">{profile.full_name}</h2>
                 <div className="flex items-center gap-1 text-gray-600 mt-1">
                   <Mail size={16} />
-                  <span className="text-sm">{user.email}</span>
+                  <span className="text-sm">{profile.email}</span>
                 </div>
               </div>
               
               <div className="flex flex-wrap gap-2">
-                <Badge className={cn(roleBadgeColor[user.role], 'capitalize')}>
+                <Badge className={cn(roleBadgeColor[profile.role], 'capitalize')}>
                   <Shield size={14} className="mr-1" />
-                  {user.role}
+                  {profile.role === 'admin' ? 'Administrador' : 
+                   profile.role === 'instructor' ? 'Instrutor' : 'Estudante'}
                 </Badge>
-                <Badge className={cn(statusBadgeColor[user.status], 'capitalize')}>
-                  {user.status === 'active' ? 'Ativo' : 'Inativo'}
+                <Badge className={cn(statusBadgeColor[profile.status], 'capitalize')}>
+                  {profile.status === 'active' ? 'Ativo' : 'Inativo'}
                 </Badge>
               </div>
             </div>
@@ -263,15 +206,14 @@ const UserProfile: React.FC = () => {
                     <CardContent className="space-y-4">
                       <div>
                         <p className="text-sm font-medium text-gray-500">Nome Completo</p>
-                        <p>{user.fullName}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-500">Data de Nascimento</p>
-                        <p>{formatDate(user.birthDate)}</p>
+                        <p>{profile.full_name}</p>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-500">Tipo de Perfil</p>
-                        <p className="capitalize">{user.role}</p>
+                        <p className="capitalize">
+                          {profile.role === 'admin' ? 'Administrador' : 
+                           profile.role === 'instructor' ? 'Instrutor' : 'Estudante'}
+                        </p>
                       </div>
                     </CardContent>
                   </Card>
@@ -286,32 +228,11 @@ const UserProfile: React.FC = () => {
                     <CardContent className="space-y-4">
                       <div>
                         <p className="text-sm font-medium text-gray-500">Email</p>
-                        <p>{user.email}</p>
+                        <p>{profile.email}</p>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-500">Telefone</p>
-                        <p>{user.phone}</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card className="md:col-span-2">
-                    <CardHeader>
-                      <CardTitle className="text-base flex items-center">
-                        <Calendar size={18} className="mr-2 text-cbmepi-orange" />
-                        Datas
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <p className="text-sm font-medium text-gray-500">Data de Cadastro</p>
-                          <p>{formatDate(user.createdAt)}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-500">Último Acesso</p>
-                          <p>{formatDateTime(user.lastLogin)}</p>
-                        </div>
+                        <p className="text-sm font-medium text-gray-500">ID do Usuário</p>
+                        <p className="text-xs text-gray-400 font-mono">{user.id}</p>
                       </div>
                     </CardContent>
                   </Card>
@@ -321,14 +242,17 @@ const UserProfile: React.FC = () => {
               <TabsContent value="permissions">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Permissões do Usuário</CardTitle>
+                    <CardTitle className="text-lg">Suas Permissões</CardTitle>
                     <CardDescription>
-                      Permissões atribuídas com base no perfil: <span className="font-medium capitalize">{user.role}</span>
+                      Permissões atribuídas com base no seu perfil: <span className="font-medium capitalize">
+                        {profile.role === 'admin' ? 'Administrador' : 
+                         profile.role === 'instructor' ? 'Instrutor' : 'Estudante'}
+                      </span>
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {user.role === 'admin' && (
+                      {profile.role === 'admin' && (
                         <>
                           <div className="flex items-center p-2 border rounded-md bg-green-50">
                             <Shield size={16} className="text-green-600 mr-2" />
@@ -349,7 +273,7 @@ const UserProfile: React.FC = () => {
                         </>
                       )}
                       
-                      {user.role === 'instructor' && (
+                      {profile.role === 'instructor' && (
                         <>
                           <div className="flex items-center p-2 border rounded-md bg-green-50">
                             <Shield size={16} className="text-green-600 mr-2" />
@@ -363,14 +287,10 @@ const UserProfile: React.FC = () => {
                             <Shield size={16} className="text-green-600 mr-2" />
                             <span>Gerenciar Frequência</span>
                           </div>
-                          <div className="flex items-center p-2 border rounded-md bg-gray-100">
-                            <Shield size={16} className="text-gray-400 mr-2" />
-                            <span className="text-gray-500">Eventos de Calendário</span>
-                          </div>
                         </>
                       )}
                       
-                      {user.role === 'student' && (
+                      {profile.role === 'student' && (
                         <>
                           <div className="flex items-center p-2 border rounded-md bg-green-50">
                             <Shield size={16} className="text-green-600 mr-2" />
@@ -388,19 +308,6 @@ const UserProfile: React.FC = () => {
                       )}
                     </div>
                   </CardContent>
-                  <CardFooter>
-                    {userRole === 'admin' && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="ml-auto"
-                        onClick={() => navigate(`/users/${id}/permissions`)}
-                      >
-                        <Key size={16} className="mr-1" />
-                        Gerenciar Permissões
-                      </Button>
-                    )}
-                  </CardFooter>
                 </Card>
               </TabsContent>
               
@@ -409,7 +316,7 @@ const UserProfile: React.FC = () => {
                   <CardHeader>
                     <CardTitle className="text-lg">Histórico de Atividades</CardTitle>
                     <CardDescription>
-                      Registro das últimas ações do usuário no sistema
+                      Registro das suas últimas ações no sistema
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -425,24 +332,11 @@ const UserProfile: React.FC = () => {
               <Button 
                 variant="outline"
                 size="sm"
-                onClick={() => navigate('/users')}
+                onClick={() => navigate('/dashboard')}
               >
                 <Users size={16} className="mr-1" />
-                Voltar para Lista
+                Voltar para Dashboard
               </Button>
-              
-              {userRole === 'admin' && (
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => navigate(`/users/${id}/edit`)}
-                  >
-                    <Edit size={16} className="mr-1" />
-                    Editar Usuário
-                  </Button>
-                </div>
-              )}
             </div>
           </CardFooter>
         </Card>

@@ -34,6 +34,7 @@ import UserView from '@/pages/users/UserView';
 import UserCreate from '@/pages/users/UserCreate';
 import UserEdit from '@/pages/users/UserEdit';
 import UserPermissions from '@/pages/users/UserPermissions';
+import UserProfile from '@/pages/users/UserProfile';
 
 // Páginas de Comunicação
 import MessagesInbox from '@/pages/communication/MessagesInbox';
@@ -50,6 +51,9 @@ function App() {
           {/* Rotas protegidas dentro do layout do Dashboard */}
           <Route path="/" element={<DashboardLayout />}>
             <Route path="dashboard" element={<Dashboard />} />
+            
+            {/* Rota de Perfil - ADICIONADA */}
+            <Route path="profile" element={<UserProfile />} />
             
             {/* Rotas de Administração */}
             <Route path="admin" element={<AdminDashboard />} />

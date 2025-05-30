@@ -13,6 +13,7 @@ const routeConfig: RouteValidationConfig = {
   adminOnlyRoutes: ['/admin', '/users'],
   protectedRoutes: [
     '/dashboard', 
+    '/profile',
     '/courses', 
     '/classes', 
     '/disciplines', 

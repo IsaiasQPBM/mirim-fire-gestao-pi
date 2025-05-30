@@ -17,6 +17,7 @@ const RouteValidator: React.FC<RouteValidatorProps> = ({ children }) => {
     '/',
     '/login',
     '/dashboard',
+    '/profile',
     '/admin',
     '/admin/migration',
     '/courses',
