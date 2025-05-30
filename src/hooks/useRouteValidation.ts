@@ -14,20 +14,12 @@ const routeConfig: RouteValidationConfig = {
   protectedRoutes: [
     '/dashboard', 
     '/profile',
-    '/curriculum',
     '/courses', 
     '/classes', 
     '/disciplines', 
     '/calendar', 
     '/lessons/planning', 
-    '/communications/messages',
-    '/students',
-    '/reports',
-    '/pedagogical/assessments',
-    '/pedagogical/observations',
-    '/pedagogical/questions',
-    '/pedagogical/results',
-    '/pedagogical/student-dashboard'
+    '/communications/messages'
   ],
   publicRoutes: ['/', '/login'],
 };

@@ -12,7 +12,7 @@ const RouteValidator: React.FC<RouteValidatorProps> = ({ children }) => {
   const navigate = useNavigate();
   const { user, profile, loading } = useAuth();
 
-  // Lista completa de rotas válidas do sistema
+  // Lista de rotas válidas do sistema - ATUALIZADA
   const validRoutes = [
     '/',
     '/login',
@@ -20,7 +20,6 @@ const RouteValidator: React.FC<RouteValidatorProps> = ({ children }) => {
     '/profile',
     '/admin',
     '/admin/migration',
-    '/curriculum',
     '/courses',
     '/courses/create',
     '/classes',
@@ -31,16 +30,6 @@ const RouteValidator: React.FC<RouteValidatorProps> = ({ children }) => {
     '/communications/messages',
     '/users',
     '/users/create',
-    '/students',
-    '/students/create',
-    '/reports',
-    '/pedagogical/assessments',
-    '/pedagogical/assessments/create',
-    '/pedagogical/observations',
-    '/pedagogical/observations/create',
-    '/pedagogical/questions',
-    '/pedagogical/results',
-    '/pedagogical/student-dashboard',
   ];
 
   // Padrões de rotas dinâmicas válidas
@@ -49,15 +38,9 @@ const RouteValidator: React.FC<RouteValidatorProps> = ({ children }) => {
     /^\/courses\/[^\/]+\/edit$/,
     /^\/classes\/[^\/]+$/,
     /^\/classes\/[^\/]+\/edit$/,
-    /^\/disciplines\/[^\/]+\/edit$/,
     /^\/users\/[^\/]+$/,
     /^\/users\/[^\/]+\/edit$/,
     /^\/users\/[^\/]+\/permissions$/,
-    /^\/students\/[^\/]+$/,
-    /^\/reports\/bulletin\/[^\/]+$/,
-    /^\/pedagogical\/assessments\/[^\/]+$/,
-    /^\/pedagogical\/assessments\/[^\/]+\/edit$/,
-    /^\/pedagogical\/assessments\/[^\/]+\/take$/,
   ];
 
   useEffect(() => {
@@ -74,11 +57,11 @@ const RouteValidator: React.FC<RouteValidatorProps> = ({ children }) => {
       pattern.test(currentPath)
     );
 
-    // Se não é uma rota válida, log para análise mas não redirecionar automaticamente
+    // Se não é uma rota válida, redirecionar para 404
     if (!isValidStaticRoute && !isValidDynamicRoute) {
-      console.warn(`Potentially invalid route detected: ${currentPath}`);
+      console.warn(`Invalid route detected: ${currentPath}`);
       
-      // Salvar informações sobre a rota para analytics
+      // Salvar informações sobre a rota inválida para analytics
       const routeError = {
         path: currentPath,
         timestamp: new Date().toISOString(),
@@ -98,7 +81,7 @@ const RouteValidator: React.FC<RouteValidatorProps> = ({ children }) => {
       localStorage.setItem('routeErrors', JSON.stringify(existingErrors));
     }
 
-    // Verificar permissões de acesso
+    // Verificar se o usuário tem permissão para acessar a rota
     if (currentPath.startsWith('/admin') && profile?.role !== 'admin') {
       navigate('/dashboard');
       return;
