@@ -12,7 +12,7 @@ const RouteValidator: React.FC<RouteValidatorProps> = ({ children }) => {
   const navigate = useNavigate();
   const { user, profile, loading } = useAuth();
 
-  // Lista de rotas válidas do sistema
+  // Lista de rotas válidas do sistema - ATUALIZADA
   const validRoutes = [
     '/',
     '/login',
@@ -23,6 +23,10 @@ const RouteValidator: React.FC<RouteValidatorProps> = ({ children }) => {
     '/courses/create',
     '/classes',
     '/classes/create',
+    '/disciplines',
+    '/calendar',
+    '/lessons/planning',
+    '/communications/messages',
     '/users',
     '/users/create',
   ];

@@ -24,6 +24,9 @@ import ClassesList from '@/pages/curriculum/ClassesList';
 import ClassView from '@/pages/curriculum/ClassView';
 import ClassCreate from '@/pages/curriculum/ClassCreate';
 import ClassEdit from '@/pages/curriculum/ClassEdit';
+import DisciplinesList from '@/pages/curriculum/DisciplinesList';
+import Calendar from '@/pages/curriculum/Calendar';
+import LessonPlanning from '@/pages/curriculum/LessonPlanning';
 
 // Páginas de Usuários
 import UsersList from '@/pages/users/UsersList';
@@ -31,6 +34,9 @@ import UserView from '@/pages/users/UserView';
 import UserCreate from '@/pages/users/UserCreate';
 import UserEdit from '@/pages/users/UserEdit';
 import UserPermissions from '@/pages/users/UserPermissions';
+
+// Páginas de Comunicação
+import MessagesInbox from '@/pages/communication/MessagesInbox';
 
 function App() {
   return (
@@ -58,6 +64,16 @@ function App() {
             <Route path="classes/:id" element={<ClassView />} />
             <Route path="classes/create" element={<ClassCreate />} />
             <Route path="classes/:id/edit" element={<ClassEdit />} />
+            
+            {/* Rotas de Disciplinas - ADICIONADAS */}
+            <Route path="disciplines" element={<DisciplinesList />} />
+            
+            {/* Rotas de Calendário e Planejamento - ADICIONADAS */}
+            <Route path="calendar" element={<Calendar />} />
+            <Route path="lessons/planning" element={<LessonPlanning />} />
+            
+            {/* Rotas de Comunicação - ADICIONADAS */}
+            <Route path="communications/messages" element={<MessagesInbox />} />
             
             {/* Rotas de Usuários */}
             <Route path="users" element={<UsersList />} />

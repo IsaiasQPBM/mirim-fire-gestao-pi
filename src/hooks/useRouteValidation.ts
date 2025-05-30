@@ -11,7 +11,15 @@ interface RouteValidationConfig {
 
 const routeConfig: RouteValidationConfig = {
   adminOnlyRoutes: ['/admin', '/users'],
-  protectedRoutes: ['/dashboard', '/courses', '/classes'],
+  protectedRoutes: [
+    '/dashboard', 
+    '/courses', 
+    '/classes', 
+    '/disciplines', 
+    '/calendar', 
+    '/lessons/planning', 
+    '/communications/messages'
+  ],
   publicRoutes: ['/', '/login'],
 };
 
