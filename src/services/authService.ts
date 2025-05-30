@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@supabase/supabase-js';
 
@@ -43,7 +44,7 @@ class AuthService {
 
       if (error) {
         console.error('❌ Erro no cadastro:', error);
-        throw error;
+        return { user: null, error: error.message };
       }
       
       console.log('✅ Cadastro realizado:', authData.user?.id);
@@ -58,14 +59,19 @@ class AuthService {
     try {
       console.log('🔐 Tentativa de login:', { email: data.email });
       
+      // Validar se email e password estão preenchidos
+      if (!data.email || !data.password) {
+        throw new Error('Email e senha são obrigatórios');
+      }
+
       const { data: authData, error } = await supabase.auth.signInWithPassword({
-        email: data.email,
+        email: data.email.trim(),
         password: data.password,
       });
 
       if (error) {
         console.error('❌ Erro no login:', error);
-        throw error;
+        return { user: null, profile: null, error: error.message };
       }
 
       console.log('✅ Login realizado:', authData.user?.id);
@@ -119,6 +125,10 @@ class AuthService {
 
       if (error) {
         console.error('❌ Erro ao buscar perfil:', error);
+        if (error.code === 'PGRST116') {
+          console.log('ℹ️ Perfil não encontrado - usuário pode não ter perfil criado ainda');
+          return null;
+        }
         throw error;
       }
       

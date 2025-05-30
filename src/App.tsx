@@ -39,6 +39,27 @@ import UserProfile from '@/pages/users/UserProfile';
 // Páginas de Comunicação
 import MessagesInbox from '@/pages/communication/MessagesInbox';
 
+// Páginas de Estudantes
+import StudentsList from '@/pages/students/StudentsList';
+import StudentDetail from '@/pages/students/StudentDetail';
+import StudentRegistration from '@/pages/students/StudentRegistration';
+
+// Páginas de Relatórios
+import ReportsDashboard from '@/pages/reports/ReportsDashboard';
+import StudentBulletin from '@/pages/reports/StudentBulletin';
+
+// Páginas Pedagógicas
+import AssessmentsList from '@/pages/pedagogical/AssessmentsList';
+import AssessmentView from '@/pages/pedagogical/AssessmentView';
+import AssessmentCreate from '@/pages/pedagogical/AssessmentCreate';
+import AssessmentEdit from '@/pages/pedagogical/AssessmentEdit';
+import AssessmentTake from '@/pages/pedagogical/AssessmentTake';
+import ObservationsList from '@/pages/pedagogical/ObservationsList';
+import ObservationCreate from '@/pages/pedagogical/ObservationCreate';
+import QuestionBank from '@/pages/pedagogical/QuestionBank';
+import ResultsView from '@/pages/pedagogical/ResultsView';
+import StudentDashboard from '@/pages/pedagogical/StudentDashboard';
+
 function App() {
   return (
     <AuthProvider>
@@ -52,7 +73,7 @@ function App() {
           <Route path="/" element={<DashboardLayout />}>
             <Route path="dashboard" element={<Dashboard />} />
             
-            {/* Rota de Perfil - ADICIONADA */}
+            {/* Rota de Perfil */}
             <Route path="profile" element={<UserProfile />} />
             
             {/* Rotas de Administração */}
@@ -69,14 +90,14 @@ function App() {
             <Route path="classes/create" element={<ClassCreate />} />
             <Route path="classes/:id/edit" element={<ClassEdit />} />
             
-            {/* Rotas de Disciplinas - ADICIONADAS */}
+            {/* Rotas de Disciplinas */}
             <Route path="disciplines" element={<DisciplinesList />} />
             
-            {/* Rotas de Calendário e Planejamento - ADICIONADAS */}
+            {/* Rotas de Calendário e Planejamento */}
             <Route path="calendar" element={<Calendar />} />
             <Route path="lessons/planning" element={<LessonPlanning />} />
             
-            {/* Rotas de Comunicação - ADICIONADAS */}
+            {/* Rotas de Comunicação */}
             <Route path="communications/messages" element={<MessagesInbox />} />
             
             {/* Rotas de Usuários */}
@@ -85,6 +106,27 @@ function App() {
             <Route path="users/create" element={<UserCreate />} />
             <Route path="users/:id/edit" element={<UserEdit />} />
             <Route path="users/:id/permissions" element={<UserPermissions />} />
+            
+            {/* Rotas de Estudantes */}
+            <Route path="students" element={<StudentsList />} />
+            <Route path="students/:id" element={<StudentDetail />} />
+            <Route path="students/create" element={<StudentRegistration />} />
+            
+            {/* Rotas de Relatórios */}
+            <Route path="reports" element={<ReportsDashboard />} />
+            <Route path="reports/bulletin/:studentId" element={<StudentBulletin />} />
+            
+            {/* Rotas Pedagógicas */}
+            <Route path="pedagogical/assessments" element={<AssessmentsList />} />
+            <Route path="pedagogical/assessments/:id" element={<AssessmentView />} />
+            <Route path="pedagogical/assessments/create" element={<AssessmentCreate />} />
+            <Route path="pedagogical/assessments/:id/edit" element={<AssessmentEdit />} />
+            <Route path="pedagogical/assessments/:id/take" element={<AssessmentTake />} />
+            <Route path="pedagogical/observations" element={<ObservationsList />} />
+            <Route path="pedagogical/observations/create" element={<ObservationCreate />} />
+            <Route path="pedagogical/questions" element={<QuestionBank />} />
+            <Route path="pedagogical/results" element={<ResultsView />} />
+            <Route path="pedagogical/student-dashboard" element={<StudentDashboard />} />
             
             {/* Outras rotas */}
             <Route path="*" element={<NotFound />} />

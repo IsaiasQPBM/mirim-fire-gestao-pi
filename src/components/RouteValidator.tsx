@@ -30,6 +30,16 @@ const RouteValidator: React.FC<RouteValidatorProps> = ({ children }) => {
     '/communications/messages',
     '/users',
     '/users/create',
+    '/students',
+    '/students/create',
+    '/reports',
+    '/pedagogical/assessments',
+    '/pedagogical/assessments/create',
+    '/pedagogical/observations',
+    '/pedagogical/observations/create',
+    '/pedagogical/questions',
+    '/pedagogical/results',
+    '/pedagogical/student-dashboard',
   ];
 
   // Padrões de rotas dinâmicas válidas
@@ -41,6 +51,11 @@ const RouteValidator: React.FC<RouteValidatorProps> = ({ children }) => {
     /^\/users\/[^\/]+$/,
     /^\/users\/[^\/]+\/edit$/,
     /^\/users\/[^\/]+\/permissions$/,
+    /^\/students\/[^\/]+$/,
+    /^\/reports\/bulletin\/[^\/]+$/,
+    /^\/pedagogical\/assessments\/[^\/]+$/,
+    /^\/pedagogical\/assessments\/[^\/]+\/edit$/,
+    /^\/pedagogical\/assessments\/[^\/]+\/take$/,
   ];
 
   useEffect(() => {

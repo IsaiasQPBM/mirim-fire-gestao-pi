@@ -19,7 +19,14 @@ const routeConfig: RouteValidationConfig = {
     '/disciplines', 
     '/calendar', 
     '/lessons/planning', 
-    '/communications/messages'
+    '/communications/messages',
+    '/students',
+    '/reports',
+    '/pedagogical/assessments',
+    '/pedagogical/observations',
+    '/pedagogical/questions',
+    '/pedagogical/results',
+    '/pedagogical/student-dashboard'
   ],
   publicRoutes: ['/', '/login'],
 };
