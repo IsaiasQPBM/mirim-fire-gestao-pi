@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -176,130 +175,136 @@ const Login: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-[#F5A623] via-[#E8941A] to-cbmepi-red flex flex-col">
       {/* Main content */}
       <div className="flex-1 flex flex-col items-center justify-center p-4">
-        <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-          {/* Left side - Login form */}
-          <div className="w-full max-w-md mx-auto animate-fade-in">
-            <div className="mb-8 flex justify-center">
-              <CBMEPILogo size="large" withText={true} />
+        <div className="w-full max-w-6xl">
+          {/* Centralized login section */}
+          <div className="flex flex-col items-center mb-8">
+            <div className="mb-8">
+              <CBMEPILogo 
+                size="large" 
+                withText={true} 
+                logoUrl="/lovable-uploads/70642b09-ab9d-4305-be14-917eb3908cb7.png"
+              />
             </div>
             
-            <Card className="border-2 border-white/20 shadow-2xl backdrop-blur-sm bg-white/95">
-              <CardHeader className="text-center">
-                <h1 className="text-2xl font-bold text-cbmepi-black">Sistema de Gestão</h1>
-                <p className="text-gray-600">Projeto Bombeiro Mirim</p>
-              </CardHeader>
-              
-              <CardContent>
-                <form onSubmit={handleLogin} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="Digite seu email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      className="border-[#F5A623] focus:ring-[#F5A623] focus:border-[#F5A623]"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Senha</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="Digite sua senha"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      className="border-[#F5A623] focus:ring-[#F5A623] focus:border-[#F5A623]"
-                    />
-                  </div>
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-gradient-to-r from-[#F5A623] to-[#E8941A] hover:from-[#E8941A] hover:to-[#D6831A] text-white shadow-lg transition-all duration-300"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? 'Entrando...' : 'Entrar'}
-                  </Button>
-
-                  {/* Quick admin login button */}
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full border-[#F5A623] text-[#F5A623] hover:bg-[#F5A623] hover:text-white"
-                    onClick={handleQuickAdminLogin}
-                  >
-                    🚀 Login Rápido Admin
-                  </Button>
-                </form>
-
-                {/* Admin diagnostic tools */}
-                {showAdminTools && (
-                  <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <div className="flex items-center gap-2 mb-3">
-                      <AlertCircle className="w-5 h-5 text-yellow-600" />
-                      <h3 className="font-semibold text-yellow-800">Ferramentas de Diagnóstico Admin</h3>
+            <div className="w-full max-w-md">
+              <Card className="border-2 border-white/20 shadow-2xl backdrop-blur-sm bg-white/95">
+                <CardHeader className="text-center">
+                  <h1 className="text-2xl font-bold text-cbmepi-black">Sistema de Gestão</h1>
+                  <p className="text-gray-600">Projeto Bombeiro Mirim</p>
+                </CardHeader>
+                
+                <CardContent>
+                  <form onSubmit={handleLogin} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="Digite seu email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        className="border-[#F5A623] focus:ring-[#F5A623] focus:border-[#F5A623]"
+                      />
                     </div>
                     
                     <div className="space-y-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="w-full"
-                        onClick={handleDiagnoseAdmin}
-                        disabled={isDiagnosing}
-                      >
-                        {isDiagnosing ? (
-                          <>
-                            <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                            Diagnosticando...
-                          </>
-                        ) : (
-                          <>
-                            🔍 Diagnosticar Problema
-                          </>
-                        )}
-                      </Button>
-                      
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="w-full"
-                        onClick={handleCreateAdmin}
-                        disabled={isCreatingAdmin}
-                      >
-                        {isCreatingAdmin ? (
-                          <>
-                            <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                            Configurando...
-                          </>
-                        ) : (
-                          <>
-                            <Wrench className="w-4 h-4 mr-2" />
-                            Criar/Reparar Admin
-                          </>
-                        )}
-                      </Button>
+                      <Label htmlFor="password">Senha</Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        placeholder="Digite sua senha"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        className="border-[#F5A623] focus:ring-[#F5A623] focus:border-[#F5A623]"
+                      />
                     </div>
-                  </div>
-                )}
-              </CardContent>
-              
-              <CardFooter className="flex justify-center border-t pt-4">
-                <p className="text-xs text-gray-500 text-center">
-                  ETI - Corpo de Bombeiros Militar do Estado do Piauí
-                </p>
-              </CardFooter>
-            </Card>
+                    
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-gradient-to-r from-[#F5A623] to-[#E8941A] hover:from-[#E8941A] hover:to-[#D6831A] text-white shadow-lg transition-all duration-300"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? 'Entrando...' : 'Entrar'}
+                    </Button>
+
+                    {/* Quick admin login button */}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full border-[#F5A623] text-[#F5A623] hover:bg-[#F5A623] hover:text-white"
+                      onClick={handleQuickAdminLogin}
+                    >
+                      🚀 Login Rápido Admin
+                    </Button>
+                  </form>
+
+                  {/* Admin diagnostic tools */}
+                  {showAdminTools && (
+                    <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <div className="flex items-center gap-2 mb-3">
+                        <AlertCircle className="w-5 h-5 text-yellow-600" />
+                        <h3 className="font-semibold text-yellow-800">Ferramentas de Diagnóstico Admin</h3>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="w-full"
+                          onClick={handleDiagnoseAdmin}
+                          disabled={isDiagnosing}
+                        >
+                          {isDiagnosing ? (
+                            <>
+                              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                              Diagnosticando...
+                            </>
+                          ) : (
+                            <>
+                              🔍 Diagnosticar Problema
+                            </>
+                          )}
+                        </Button>
+                        
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="w-full"
+                          onClick={handleCreateAdmin}
+                          disabled={isCreatingAdmin}
+                        >
+                          {isCreatingAdmin ? (
+                            <>
+                              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                              Configurando...
+                            </>
+                          ) : (
+                            <>
+                              <Wrench className="w-4 h-4 mr-2" />
+                              Criar/Reparar Admin
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+                
+                <CardFooter className="flex justify-center border-t pt-4">
+                  <p className="text-xs text-gray-500 text-center">
+                    ETI - Corpo de Bombeiros Militar do Estado do Piauí
+                  </p>
+                </CardFooter>
+              </Card>
+            </div>
           </div>
 
-          {/* Right side - Info cards */}
-          <div className="w-full max-w-2xl mx-auto">
+          {/* Info cards section - now below the login form */}
+          <div className="w-full max-w-4xl mx-auto">
             <div className="text-center mb-8 text-white">
               <h2 className="text-3xl font-bold mb-4">Projeto Bombeiro Mirim</h2>
               <p className="text-lg opacity-90">
