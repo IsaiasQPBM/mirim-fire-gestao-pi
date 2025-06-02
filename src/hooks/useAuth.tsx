@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { authService, type AuthUser } from '@/services/authService';
@@ -22,7 +23,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // Helper function to create AuthUser from user and profile data
   const createAuthUser = (user: User, profileData: any): AuthUser | null => {
     if (!profileData) return null;
     
@@ -35,7 +35,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   };
 
-  // Function to create admin profile if missing
   const createAdminProfile = async (user: User): Promise<any> => {
     console.log('🛠️ Criando perfil do administrador...');
     
@@ -67,97 +66,88 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Optimized function to get or create profile with shorter timeout
   const getOrCreateProfile = async (user: User): Promise<any> => {
-    const maxAttempts = 2;
-    const timeoutMs = 3000; // Reduced to 3 seconds
-    
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      console.log(`🔍 Tentativa ${attempt}/${maxAttempts} - Buscando perfil para:`, user.email);
+    try {
+      console.log('🔍 Buscando perfil para usuário:', user.email);
       
-      try {
-        // Create a timeout promise
-        const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Timeout na busca do perfil')), timeoutMs);
-        });
+      // Primeira tentativa: buscar perfil existente
+      const { data: profileData, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .maybeSingle(); // Use maybeSingle em vez de single para evitar erro quando não há dados
 
-        // Race between profile fetch and timeout
-        const profilePromise = supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-
-        const { data: profileData, error } = await Promise.race([
-          profilePromise,
-          timeoutPromise
-        ]) as any;
-
-        if (error && error.code !== 'PGRST116') { // PGRST116 = no rows found
-          console.error(`❌ Erro na tentativa ${attempt}:`, error);
-          if (attempt === maxAttempts) {
-            throw error;
-          }
-          continue;
-        }
-
-        if (profileData) {
-          console.log(`✅ Perfil encontrado na tentativa ${attempt}:`, profileData);
-          return profileData;
-        }
-
-        // Profile not found - check if admin user needs profile creation
-        if (user.email === 'erisman@admin.com') {
-          console.log('👑 Usuário admin sem perfil detectado - criando perfil...');
-          const newProfile = await createAdminProfile(user);
-          return newProfile;
-        }
-
-        // For non-admin users, create a basic profile
-        console.log(`ℹ️ Criando perfil básico para usuário:`, user.email);
-        const basicProfileData = {
-          id: user.id,
-          email: user.email,
-          full_name: user.user_metadata?.full_name || 'Usuário',
-          role: user.user_metadata?.role || 'student',
-          status: 'active'
-        };
-
-        const { data: newProfileData, error: createError } = await supabase
-          .from('profiles')
-          .insert(basicProfileData)
-          .select()
-          .single();
-
-        if (createError) {
-          console.error('❌ Erro ao criar perfil básico:', createError);
-          throw createError;
-        }
-
-        console.log('✅ Perfil básico criado:', newProfileData);
-        return newProfileData;
-
-      } catch (error: any) {
-        console.error(`💥 Erro na tentativa ${attempt}:`, error);
-        
-        if (attempt === maxAttempts) {
-          // Return a default profile to prevent blocking
-          console.log('⚠️ Retornando perfil padrão para evitar bloqueio');
-          return {
-            id: user.id,
-            email: user.email,
-            full_name: user.user_metadata?.full_name || 'Usuário',
-            role: user.user_metadata?.role || 'student',
-            status: 'active'
-          };
-        }
-        
-        // Wait before next attempt (reduced wait time)
-        await new Promise(resolve => setTimeout(resolve, 500 * attempt));
+      if (error) {
+        console.error('❌ Erro ao buscar perfil:', error);
+        throw error;
       }
-    }
 
-    throw new Error('Falha ao obter ou criar perfil após todas as tentativas');
+      if (profileData) {
+        console.log('✅ Perfil encontrado:', profileData);
+        // Verificar se o perfil tem o role correto para admin
+        if (user.email === 'erisman@admin.com' && profileData.role !== 'admin') {
+          console.log('🔧 Corrigindo role do admin...');
+          const { data: updatedProfile, error: updateError } = await supabase
+            .from('profiles')
+            .update({ role: 'admin', full_name: 'Administrador Sistema' })
+            .eq('id', user.id)
+            .select()
+            .single();
+          
+          if (updateError) {
+            console.error('❌ Erro ao atualizar role do admin:', updateError);
+            return profileData; // Retorna o perfil original se não conseguir atualizar
+          }
+          
+          console.log('✅ Role do admin corrigido:', updatedProfile);
+          return updatedProfile;
+        }
+        return profileData;
+      }
+
+      // Se não encontrou perfil, criar um novo
+      console.log('ℹ️ Perfil não encontrado, criando novo...');
+      
+      if (user.email === 'erisman@admin.com') {
+        return await createAdminProfile(user);
+      }
+
+      // Para outros usuários, criar perfil básico
+      const basicProfileData = {
+        id: user.id,
+        email: user.email,
+        full_name: user.user_metadata?.full_name || 'Usuário',
+        role: user.user_metadata?.role || 'student',
+        status: 'active'
+      };
+
+      const { data: newProfileData, error: createError } = await supabase
+        .from('profiles')
+        .insert(basicProfileData)
+        .select()
+        .single();
+
+      if (createError) {
+        console.error('❌ Erro ao criar perfil básico:', createError);
+        throw createError;
+      }
+
+      console.log('✅ Perfil básico criado:', newProfileData);
+      return newProfileData;
+
+    } catch (error: any) {
+      console.error('💥 Erro ao obter/criar perfil:', error);
+      
+      // Retornar perfil padrão para evitar bloqueio
+      console.log('⚠️ Retornando perfil padrão para evitar bloqueio');
+      return {
+        id: user.id,
+        email: user.email,
+        full_name: user.email === 'erisman@admin.com' ? 'Administrador Sistema' : 'Usuário',
+        role: user.email === 'erisman@admin.com' ? 'admin' : 'student',
+        status: 'active'
+      };
+    }
   };
 
   useEffect(() => {
@@ -167,16 +157,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         console.log('🔄 Inicializando autenticação...');
         
-        // Get current session with timeout
-        const sessionPromise = supabase.auth.getSession();
-        const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Timeout ao obter sessão')), 5000);
-        });
-
-        const { data: { session }, error } = await Promise.race([
-          sessionPromise,
-          timeoutPromise
-        ]) as any;
+        const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error('❌ Erro ao obter sessão:', error);
@@ -211,12 +192,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 duration: 5000,
               });
               
-              // Set a temporary profile to avoid blocking the app
               const tempProfile = createAuthUser(session.user, {
                 id: session.user.id,
                 email: session.user.email,
-                full_name: 'Usuário Temporário',
-                role: 'student',
+                full_name: session.user.email === 'erisman@admin.com' ? 'Administrador Sistema' : 'Usuário Temporário',
+                role: session.user.email === 'erisman@admin.com' ? 'admin' : 'student',
                 status: 'active'
               });
               setProfile(tempProfile);
@@ -241,10 +221,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
-    // Initialize auth
     initializeAuth();
 
-    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('📡 Auth event:', event, session?.user?.email);
@@ -275,12 +253,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           } catch (profileError) {
             console.error('💥 Erro ao carregar/criar perfil no SIGNED_IN:', profileError);
             
-            // Set temporary profile instead of failing
             const tempProfile = createAuthUser(session.user, {
               id: session.user.id,
               email: session.user.email,
-              full_name: 'Usuário',
-              role: 'student',
+              full_name: session.user.email === 'erisman@admin.com' ? 'Administrador Sistema' : 'Usuário',
+              role: session.user.email === 'erisman@admin.com' ? 'admin' : 'student',
               status: 'active'
             });
             setProfile(tempProfile);

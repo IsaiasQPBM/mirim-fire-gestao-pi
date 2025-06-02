@@ -24,44 +24,39 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 const Dashboard: React.FC = () => {
-  const [userRole, setUserRole] = useState<string>('');
-  const [userName, setUserName] = useState<string>('');
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, profile, loading } = useAuth();
 
   useEffect(() => {
-    // In a real app, this would check authentication status
-    const storedUserRole = localStorage.getItem('userRole');
-    const storedUserName = localStorage.getItem('userName');
-
-    if (!storedUserRole || !storedUserName) {
-      navigate('/');
+    if (!loading && (!user || !profile)) {
+      navigate('/login');
       return;
     }
 
-    setUserRole(storedUserRole);
-    setUserName(storedUserName);
-
-    // Demo welcome toast
-    toast({
-      title: "Bem-vindo de volta!",
-      description: `Olá ${storedUserName}, você tem 3 novas notificações.`,
-      duration: 5000,
-    });
-  }, [navigate, toast]);
+    if (profile) {
+      // Demo welcome toast
+      toast({
+        title: "Bem-vindo de volta!",
+        description: `Olá ${profile.full_name}, você tem 3 novas notificações.`,
+        duration: 5000,
+      });
+    }
+  }, [navigate, toast, user, profile, loading]);
 
   // Mock data for dashboard cards
   const getCardData = () => {
-    if (userRole === 'admin') {
+    if (profile?.role === 'admin') {
       return [
         { title: 'Total de Alunos', value: '120', icon: Users, color: 'bg-blue-100 text-blue-600', link: '/students' },
         { title: 'Disciplinas Ativas', value: '8', icon: BookOpen, color: 'bg-green-100 text-green-600', link: '/disciplines' },
         { title: 'Instrutores', value: '12', icon: Shield, color: 'bg-purple-100 text-purple-600', link: '/users' },
         { title: 'Eventos do Mês', value: '5', icon: Calendar, color: 'bg-orange-100 text-orange-600', link: '/calendar' }
       ];
-    } else if (userRole === 'instructor') {
+    } else if (profile?.role === 'instructor') {
       return [
         { title: 'Seus Alunos', value: '45', icon: Users, color: 'bg-blue-100 text-blue-600', link: '/students' },
         { title: 'Suas Disciplinas', value: '3', icon: BookOpen, color: 'bg-green-100 text-green-600', link: '/disciplines' },
@@ -80,14 +75,14 @@ const Dashboard: React.FC = () => {
   };
 
   const getQuickActions = () => {
-    if (userRole === 'admin') {
+    if (profile?.role === 'admin') {
       return [
         { title: 'Novo Comunicado', icon: Megaphone, color: 'bg-amber-100 text-amber-600', link: '/communication/announcements/new' },
         { title: 'Nova Mensagem', icon: MessageSquare, color: 'bg-violet-100 text-violet-600', link: '/communication/messages/new' },
         { title: 'Gerar Relatório', icon: FileText, color: 'bg-emerald-100 text-emerald-600', link: '/reports' },
         { title: 'Ver Notificações', icon: Bell, color: 'bg-rose-100 text-rose-600', link: '/notifications' }
       ];
-    } else if (userRole === 'instructor') {
+    } else if (profile?.role === 'instructor') {
       return [
         { title: 'Nova Avaliação', icon: FileText, color: 'bg-amber-100 text-amber-600', link: '/pedagogical/assessments/create' },
         { title: 'Nova Mensagem', icon: MessageSquare, color: 'bg-violet-100 text-violet-600', link: '/communication/messages/new' },
@@ -97,7 +92,7 @@ const Dashboard: React.FC = () => {
     } else {
       // Student role
       return [
-        { title: 'Ver Mensagens', icon: MessageSquare, color: 'bg-violet-100 text-violet-600', link: '/communication/messages' },
+        { title: 'Ver Mensagens', icon: MessageSquare, color: 'bg-violet-100 text-violet-600', link: '/communications/messages' },
         { title: 'Comunicados', icon: Megaphone, color: 'bg-amber-100 text-amber-600', link: '/communication/announcements' },
         { title: 'Cronograma', icon: Calendar, color: 'bg-green-100 text-green-600', link: '/schedule' },
         { title: 'Meu Boletim', icon: FileText, color: 'bg-emerald-100 text-emerald-600', link: '/reports/student-bulletin' }
@@ -116,22 +111,32 @@ const Dashboard: React.FC = () => {
     else if (hour < 18) greeting = 'Boa tarde';
     else greeting = 'Boa noite';
     
-    return `${greeting}, ${userName}!`;
+    return `${greeting}, ${profile?.full_name || 'Usuário'}!`;
   };
 
-  if (!userRole) return null; // Don't render until we have the user role
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cbmepi-orange"></div>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return null;
+  }
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
-      <Header title="Dashboard" userRole={userRole} userName={userName} />
+      <Header title="Dashboard" userRole={profile.role} userName={profile.full_name} />
       
       <main className="flex-1 p-6 overflow-y-auto">
         <AnimatedContainer animation="fadeIn" className="mb-6">
           <h2 className="text-2xl font-bold text-cbmepi-black">{getWelcomeMessage()}</h2>
           <p className="text-gray-600">
-            {userRole === 'admin' 
+            {profile.role === 'admin' 
               ? 'Aqui está o resumo do sistema do Pelotão Mirim.' 
-              : userRole === 'instructor' 
+              : profile.role === 'instructor' 
                 ? 'Aqui está o resumo das suas atividades como instrutor.' 
                 : 'Aqui está o resumo das suas atividades como aluno do Pelotão Mirim.'}
           </p>
@@ -214,9 +219,9 @@ const Dashboard: React.FC = () => {
           <Card className="lg:col-span-2 shadow-md">
             <CardHeader>
               <CardTitle>
-                {userRole === 'admin' 
+                {profile.role === 'admin' 
                   ? 'Visão Geral do Sistema' 
-                  : userRole === 'instructor' 
+                  : profile.role === 'instructor' 
                     ? 'Suas Próximas Atividades'
                     : 'Seu Progresso Acadêmico'}
                 <TooltipProvider>
@@ -228,9 +233,9 @@ const Dashboard: React.FC = () => {
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>
-                        {userRole === 'admin' 
+                        {profile.role === 'admin' 
                           ? 'Visualização gráfica dos dados do sistema' 
-                          : userRole === 'instructor' 
+                          : profile.role === 'instructor' 
                             ? 'Calendário de atividades agendadas'
                             : 'Acompanhamento do seu desempenho acadêmico'}
                       </p>
@@ -242,9 +247,9 @@ const Dashboard: React.FC = () => {
             <CardContent>
               <div className="h-64 flex items-center justify-center border rounded-md bg-gray-50">
                 <p className="text-gray-500">
-                  {userRole === 'admin' 
+                  {profile.role === 'admin' 
                     ? 'Gráficos e estatísticas serão exibidos aqui' 
-                    : userRole === 'instructor' 
+                    : profile.role === 'instructor' 
                       ? 'Seu calendário de atividades será exibido aqui'
                       : 'Seu progresso nas disciplinas será exibido aqui'}
                 </p>
@@ -256,9 +261,9 @@ const Dashboard: React.FC = () => {
           <Card className="shadow-md">
             <CardHeader>
               <CardTitle>
-                {userRole === 'admin' 
+                {profile.role === 'admin' 
                   ? 'Atividades Recentes' 
-                  : userRole === 'instructor' 
+                  : profile.role === 'instructor' 
                     ? 'Notificações'
                     : 'Avisos Importantes'}
               </CardTitle>
@@ -270,9 +275,9 @@ const Dashboard: React.FC = () => {
                     <div className="w-2 h-2 mt-2 rounded-full bg-cbmepi-orange"></div>
                     <div>
                       <p className="font-medium text-sm">
-                        {userRole === 'admin' 
+                        {profile.role === 'admin' 
                           ? `Novo aluno registrado: João Silva` 
-                          : userRole === 'instructor' 
+                          : profile.role === 'instructor' 
                             ? 'Avaliação pendente: Turma A'
                             : 'Entrega de trabalho amanhã'}
                       </p>

@@ -24,6 +24,8 @@ const routeConfig: RouteValidationConfig = {
     '/students',
     '/reports',
     '/reports/student-bulletin',
+    '/grades',
+    '/schedule',
     '/pedagogical/assessments',
     '/pedagogical/observations',
     '/pedagogical/questions',

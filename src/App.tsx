@@ -121,6 +121,10 @@ function App() {
             <Route path="reports/bulletin/:studentId" element={<StudentBulletin />} />
             <Route path="reports/student-bulletin" element={<StudentBulletin />} />
             
+            {/* Páginas para estudantes e instrutores */}
+            <Route path="grades" element={<PlaceholderPage title="Notas" description="Visualização de notas e avaliações" />} />
+            <Route path="schedule" element={<PlaceholderPage title="Cronograma" description="Cronograma de aulas e atividades" />} />
+            
             {/* Rotas Pedagógicas */}
             <Route path="pedagogical/assessments" element={<AssessmentsList />} />
             <Route path="pedagogical/assessments/:id" element={<AssessmentView />} />
@@ -133,7 +137,7 @@ function App() {
             <Route path="pedagogical/results" element={<ResultsView />} />
             <Route path="pedagogical/student-dashboard" element={<StudentDashboard />} />
             
-            {/* Outras rotas */}
+            {/* Rota de fallback */}
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
