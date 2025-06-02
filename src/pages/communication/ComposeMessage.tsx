@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Send, Users, User, X } from 'lucide-react';
@@ -72,7 +71,7 @@ const ComposeMessage: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
-      <Header title="Compor Mensagem" userRole={userRole} userName={userName} />
+      <Header />
       
       <main className="flex-1 p-6 overflow-y-auto">
         <Button variant="ghost" onClick={() => navigate('/communication/messages')} className="mb-6">
