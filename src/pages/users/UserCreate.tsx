@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -50,7 +49,7 @@ const UserCreate: React.FC = () => {
   if (userRole !== 'admin') {
     return (
       <div className="p-6">
-        <Header title="Cadastrar Novo Usuário" userRole={userRole} userName={userName} />
+        <Header />
         <div className="mt-8 text-center">
           <h2 className="text-xl font-bold text-red-600">Acesso Restrito</h2>
           <p className="mt-2">Você não tem permissão para acessar esta página.</p>
@@ -111,7 +110,7 @@ const UserCreate: React.FC = () => {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <Header title="Cadastrar Novo Usuário" userRole={userRole} userName={userName} />
+      <Header />
       
       <div className="max-w-2xl mx-auto mt-8">
         <Card className="border-t-4 border-t-cbmepi-orange shadow-md">
