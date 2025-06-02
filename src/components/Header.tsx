@@ -56,7 +56,7 @@ const Header: React.FC = () => {
         {/* Right side - Actions */}
         <div className="flex items-center space-x-4">
           {/* Notifications */}
-          <NotificationsPanel />
+          <NotificationsPanel userId={user?.id || ''} />
 
           {/* User Menu */}
           <DropdownMenu>

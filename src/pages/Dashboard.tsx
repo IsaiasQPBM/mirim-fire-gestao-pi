@@ -128,7 +128,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
-      <Header title="Dashboard" userRole={profile.role} userName={profile.full_name} />
+      <Header />
       
       <main className="flex-1 p-6 overflow-y-auto">
         <AnimatedContainer animation="fadeIn" className="mb-6">
