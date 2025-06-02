@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -19,45 +20,60 @@ const Login: React.FC = () => {
   const [isDiagnosing, setIsDiagnosing] = useState(false);
   const [isCreatingAdmin, setIsCreatingAdmin] = useState(false);
   const [showAdminTools, setShowAdminTools] = useState(false);
-  const { signIn, user } = useAuth();
+  const { signIn, user, loading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const migrationService = new MigrationService();
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (user) {
+    if (user && !loading) {
+      console.log('✅ Usuário autenticado, redirecionando para dashboard');
       navigate('/dashboard');
     }
-  }, [user, navigate]);
+  }, [user, loading, navigate]);
+
+  // Don't render login form if already authenticated
+  if (user && !loading) {
+    return null;
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!email || !password) {
+      toast({
+        variant: 'destructive',
+        title: 'Campos obrigatórios',
+        description: 'Por favor, preencha email e senha.',
+      });
+      return;
+    }
+    
     setIsLoading(true);
     
     console.log('🔐 Tentativa de login:', { email, password: '***' });
     
     try {
-      const { error } = await signIn(email, password);
+      const { error } = await signIn(email.trim(), password);
       
       if (!error) {
-        console.log('✅ Login bem-sucedido, redirecionando...');
+        console.log('✅ Login bem-sucedido');
         toast({
           title: "Login realizado com sucesso",
           description: "Bem-vindo ao sistema!",
         });
-        navigate('/dashboard');
+        // Navigation will be handled by useEffect above
       } else {
         console.error('❌ Erro no login:', error);
         
-        // Show specific error messages
         let errorMessage = 'Erro no login';
-        if (error.includes('Invalid login credentials')) {
-          errorMessage = 'Email ou senha incorretos. Verifique suas credenciais.';
+        if (error.includes('Invalid login credentials') || error.includes('Invalid')) {
+          errorMessage = 'Email ou senha incorretos.';
         } else if (error.includes('Email not confirmed')) {
           errorMessage = 'Email não confirmado. Verifique sua caixa de entrada.';
         } else if (error.includes('Too many requests')) {
-          errorMessage = 'Muitas tentativas. Aguarde alguns minutos e tente novamente.';
+          errorMessage = 'Muitas tentativas. Aguarde alguns minutos.';
         }
         
         toast({
@@ -66,17 +82,16 @@ const Login: React.FC = () => {
           description: errorMessage,
         });
 
-        // Show admin tools if it's the admin email
         if (email === 'erisman@admin.com') {
           setShowAdminTools(true);
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('💥 Erro crítico no login:', error);
       toast({
         variant: 'destructive',
         title: 'Erro crítico',
-        description: 'Erro inesperado durante o login. Tente novamente.',
+        description: 'Erro inesperado durante o login.',
       });
     } finally {
       setIsLoading(false);
@@ -125,7 +140,6 @@ const Login: React.FC = () => {
       console.log('📊 Resultado da criação:', result);
       
       if (result.success) {
-        // Try to auto-login after creation
         setTimeout(() => {
           setEmail('erisman@admin.com');
           setPassword('admin');
@@ -173,10 +187,8 @@ const Login: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F5A623] via-[#E8941A] to-cbmepi-red flex flex-col">
-      {/* Main content */}
       <div className="flex-1 flex flex-col items-center justify-center p-4">
         <div className="w-full max-w-6xl">
-          {/* Centralized login section */}
           <div className="flex flex-col items-center mb-8">
             <div className="mb-8">
               <CBMEPILogo 
@@ -205,6 +217,7 @@ const Login: React.FC = () => {
                         onChange={(e) => setEmail(e.target.value)}
                         required
                         className="border-[#F5A623] focus:ring-[#F5A623] focus:border-[#F5A623]"
+                        disabled={isLoading}
                       />
                     </div>
                     
@@ -218,6 +231,7 @@ const Login: React.FC = () => {
                         onChange={(e) => setPassword(e.target.value)}
                         required
                         className="border-[#F5A623] focus:ring-[#F5A623] focus:border-[#F5A623]"
+                        disabled={isLoading}
                       />
                     </div>
                     
@@ -226,21 +240,27 @@ const Login: React.FC = () => {
                       className="w-full bg-gradient-to-r from-[#F5A623] to-[#E8941A] hover:from-[#E8941A] hover:to-[#D6831A] text-white shadow-lg transition-all duration-300"
                       disabled={isLoading}
                     >
-                      {isLoading ? 'Entrando...' : 'Entrar'}
+                      {isLoading ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                          Entrando...
+                        </>
+                      ) : (
+                        'Entrar'
+                      )}
                     </Button>
 
-                    {/* Quick admin login button */}
                     <Button
                       type="button"
                       variant="outline"
                       className="w-full border-[#F5A623] text-[#F5A623] hover:bg-[#F5A623] hover:text-white"
                       onClick={handleQuickAdminLogin}
+                      disabled={isLoading}
                     >
                       🚀 Login Rápido Admin
                     </Button>
                   </form>
 
-                  {/* Admin diagnostic tools */}
                   {showAdminTools && (
                     <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                       <div className="flex items-center gap-2 mb-3">
@@ -263,9 +283,7 @@ const Login: React.FC = () => {
                               Diagnosticando...
                             </>
                           ) : (
-                            <>
-                              🔍 Diagnosticar Problema
-                            </>
+                            '🔍 Diagnosticar Problema'
                           )}
                         </Button>
                         
@@ -303,7 +321,6 @@ const Login: React.FC = () => {
             </div>
           </div>
 
-          {/* Info cards section - now below the login form */}
           <div className="w-full max-w-4xl mx-auto">
             <div className="text-center mb-8 text-white">
               <h2 className="text-3xl font-bold mb-4">Projeto Bombeiro Mirim</h2>
@@ -328,7 +345,6 @@ const Login: React.FC = () => {
         </div>
       </div>
 
-      {/* Footer */}
       <Footer className="bg-black/20 text-white border-white/20" />
     </div>
   );

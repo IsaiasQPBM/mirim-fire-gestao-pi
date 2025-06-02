@@ -75,7 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .from('profiles')
         .select('*')
         .eq('id', user.id)
-        .maybeSingle(); // Use maybeSingle em vez de single para evitar erro quando não há dados
+        .maybeSingle();
 
       if (error) {
         console.error('❌ Erro ao buscar perfil:', error);
@@ -96,7 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           
           if (updateError) {
             console.error('❌ Erro ao atualizar role do admin:', updateError);
-            return profileData; // Retorna o perfil original se não conseguir atualizar
+            return profileData;
           }
           
           console.log('✅ Role do admin corrigido:', updatedProfile);
@@ -185,13 +185,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             console.error('💥 Erro ao carregar/criar perfil:', profileError);
             
             if (mounted) {
-              toast({
-                variant: 'destructive',
-                title: 'Erro ao carregar perfil',
-                description: 'Usando perfil temporário. Algumas funcionalidades podem estar limitadas.',
-                duration: 5000,
-              });
-              
               const tempProfile = createAuthUser(session.user, {
                 id: session.user.id,
                 email: session.user.email,
@@ -205,15 +198,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       } catch (error) {
         console.error('💥 Erro na inicialização da auth:', error);
-        
-        if (mounted) {
-          toast({
-            variant: 'destructive',
-            title: 'Erro de autenticação',
-            description: 'Erro ao verificar autenticação. Tente recarregar a página.',
-            duration: 5000,
-          });
-        }
       } finally {
         if (mounted) {
           setLoading(false);
@@ -243,11 +227,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 localStorage.setItem('userId', session.user.id);
                 localStorage.setItem('userName', authUser.full_name);
                 localStorage.setItem('userRole', authUser.role);
-                
-                toast({
-                  title: 'Login realizado com sucesso',
-                  description: `Bem-vindo, ${authUser.full_name}!`,
-                });
               }
             }
           } catch (profileError) {
@@ -261,11 +240,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               status: 'active'
             });
             setProfile(tempProfile);
-            
-            toast({
-              title: 'Login realizado',
-              description: 'Bem-vindo! Usando perfil temporário.',
-            });
           }
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
@@ -288,22 +262,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { user, profile: profileData, error } = await authService.signIn({ email, password });
       
       if (error) {
-        toast({
-          variant: 'destructive',
-          title: 'Erro no login',
-          description: error,
-        });
         return { error };
       }
 
       return { error: null };
     } catch (error: any) {
       const errorMessage = error.message || 'Erro desconhecido no login';
-      toast({
-        variant: 'destructive',
-        title: 'Erro no login',
-        description: errorMessage,
-      });
       return { error: errorMessage };
     }
   };
@@ -313,27 +277,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { user, error } = await authService.signUp(data);
       
       if (error) {
-        toast({
-          variant: 'destructive',
-          title: 'Erro no cadastro',
-          description: error,
-        });
         return { error };
       }
-
-      toast({
-        title: 'Cadastro realizado com sucesso',
-        description: 'Verifique seu email para confirmar a conta.',
-      });
 
       return { error: null };
     } catch (error: any) {
       const errorMessage = error.message || 'Erro desconhecido no cadastro';
-      toast({
-        variant: 'destructive',
-        title: 'Erro no cadastro',
-        description: errorMessage,
-      });
       return { error: errorMessage };
     }
   };
@@ -343,16 +292,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await authService.signOut();
       setUser(null);
       setProfile(null);
-      toast({
-        title: 'Logout realizado com sucesso',
-        description: 'Até breve!',
-      });
     } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Erro no logout',
-        description: error.message,
-      });
+      console.error('Erro no logout:', error);
+      throw error;
     }
   };
 
@@ -363,30 +305,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { data, error } = await authService.updateProfile(user.id, updates);
       
       if (error) {
-        toast({
-          variant: 'destructive',
-          title: 'Erro ao atualizar perfil',
-          description: error,
-        });
         return { error };
       }
 
       if (data) {
         const authUser = createAuthUser(user, data);
         setProfile(authUser);
-        toast({
-          title: 'Perfil atualizado com sucesso',
-        });
       }
 
       return { error: null };
     } catch (error: any) {
       const errorMessage = error.message || 'Erro desconhecido ao atualizar perfil';
-      toast({
-        variant: 'destructive',
-        title: 'Erro ao atualizar perfil',
-        description: errorMessage,
-      });
       return { error: errorMessage };
     }
   };

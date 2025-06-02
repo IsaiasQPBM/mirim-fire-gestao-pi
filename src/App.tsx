@@ -9,6 +9,7 @@ import Dashboard from '@/pages/Dashboard';
 import PlaceholderPage from '@/pages/PlaceholderPage';
 import NotFound from '@/pages/NotFound';
 import Index from '@/pages/Index';
+import Settings from '@/pages/Settings';
 import DashboardLayout from '@/components/DashboardLayout';
 
 // Páginas de Administração
@@ -75,8 +76,9 @@ function App() {
           <Route path="/" element={<DashboardLayout />}>
             <Route path="dashboard" element={<Dashboard />} />
             
-            {/* Rota de Perfil */}
+            {/* Rota de Perfil e Configurações */}
             <Route path="profile" element={<UserProfile />} />
+            <Route path="settings" element={<Settings />} />
             
             {/* Rotas de Administração */}
             <Route path="admin" element={<AdminDashboard />} />
