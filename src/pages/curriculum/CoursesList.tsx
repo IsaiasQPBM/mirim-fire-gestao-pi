@@ -65,11 +65,7 @@ const CoursesList: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
-      <Header 
-        title="Cursos" 
-        userRole={userRole} 
-        userName={userName}
-      />
+      <Header />
       
       <main className="flex-1 p-6 overflow-y-auto">
         <div className="max-w-7xl mx-auto">

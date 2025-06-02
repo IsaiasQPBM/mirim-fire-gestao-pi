@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -138,11 +137,7 @@ const CourseEdit: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
-      <Header 
-        title={`Editar: ${course.name}`} 
-        userRole={userRole} 
-        userName={userName} 
-      />
+      <Header />
       
       <main className="flex-1 p-6 overflow-y-auto">
         <div className="max-w-4xl mx-auto">
