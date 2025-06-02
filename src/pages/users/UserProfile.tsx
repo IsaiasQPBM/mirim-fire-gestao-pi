@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
@@ -56,7 +55,7 @@ const UserProfile: React.FC = () => {
   if (!user || !profile) {
     return (
       <div className="p-6">
-        <Header title="Meu Perfil" userRole="student" userName="" />
+        <Header />
         <div className="mt-8 text-center">
           <h2 className="text-xl font-bold text-red-600">Acesso Restrito</h2>
           <p className="mt-2">Você precisa estar logado para ver seu perfil.</p>
@@ -134,7 +133,7 @@ const UserProfile: React.FC = () => {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <Header title="Meu Perfil" userRole={profile.role} userName={profile.full_name} />
+      <Header />
       
       <div className="max-w-5xl mx-auto mt-6">
         <Card className="overflow-hidden border-t-4 border-t-cbmepi-orange shadow-md">

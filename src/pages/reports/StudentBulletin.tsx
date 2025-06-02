@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -109,7 +108,7 @@ const StudentBulletin: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
-      <Header title="Boletim Individual" userRole={userRole} userName={userName} />
+      <Header />
       
       <main className="flex-1 p-4 md:p-6 overflow-y-auto">
         <div className="flex items-center mb-6">

@@ -170,7 +170,7 @@ const StudentDetail: React.FC = () => {
   if (!student) {
     return (
       <div className="p-6">
-        <Header title="Perfil do Aluno" userRole={userRole} userName={userName} />
+        <Header />
         <Breadcrumb className="mb-6">
           <BreadcrumbList>
             <BreadcrumbItem>
@@ -203,7 +203,7 @@ const StudentDetail: React.FC = () => {
   if (!canAccessStudentDetail()) {
     return (
       <div className="p-6">
-        <Header title="Perfil do Aluno" userRole={userRole} userName={userName} />
+        <Header />
         <Breadcrumb className="mb-6">
           <BreadcrumbList>
             <BreadcrumbItem>
@@ -240,7 +240,7 @@ const StudentDetail: React.FC = () => {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <Header title="Perfil do Aluno" userRole={userRole} userName={userName} />
+      <Header />
       
       <div className="max-w-7xl mx-auto mt-6">
         <Breadcrumb className="mb-6">

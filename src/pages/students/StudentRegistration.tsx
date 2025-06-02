@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -336,7 +335,7 @@ const StudentRegistration: React.FC = () => {
   if (!canAccessStudentRegistration()) {
     return (
       <div className="p-6">
-        <Header title="Cadastro de Aluno" userRole={userRole} userName={userName} />
+        <Header />
         <div className="mt-8 text-center">
           <h2 className="text-xl font-bold text-red-600">Acesso Restrito</h2>
           <p className="mt-2">Você não tem permissão para acessar esta página.</p>
@@ -353,7 +352,7 @@ const StudentRegistration: React.FC = () => {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <Header title="Cadastro de Aluno" userRole={userRole} userName={userName} />
+      <Header />
       
       <div className="max-w-5xl mx-auto mt-6">
         {/* Progress bar */}

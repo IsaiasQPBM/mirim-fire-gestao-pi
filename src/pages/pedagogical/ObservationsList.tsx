@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PlusCircle, Search, Filter } from 'lucide-react';
@@ -216,7 +217,7 @@ const ObservationsList = () => {
                         onClick={() => navigate(`/pedagogical/student/${observation.studentId}`)}
                       >
                         <TableCell>{formatDate(observation.date)}</TableCell>
-                        <TableCell className="font-medium">{getStudentName(obs.studentId)}</TableCell>
+                        <TableCell className="font-medium">{getStudentName(observation.studentId)}</TableCell>
                         <TableCell>
                           <Badge className={`${getTypeBadgeColor(observation.type)} text-white`}>
                             {observation.type === 'behavioral' && 'Comportamental'}
@@ -235,7 +236,7 @@ const ObservationsList = () => {
                           </Badge>
                         </TableCell>
                         <TableCell className="max-w-[300px] truncate">{observation.description}</TableCell>
-                        <TableCell>{getInstructorName(obs.instructorId)}</TableCell>
+                        <TableCell>{getInstructorName(observation.instructorId)}</TableCell>
                       </TableRow>
                     ))
                   ) : (
