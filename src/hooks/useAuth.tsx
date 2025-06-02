@@ -67,10 +67,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Function to get or create profile with timeout and retry logic
+  // Optimized function to get or create profile with shorter timeout
   const getOrCreateProfile = async (user: User): Promise<any> => {
-    const maxAttempts = 3;
-    const timeoutMs = 5000; // 5 seconds timeout per attempt
+    const maxAttempts = 2;
+    const timeoutMs = 3000; // Reduced to 3 seconds
     
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       console.log(`🔍 Tentativa ${attempt}/${maxAttempts} - Buscando perfil para:`, user.email);
@@ -95,7 +95,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (error && error.code !== 'PGRST116') { // PGRST116 = no rows found
           console.error(`❌ Erro na tentativa ${attempt}:`, error);
-          throw error;
+          if (attempt === maxAttempts) {
+            throw error;
+          }
+          continue;
         }
 
         if (profileData) {
@@ -110,25 +113,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return newProfile;
         }
 
-        // For non-admin users, profile should exist
-        console.warn(`⚠️ Perfil não encontrado na tentativa ${attempt} para usuário não-admin:`, user.email);
-        
-        if (attempt === maxAttempts) {
-          throw new Error('Perfil não encontrado após todas as tentativas');
+        // For non-admin users, create a basic profile
+        console.log(`ℹ️ Criando perfil básico para usuário:`, user.email);
+        const basicProfileData = {
+          id: user.id,
+          email: user.email,
+          full_name: user.user_metadata?.full_name || 'Usuário',
+          role: user.user_metadata?.role || 'student',
+          status: 'active'
+        };
+
+        const { data: newProfileData, error: createError } = await supabase
+          .from('profiles')
+          .insert(basicProfileData)
+          .select()
+          .single();
+
+        if (createError) {
+          console.error('❌ Erro ao criar perfil básico:', createError);
+          throw createError;
         }
 
-        // Wait before next attempt
-        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+        console.log('✅ Perfil básico criado:', newProfileData);
+        return newProfileData;
 
       } catch (error: any) {
         console.error(`💥 Erro na tentativa ${attempt}:`, error);
         
         if (attempt === maxAttempts) {
-          throw error;
+          // Return a default profile to prevent blocking
+          console.log('⚠️ Retornando perfil padrão para evitar bloqueio');
+          return {
+            id: user.id,
+            email: user.email,
+            full_name: user.user_metadata?.full_name || 'Usuário',
+            role: user.user_metadata?.role || 'student',
+            status: 'active'
+          };
         }
         
-        // Wait before next attempt (exponential backoff)
-        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+        // Wait before next attempt (reduced wait time)
+        await new Promise(resolve => setTimeout(resolve, 500 * attempt));
       }
     }
 
@@ -142,8 +167,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         console.log('🔄 Inicializando autenticação...');
         
-        // Get current session
-        const { data: { session }, error } = await supabase.auth.getSession();
+        // Get current session with timeout
+        const sessionPromise = supabase.auth.getSession();
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Timeout ao obter sessão')), 5000);
+        });
+
+        const { data: { session }, error } = await Promise.race([
+          sessionPromise,
+          timeoutPromise
+        ]) as any;
         
         if (error) {
           console.error('❌ Erro ao obter sessão:', error);
@@ -174,9 +207,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               toast({
                 variant: 'destructive',
                 title: 'Erro ao carregar perfil',
-                description: 'Erro ao carregar perfil do usuário. Tente novamente ou contate o suporte.',
-                duration: 10000,
+                description: 'Usando perfil temporário. Algumas funcionalidades podem estar limitadas.',
+                duration: 5000,
               });
+              
+              // Set a temporary profile to avoid blocking the app
+              const tempProfile = createAuthUser(session.user, {
+                id: session.user.id,
+                email: session.user.email,
+                full_name: 'Usuário Temporário',
+                role: 'student',
+                status: 'active'
+              });
+              setProfile(tempProfile);
             }
           }
         }
@@ -188,7 +231,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             variant: 'destructive',
             title: 'Erro de autenticação',
             description: 'Erro ao verificar autenticação. Tente recarregar a página.',
-            duration: 10000,
+            duration: 5000,
           });
         }
       } finally {
@@ -232,11 +275,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           } catch (profileError) {
             console.error('💥 Erro ao carregar/criar perfil no SIGNED_IN:', profileError);
             
+            // Set temporary profile instead of failing
+            const tempProfile = createAuthUser(session.user, {
+              id: session.user.id,
+              email: session.user.email,
+              full_name: 'Usuário',
+              role: 'student',
+              status: 'active'
+            });
+            setProfile(tempProfile);
+            
             toast({
-              variant: 'destructive',
-              title: 'Erro ao carregar perfil',
-              description: 'Erro ao carregar perfil do usuário. Tente novamente ou contate o suporte.',
-              duration: 10000,
+              title: 'Login realizado',
+              description: 'Bem-vindo! Usando perfil temporário.',
             });
           }
         } else if (event === 'SIGNED_OUT') {
@@ -268,7 +319,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { error };
       }
 
-      // Auth state change will handle profile loading
       return { error: null };
     } catch (error: any) {
       const errorMessage = error.message || 'Erro desconhecido no login';

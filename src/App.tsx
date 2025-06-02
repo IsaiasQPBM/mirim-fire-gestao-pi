@@ -25,8 +25,10 @@ import ClassView from '@/pages/curriculum/ClassView';
 import ClassCreate from '@/pages/curriculum/ClassCreate';
 import ClassEdit from '@/pages/curriculum/ClassEdit';
 import DisciplinesList from '@/pages/curriculum/DisciplinesList';
+import DisciplineEdit from '@/pages/curriculum/DisciplineEdit';
 import Calendar from '@/pages/curriculum/Calendar';
 import LessonPlanning from '@/pages/curriculum/LessonPlanning';
+import CurriculumView from '@/pages/curriculum/CurriculumView';
 
 // Páginas de Usuários
 import UsersList from '@/pages/users/UsersList';
@@ -81,6 +83,7 @@ function App() {
             <Route path="admin/migration" element={<DataMigration />} />
             
             {/* Rotas de Currículo */}
+            <Route path="curriculum" element={<CurriculumView />} />
             <Route path="courses" element={<CoursesList />} />
             <Route path="courses/:id" element={<CourseView />} />
             <Route path="courses/create" element={<CourseCreate />} />
@@ -92,6 +95,7 @@ function App() {
             
             {/* Rotas de Disciplinas */}
             <Route path="disciplines" element={<DisciplinesList />} />
+            <Route path="disciplines/:id/edit" element={<DisciplineEdit />} />
             
             {/* Rotas de Calendário e Planejamento */}
             <Route path="calendar" element={<Calendar />} />
@@ -115,6 +119,7 @@ function App() {
             {/* Rotas de Relatórios */}
             <Route path="reports" element={<ReportsDashboard />} />
             <Route path="reports/bulletin/:studentId" element={<StudentBulletin />} />
+            <Route path="reports/student-bulletin" element={<StudentBulletin />} />
             
             {/* Rotas Pedagógicas */}
             <Route path="pedagogical/assessments" element={<AssessmentsList />} />

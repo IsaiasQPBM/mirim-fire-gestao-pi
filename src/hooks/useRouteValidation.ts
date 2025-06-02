@@ -14,6 +14,7 @@ const routeConfig: RouteValidationConfig = {
   protectedRoutes: [
     '/dashboard', 
     '/profile',
+    '/curriculum',
     '/courses', 
     '/classes', 
     '/disciplines', 
@@ -22,6 +23,7 @@ const routeConfig: RouteValidationConfig = {
     '/communications/messages',
     '/students',
     '/reports',
+    '/reports/student-bulletin',
     '/pedagogical/assessments',
     '/pedagogical/observations',
     '/pedagogical/questions',
