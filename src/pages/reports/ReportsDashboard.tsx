@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FileCog, FileText, Download, Calendar, BarChartHorizontal, PieChart, Users, Info } from 'lucide-react';
@@ -62,7 +61,7 @@ const ReportsDashboard: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
-      <Header title="Relatórios" userRole={userRole} userName={userName} />
+      <Header />
       
       <main className="flex-1 p-4 md:p-6 overflow-y-auto">
         <div className="mb-6">

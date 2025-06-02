@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,7 +34,7 @@ const UserView: React.FC = () => {
   if (!user) {
     return (
       <div className="p-6">
-        <Header title="Detalhes do Usuário" userRole={userRole} userName={userName} />
+        <Header />
         <div className="mt-8 text-center">
           <h2 className="text-xl font-bold text-red-600">Usuário não encontrado</h2>
           <p className="mt-2">O usuário que você está procurando não existe.</p>
@@ -72,7 +71,7 @@ const UserView: React.FC = () => {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <Header title="Detalhes do Usuário" userRole={userRole} userName={userName} />
+      <Header />
       
       <div className="max-w-4xl mx-auto mt-6">
         <div className="flex items-center justify-between mb-6">

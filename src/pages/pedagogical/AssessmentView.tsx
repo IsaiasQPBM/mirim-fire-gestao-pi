@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, FileText, Clock, Check, Calendar, Users, Play } from 'lucide-react';
@@ -51,7 +50,7 @@ const AssessmentView = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
-      <Header title="Visualizar Avaliação" userRole={userRole} userName={userName} />
+      <Header />
       
       <main className="flex-1 p-6 overflow-y-auto">
         <div className="max-w-5xl mx-auto">
