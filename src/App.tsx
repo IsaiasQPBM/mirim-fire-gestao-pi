@@ -122,8 +122,8 @@ function App() {
             <Route path="reports/student-bulletin" element={<StudentBulletin />} />
             
             {/* Páginas para estudantes e instrutores */}
-            <Route path="grades" element={<PlaceholderPage title="Notas" description="Visualização de notas e avaliações" />} />
-            <Route path="schedule" element={<PlaceholderPage title="Cronograma" description="Cronograma de aulas e atividades" />} />
+            <Route path="grades" element={<PlaceholderPage title="Notas" />} />
+            <Route path="schedule" element={<PlaceholderPage title="Cronograma" />} />
             
             {/* Rotas Pedagógicas */}
             <Route path="pedagogical/assessments" element={<AssessmentsList />} />
