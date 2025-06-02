@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -30,7 +29,7 @@ const UsersList: React.FC = () => {
   if (userRole !== 'admin') {
     return (
       <div className="p-6">
-        <Header title="Gerenciamento de Usuários" userRole={userRole} userName={userName} />
+        <Header />
         <div className="mt-8 text-center">
           <h2 className="text-xl font-bold text-red-600">Acesso Restrito</h2>
           <p className="mt-2">Você não tem permissão para acessar esta página.</p>
@@ -87,7 +86,7 @@ const UsersList: React.FC = () => {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <Header title="Gerenciamento de Usuários" userRole={userRole} userName={userName} />
+      <Header />
       
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4 mt-6">
         <div className="flex items-center gap-2">
