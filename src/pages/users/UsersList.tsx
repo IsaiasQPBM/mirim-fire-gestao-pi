@@ -20,10 +20,10 @@ interface User {
   id: string;
   fullName: string;
   email: string;
-  phone?: string;
+  phone: string; // Make phone required to match userTypes.User
   role: 'admin' | 'instructor' | 'student';
   status: 'active' | 'inactive';
-  birthDate: string; // Add missing birthDate property
+  birthDate: string;
   createdAt: string;
 }
 
@@ -75,10 +75,10 @@ const UsersList: React.FC = () => {
             id: profile.id,
             fullName: profile.full_name,
             email: profile.email || '',
-            phone: profile.phone,
+            phone: profile.phone || '', // Provide default empty string for required field
             role: profile.role,
             status: profile.status,
-            birthDate: profile.birth_date || '', // Add birthDate mapping
+            birthDate: profile.birth_date || '',
             createdAt: profile.created_at
           }));
           
