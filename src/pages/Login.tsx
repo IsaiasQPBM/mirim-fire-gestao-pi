@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -82,7 +81,7 @@ const Login: React.FC = () => {
           description: errorMessage,
         });
 
-        if (email === 'erisman@admin.com') {
+        if (email === 'admin@admin.com') {
           setShowAdminTools(true);
         }
       }
@@ -141,7 +140,7 @@ const Login: React.FC = () => {
       
       if (result.success) {
         setTimeout(() => {
-          setEmail('erisman@admin.com');
+          setEmail('admin@admin.com');
           setPassword('admin');
         }, 1000);
       }
@@ -158,7 +157,7 @@ const Login: React.FC = () => {
   };
 
   const handleQuickAdminLogin = () => {
-    setEmail('erisman@admin.com');
+    setEmail('admin@admin.com');
     setPassword('admin');
   };
 
@@ -257,7 +256,7 @@ const Login: React.FC = () => {
                       onClick={handleQuickAdminLogin}
                       disabled={isLoading}
                     >
-                      🚀 Login Rápido Admin
+                      🚀 Login Admin (admin@admin.com)
                     </Button>
                   </form>
 

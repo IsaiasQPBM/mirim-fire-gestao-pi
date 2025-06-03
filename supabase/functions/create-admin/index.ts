@@ -44,7 +44,7 @@ serve(async (req) => {
       console.log('ℹ️ Admin user already exists');
       return new Response(
         JSON.stringify({ 
-          message: 'Admin user already exists',
+          message: 'Usuário administrador já existe',
           email: adminEmail
         }),
         { 
@@ -98,7 +98,7 @@ serve(async (req) => {
       await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
       
       return new Response(
-        JSON.stringify({ error: `Failed to create admin profile: ${profileError.message}` }),
+        JSON.stringify({ error: `Falha ao criar perfil do admin: ${profileError.message}` }),
         { 
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -110,7 +110,7 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify({ 
-        message: 'Admin user created successfully',
+        message: 'Usuário administrador criado com sucesso',
         email: adminEmail,
         password: adminPassword,
         profile: profileData
@@ -124,7 +124,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('💥 Unexpected error:', error);
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ error: 'Erro interno do servidor' }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
