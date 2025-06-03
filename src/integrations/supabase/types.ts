@@ -518,6 +518,47 @@ export type Database = {
           },
         ]
       }
+      guardians: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          is_emergency_contact: boolean | null
+          name: string
+          phone: string | null
+          relationship: string
+          student_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_emergency_contact?: boolean | null
+          name: string
+          phone?: string | null
+          relationship: string
+          student_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_emergency_contact?: boolean | null
+          name?: string
+          phone?: string | null
+          relationship?: string
+          student_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guardians_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lessons: {
         Row: {
           class_id: string
@@ -591,6 +632,63 @@ export type Database = {
           },
         ]
       }
+      pedagogical_observations: {
+        Row: {
+          created_at: string
+          date: string
+          description: string
+          follow_up_date: string | null
+          follow_up_required: boolean | null
+          id: string
+          instructor_id: string | null
+          priority: string
+          student_id: string | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          description: string
+          follow_up_date?: string | null
+          follow_up_required?: boolean | null
+          id?: string
+          instructor_id?: string | null
+          priority: string
+          student_id?: string | null
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          description?: string
+          follow_up_date?: string | null
+          follow_up_required?: boolean | null
+          id?: string
+          instructor_id?: string | null
+          priority?: string
+          student_id?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pedagogical_observations_instructor_id_fkey"
+            columns: ["instructor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pedagogical_observations_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           birth_date: string | null
@@ -626,6 +724,100 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      student_documents: {
+        Row: {
+          created_at: string
+          file_path: string | null
+          id: string
+          name: string
+          notes: string | null
+          student_id: string | null
+          type: string
+          upload_date: string
+        }
+        Insert: {
+          created_at?: string
+          file_path?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          student_id?: string | null
+          type: string
+          upload_date?: string
+        }
+        Update: {
+          created_at?: string
+          file_path?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          student_id?: string | null
+          type?: string
+          upload_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_documents_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      students: {
+        Row: {
+          address: Json | null
+          birth_date: string | null
+          created_at: string
+          enrollment_date: string
+          id: string
+          notes: string | null
+          phone: string | null
+          profile_image: string | null
+          registration_number: string
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          address?: Json | null
+          birth_date?: string | null
+          created_at?: string
+          enrollment_date?: string
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          profile_image?: string | null
+          registration_number: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          address?: Json | null
+          birth_date?: string | null
+          created_at?: string
+          enrollment_date?: string
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          profile_image?: string | null
+          registration_number?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "students_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

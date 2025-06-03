@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -23,7 +24,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Header from '@/components/Header';
-import { User, UserRole } from '@/data/userTypes';
+import { profilesService } from '@/services/profilesService';
 
 const userSchema = z.object({
   fullName: z.string().min(3, { message: 'Nome completo deve ter pelo menos 3 caracteres' }),
@@ -31,11 +32,6 @@ const userSchema = z.object({
   role: z.enum(['admin', 'instructor', 'student']),
   email: z.string().email({ message: 'Email inválido' }),
   phone: z.string().min(10, { message: 'Telefone deve ter pelo menos 10 dígitos' }),
-  password: z.string().min(6, { message: 'Senha deve ter pelo menos 6 caracteres' }),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "As senhas não correspondem",
-  path: ["confirmPassword"],
 });
 
 type FormData = z.infer<typeof userSchema>;
@@ -43,7 +39,6 @@ type FormData = z.infer<typeof userSchema>;
 const UserCreate: React.FC = () => {
   const navigate = useNavigate();
   const userRole = localStorage.getItem('userRole') as 'admin' | 'instructor' | 'student' || 'student';
-  const userName = localStorage.getItem('userName') || '';
   
   // Only admin should be able to see this page
   if (userRole !== 'admin') {
@@ -72,40 +67,32 @@ const UserCreate: React.FC = () => {
       role: 'student',
       email: '',
       phone: '',
-      password: '',
-      confirmPassword: '',
     },
   });
 
-  const onSubmit = (data: FormData) => {
-    // In a real app, this would be an API call
-    console.log('Form submitted:', data);
-    
-    // Simulate API call delay
-    toast.promise(
-      new Promise<User>(resolve => {
-        setTimeout(() => {
-          resolve({
-            id: Math.random().toString(36).substr(2, 9),
-            fullName: data.fullName,
-            birthDate: data.birthDate,
-            role: data.role as UserRole,
-            email: data.email,
-            phone: data.phone,
-            status: 'active',
-            createdAt: new Date().toISOString(),
-          });
-        }, 1000);
-      }),
-      {
-        loading: 'Cadastrando usuário...',
-        success: () => {
-          navigate('/users');
-          return 'Usuário cadastrado com sucesso!';
-        },
-        error: 'Erro ao cadastrar usuário.',
+  const onSubmit = async (data: FormData) => {
+    try {
+      const { data: newUser, error } = await profilesService.create({
+        id: '', // Will be set by the service
+        full_name: data.fullName,
+        birth_date: data.birthDate,
+        role: data.role,
+        email: data.email,
+        phone: data.phone,
+        status: 'active',
+      });
+
+      if (error) {
+        toast.error(`Erro ao cadastrar usuário: ${error}`);
+        return;
       }
-    );
+
+      toast.success('Usuário cadastrado com sucesso!');
+      navigate('/users');
+    } catch (error) {
+      console.error('Error creating user:', error);
+      toast.error('Erro inesperado ao cadastrar usuário.');
+    }
   };
 
   return (
@@ -200,39 +187,6 @@ const UserCreate: React.FC = () => {
                             <SelectItem value="student">Aluno</SelectItem>
                           </SelectContent>
                         </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <div className="md:col-span-2">
-                    <hr className="my-2" />
-                    <h3 className="font-medium mb-4">Credenciais de Acesso</h3>
-                  </div>
-                  
-                  <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Senha *</FormLabel>
-                        <FormControl>
-                          <Input type="password" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="confirmPassword"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Confirmar Senha *</FormLabel>
-                        <FormControl>
-                          <Input type="password" {...field} />
-                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
