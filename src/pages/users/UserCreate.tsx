@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -24,7 +23,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Header from '@/components/Header';
-import { profilesService } from '@/services/profilesService';
+import { profilesService, userService } from '@/services';
 
 const userSchema = z.object({
   fullName: z.string().min(3, { message: 'Nome completo deve ter pelo menos 3 caracteres' }),
@@ -72,26 +71,46 @@ const UserCreate: React.FC = () => {
 
   const onSubmit = async (data: FormData) => {
     try {
-      const { data: newUser, error } = await profilesService.create({
-        id: '', // Will be set by the service
-        full_name: data.fullName,
-        birth_date: data.birthDate,
-        role: data.role,
+      console.log('📝 Submitting user creation:', data);
+      
+      const { data: newUser, error } = await userService.createUser({
         email: data.email,
+        password: 'temp123456', // Senha temporária
+        fullName: data.fullName,
+        role: data.role,
         phone: data.phone,
-        status: 'active',
+        birthDate: data.birthDate,
       });
 
       if (error) {
+        console.error('❌ Error creating user:', error);
         toast.error(`Erro ao cadastrar usuário: ${error}`);
         return;
       }
 
+      console.log('✅ User created successfully:', newUser);
       toast.success('Usuário cadastrado com sucesso!');
       navigate('/users');
     } catch (error) {
-      console.error('Error creating user:', error);
+      console.error('💥 Unexpected error:', error);
       toast.error('Erro inesperado ao cadastrar usuário.');
+    }
+  };
+
+  // Add function to create admin user
+  const createAdminUser = async () => {
+    try {
+      const { data, error } = await userService.createAdminUser();
+      
+      if (error) {
+        toast.error(`Erro ao criar admin: ${error}`);
+        return;
+      }
+      
+      toast.success(data.message);
+    } catch (error) {
+      console.error('Error creating admin:', error);
+      toast.error('Erro ao criar usuário administrador');
     }
   };
 
@@ -102,9 +121,20 @@ const UserCreate: React.FC = () => {
       <div className="max-w-2xl mx-auto mt-8">
         <Card className="border-t-4 border-t-cbmepi-orange shadow-md">
           <CardHeader className="bg-gray-50 border-b">
-            <CardTitle className="text-lg font-semibold text-cbmepi-black">
-              Informações do Usuário
-            </CardTitle>
+            <div className="flex justify-between items-center">
+              <CardTitle className="text-lg font-semibold text-cbmepi-black">
+                Informações do Usuário
+              </CardTitle>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={createAdminUser}
+                className="text-xs"
+              >
+                Criar Admin
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="pt-6">
             <Form {...form}>
