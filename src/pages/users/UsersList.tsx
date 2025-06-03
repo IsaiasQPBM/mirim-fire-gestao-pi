@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -24,6 +23,7 @@ interface User {
   phone?: string;
   role: 'admin' | 'instructor' | 'student';
   status: 'active' | 'inactive';
+  birthDate: string; // Add missing birthDate property
   createdAt: string;
 }
 
@@ -78,6 +78,7 @@ const UsersList: React.FC = () => {
             phone: profile.phone,
             role: profile.role,
             status: profile.status,
+            birthDate: profile.birth_date || '', // Add birthDate mapping
             createdAt: profile.created_at
           }));
           
