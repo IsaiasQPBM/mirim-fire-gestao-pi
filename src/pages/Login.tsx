@@ -81,6 +81,7 @@ const Login: React.FC = () => {
           description: errorMessage,
         });
 
+        // Show admin tools if trying to login as admin
         if (email === 'admin@admin.com') {
           setShowAdminTools(true);
         }
@@ -139,9 +140,15 @@ const Login: React.FC = () => {
       console.log('📊 Resultado da criação:', result);
       
       if (result.success) {
+        toast({
+          title: 'Credenciais do Admin',
+          description: 'Email: admin@admin.com | Senha: admin',
+        });
+        
         setTimeout(() => {
           setEmail('admin@admin.com');
           setPassword('admin');
+          setShowAdminTools(false);
         }, 1000);
       }
     } catch (error) {
@@ -159,6 +166,10 @@ const Login: React.FC = () => {
   const handleQuickAdminLogin = () => {
     setEmail('admin@admin.com');
     setPassword('admin');
+    toast({
+      title: 'Credenciais preenchidas',
+      description: 'Email: admin@admin.com | Senha: admin',
+    });
   };
 
   const infoCards = [
@@ -256,7 +267,7 @@ const Login: React.FC = () => {
                       onClick={handleQuickAdminLogin}
                       disabled={isLoading}
                     >
-                      🚀 Login Admin (admin@admin.com)
+                      🚀 Preencher Login Admin
                     </Button>
                   </form>
 
@@ -306,6 +317,12 @@ const Login: React.FC = () => {
                             </>
                           )}
                         </Button>
+                      </div>
+
+                      <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded text-sm">
+                        <strong>Credenciais padrão:</strong><br />
+                        Email: admin@admin.com<br />
+                        Senha: admin
                       </div>
                     </div>
                   )}

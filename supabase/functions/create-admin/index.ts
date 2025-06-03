@@ -31,27 +31,39 @@ serve(async (req) => {
     const adminEmail = 'admin@admin.com';
     const adminPassword = 'admin';
 
-    console.log('👤 Creating admin user:', adminEmail);
+    console.log('👤 Creating/updating admin user:', adminEmail);
 
-    // Check if admin already exists
+    // First, check if admin already exists in profiles
     const { data: existingProfile } = await supabaseAdmin
       .from('profiles')
-      .select('id, email')
+      .select('id, email, role')
       .eq('email', adminEmail)
-      .single();
+      .maybeSingle();
 
     if (existingProfile) {
-      console.log('ℹ️ Admin user already exists');
-      return new Response(
-        JSON.stringify({ 
-          message: 'Usuário administrador já existe',
-          email: adminEmail
-        }),
-        { 
-          status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
+      console.log('ℹ️ Admin profile already exists, checking auth user...');
+      
+      // Try to get the auth user
+      const { data: authUser, error: getUserError } = await supabaseAdmin.auth.admin.getUserById(existingProfile.id);
+      
+      if (authUser?.user) {
+        console.log('✅ Admin user already exists and is functional');
+        return new Response(
+          JSON.stringify({ 
+            message: 'Usuário administrador já existe e está funcional',
+            email: adminEmail,
+            password: adminPassword
+          }),
+          { 
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
+      } else {
+        // Auth user doesn't exist, but profile does - delete profile and recreate
+        console.log('🔄 Profile exists but no auth user, cleaning up...');
+        await supabaseAdmin.from('profiles').delete().eq('id', existingProfile.id);
+      }
     }
 
     // Create admin user in auth
@@ -67,8 +79,66 @@ serve(async (req) => {
 
     if (authError) {
       console.error('❌ Auth error:', authError);
+      
+      // If user already exists error, try to update password
+      if (authError.message?.includes('already exists') || authError.message?.includes('already registered')) {
+        console.log('🔄 User exists, trying to update password...');
+        
+        // Get user by email first
+        const { data: userData } = await supabaseAdmin.auth.admin.listUsers();
+        const existingUser = userData.users?.find(u => u.email === adminEmail);
+        
+        if (existingUser) {
+          // Update password
+          const { data: updateData, error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+            existingUser.id,
+            { 
+              password: adminPassword,
+              email_confirm: true,
+              user_metadata: {
+                full_name: 'Administrador Sistema',
+                role: 'admin'
+              }
+            }
+          );
+          
+          if (updateError) {
+            console.error('❌ Update error:', updateError);
+            return new Response(
+              JSON.stringify({ error: `Erro ao atualizar usuário: ${updateError.message}` }),
+              { 
+                status: 400,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+              }
+            );
+          }
+          
+          // Use updated user data
+          authData.user = updateData.user;
+          console.log('✅ Admin user password updated');
+        } else {
+          return new Response(
+            JSON.stringify({ error: `Erro na criação do usuário: ${authError.message}` }),
+            { 
+              status: 400,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            }
+          );
+        }
+      } else {
+        return new Response(
+          JSON.stringify({ error: `Erro na criação do usuário: ${authError.message}` }),
+          { 
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
+      }
+    }
+
+    if (!authData.user) {
       return new Response(
-        JSON.stringify({ error: authError.message }),
+        JSON.stringify({ error: 'Falha ao criar usuário' }),
         { 
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -76,41 +146,76 @@ serve(async (req) => {
       );
     }
 
-    console.log('✅ Admin user created in auth:', authData.user?.id);
+    console.log('✅ Admin user processed:', authData.user.id);
 
-    // Create admin profile
-    const { data: profileData, error: profileError } = await supabaseAdmin
+    // Check if profile already exists for this user ID
+    const { data: existingProfileById } = await supabaseAdmin
       .from('profiles')
-      .insert({
-        id: authData.user.id,
-        full_name: 'Administrador Sistema',
-        email: adminEmail,
-        role: 'admin',
-        status: 'active'
-      })
-      .select()
-      .single();
+      .select('id')
+      .eq('id', authData.user.id)
+      .maybeSingle();
 
-    if (profileError) {
-      console.error('❌ Profile creation error:', profileError);
-      
-      // If profile creation fails, clean up auth user
-      await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
-      
-      return new Response(
-        JSON.stringify({ error: `Falha ao criar perfil do admin: ${profileError.message}` }),
-        { 
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
+    let profileData;
+
+    if (existingProfileById) {
+      // Update existing profile
+      const { data: updateProfileData, error: updateProfileError } = await supabaseAdmin
+        .from('profiles')
+        .update({
+          full_name: 'Administrador Sistema',
+          email: adminEmail,
+          role: 'admin',
+          status: 'active'
+        })
+        .eq('id', authData.user.id)
+        .select()
+        .single();
+
+      if (updateProfileError) {
+        console.error('❌ Profile update error:', updateProfileError);
+        return new Response(
+          JSON.stringify({ error: `Falha ao atualizar perfil: ${updateProfileError.message}` }),
+          { 
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
+      }
+
+      profileData = updateProfileData;
+      console.log('✅ Admin profile updated');
+    } else {
+      // Create new profile
+      const { data: createProfileData, error: createProfileError } = await supabaseAdmin
+        .from('profiles')
+        .insert({
+          id: authData.user.id,
+          full_name: 'Administrador Sistema',
+          email: adminEmail,
+          role: 'admin',
+          status: 'active'
+        })
+        .select()
+        .single();
+
+      if (createProfileError) {
+        console.error('❌ Profile creation error:', createProfileError);
+        return new Response(
+          JSON.stringify({ error: `Falha ao criar perfil: ${createProfileError.message}` }),
+          { 
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
+      }
+
+      profileData = createProfileData;
+      console.log('✅ Admin profile created');
     }
-
-    console.log('✅ Admin profile created');
 
     return new Response(
       JSON.stringify({ 
-        message: 'Usuário administrador criado com sucesso',
+        message: 'Usuário administrador configurado com sucesso',
         email: adminEmail,
         password: adminPassword,
         profile: profileData

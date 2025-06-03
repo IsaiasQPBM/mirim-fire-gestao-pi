@@ -55,48 +55,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return profileData;
       }
 
-      // Se não encontrou perfil, criar um básico
-      console.log('ℹ️ Perfil não encontrado, criando básico...');
-      
-      const basicProfileData = {
-        id: userId,
-        email: user?.email || '',
-        full_name: user?.email === 'admin@admin.com' ? 'Administrador Sistema' : 'Usuário',
-        role: user?.email === 'admin@admin.com' ? 'admin' : 'student',
-        status: 'active'
-      };
-
-      const { data: newProfileData, error: createError } = await supabase
-        .from('profiles')
-        .insert(basicProfileData)
-        .select()
-        .single();
-
-      if (createError) {
-        console.error('❌ Erro ao criar perfil básico:', createError);
-        return basicProfileData; // Retorna perfil padrão mesmo se falhar a criação
-      }
-
-      console.log('✅ Perfil básico criado:', newProfileData);
-      return newProfileData;
+      console.log('ℹ️ Perfil não encontrado');
+      return null;
 
     } catch (error: any) {
       console.error('💥 Erro ao obter perfil:', error);
-      
-      // Retornar perfil padrão para evitar bloqueio
-      return {
-        id: userId,
-        email: user?.email || '',
-        full_name: user?.email === 'admin@admin.com' ? 'Administrador Sistema' : 'Usuário',
-        role: user?.email === 'admin@admin.com' ? 'admin' : 'student',
-        status: 'active'
-      };
+      return null;
     }
   };
 
   useEffect(() => {
     let mounted = true;
-    let profileLoaded = false;
 
     const initializeAuth = async () => {
       try {
@@ -106,10 +75,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         if (error) {
           console.error('❌ Erro ao obter sessão:', error);
-          throw error;
+          if (mounted) setLoading(false);
+          return;
         }
 
-        if (session?.user && mounted && !profileLoaded) {
+        if (session?.user && mounted) {
           console.log('👤 Sessão encontrada para:', session.user.email);
           setUser(session.user);
           
@@ -124,7 +94,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               localStorage.setItem('userName', authUser.full_name);
               localStorage.setItem('userRole', authUser.role);
             }
-            profileLoaded = true;
           }
         }
       } catch (error) {
@@ -144,7 +113,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         if (!mounted) return;
 
-        if (event === 'SIGNED_IN' && session?.user && !profileLoaded) {
+        if (event === 'SIGNED_IN' && session?.user) {
           setUser(session.user);
           
           const profileData = await getProfile(session.user.id);
@@ -158,12 +127,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               localStorage.setItem('userName', authUser.full_name);
               localStorage.setItem('userRole', authUser.role);
             }
-            profileLoaded = true;
           }
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
           setProfile(null);
-          profileLoaded = false;
           localStorage.removeItem('userId');
           localStorage.removeItem('userName');
           localStorage.removeItem('userRole');
