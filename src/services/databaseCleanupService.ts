@@ -1,13 +1,30 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
+type TableName = 
+  | 'assessment_results'
+  | 'assessments' 
+  | 'calendar_events'
+  | 'class_disciplines'
+  | 'class_instructors'
+  | 'class_students'
+  | 'lessons'
+  | 'communications'
+  | 'pedagogical_observations'
+  | 'student_documents'
+  | 'guardians'
+  | 'students'
+  | 'classes'
+  | 'disciplines'
+  | 'courses';
+
 class DatabaseCleanupService {
   async cleanupDatabase() {
     try {
       console.log('🧹 Iniciando limpeza do banco de dados...');
 
       // Ordem de limpeza considerando foreign keys
-      const tables = [
+      const tables: TableName[] = [
         'assessment_results',
         'assessments', 
         'calendar_events',
