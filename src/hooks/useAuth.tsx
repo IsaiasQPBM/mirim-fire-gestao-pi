@@ -75,7 +75,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         if (error) {
           console.error('❌ Erro ao obter sessão:', error);
-          if (mounted) setLoading(false);
+          if (mounted) {
+            setLoading(false);
+          }
           return;
         }
 
@@ -100,13 +102,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error('💥 Erro na inicialização da auth:', error);
       } finally {
         if (mounted) {
+          console.log('✅ Inicialização da auth concluída');
           setLoading(false);
         }
       }
     };
 
-    initializeAuth();
-
+    // Configurar listener de mudanças de auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('📡 Auth event:', event, session?.user?.email);
@@ -116,18 +118,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (event === 'SIGNED_IN' && session?.user) {
           setUser(session.user);
           
-          const profileData = await getProfile(session.user.id);
-          
-          if (profileData) {
-            const authUser = createAuthUser(session.user, profileData);
-            setProfile(authUser);
-            
-            if (authUser) {
-              localStorage.setItem('userId', session.user.id);
-              localStorage.setItem('userName', authUser.full_name);
-              localStorage.setItem('userRole', authUser.role);
+          // Usar setTimeout para evitar deadlock
+          setTimeout(async () => {
+            if (mounted) {
+              const profileData = await getProfile(session.user.id);
+              
+              if (profileData && mounted) {
+                const authUser = createAuthUser(session.user, profileData);
+                setProfile(authUser);
+                
+                if (authUser) {
+                  localStorage.setItem('userId', session.user.id);
+                  localStorage.setItem('userName', authUser.full_name);
+                  localStorage.setItem('userRole', authUser.role);
+                }
+              }
             }
-          }
+          }, 0);
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
           setProfile(null);
@@ -137,6 +144,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
     );
+
+    // Inicializar auth
+    initializeAuth();
 
     return () => {
       mounted = false;

@@ -5,38 +5,43 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
-import { Target, Heart, Users, Shield, AlertCircle, RefreshCw, Wrench, Trash2 } from 'lucide-react';
+import { Target, Heart, Users, Shield, AlertCircle, RefreshCw, Trash2 } from 'lucide-react';
 import CBMEPILogo from '@/components/CBMEPILogo';
 import InfoCard from '@/components/InfoCard';
 import Footer from '@/components/Footer';
 import { useToast } from '@/hooks/use-toast';
-import { MigrationService } from '@/services/migration/migrationService';
 import { databaseCleanupService } from '@/services/databaseCleanupService';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isDiagnosing, setIsDiagnosing] = useState(false);
-  const [isCreatingAdmin, setIsCreatingAdmin] = useState(false);
   const [isCleaning, setIsCleaning] = useState(false);
   const [showAdminTools, setShowAdminTools] = useState(false);
   const { signIn, user, loading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const migrationService = new MigrationService();
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (user && !loading) {
-      console.log('✅ Usuário autenticado, redirecionando para dashboard');
-      navigate('/dashboard');
+    console.log('🔐 Login - Auth State:', { user: !!user, loading });
+    
+    if (!loading && user) {
+      console.log('✅ Usuário já autenticado, redirecionando para dashboard');
+      navigate('/dashboard', { replace: true });
     }
   }, [user, loading, navigate]);
 
   // Don't render login form if already authenticated
-  if (user && !loading) {
-    return null;
+  if (!loading && user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F5A623] via-[#E8941A] to-cbmepi-red">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+          <p className="text-white">Redirecionando...</p>
+        </div>
+      </div>
+    );
   }
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -62,7 +67,7 @@ const Login: React.FC = () => {
         console.log('✅ Login bem-sucedido');
         toast({
           title: "Login realizado com sucesso",
-          description: "Bem-vindo ao sistema!",
+          description: "Redirecionando para o dashboard...",
         });
         // Navigation will be handled by useEffect above
       } else {
@@ -84,7 +89,7 @@ const Login: React.FC = () => {
         });
 
         // Show admin tools if trying to login as admin
-        if (email.includes('admin')) {
+        if (email.includes('admin') || email.includes('erisman')) {
           setShowAdminTools(true);
         }
       }
@@ -100,77 +105,12 @@ const Login: React.FC = () => {
     }
   };
 
-  const handleDiagnoseAdmin = async () => {
-    setIsDiagnosing(true);
-    
-    try {
-      console.log('🔍 Iniciando diagnóstico do administrador...');
-      const result = await migrationService.diagnoseAdminUser();
-      
-      toast({
-        variant: result.success ? 'default' : 'destructive',
-        title: result.success ? 'Diagnóstico Completo' : 'Problema Detectado',
-        description: result.message,
-      });
-      
-      console.log('📊 Resultado do diagnóstico:', result);
-    } catch (error) {
-      console.error('💥 Erro no diagnóstico:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Erro no diagnóstico',
-        description: 'Falha ao executar diagnóstico do administrador.',
-      });
-    } finally {
-      setIsDiagnosing(false);
-    }
-  };
-
-  const handleCreateAdmin = async () => {
-    setIsCreatingAdmin(true);
-    
-    try {
-      console.log('👑 Criando usuário administrador...');
-      const result = await migrationService.runAdminUserMigration();
-      
-      toast({
-        variant: result.success ? 'default' : 'destructive',
-        title: result.success ? 'Administrador Configurado' : 'Erro na Configuração',
-        description: result.message,
-      });
-      
-      console.log('📊 Resultado da criação:', result);
-      
-      if (result.success) {
-        toast({
-          title: 'Credenciais do Admin',
-          description: 'Email: admin@admin.com | Senha: admin',
-        });
-        
-        setTimeout(() => {
-          setEmail('admin@admin.com');
-          setPassword('admin');
-          setShowAdminTools(false);
-        }, 1000);
-      }
-    } catch (error) {
-      console.error('💥 Erro na criação do admin:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Erro na criação',
-        description: 'Falha ao criar usuário administrador.',
-      });
-    } finally {
-      setIsCreatingAdmin(false);
-    }
-  };
-
   const handleQuickAdminLogin = () => {
-    setEmail('admin@admin.com');
+    setEmail('erisman@admin.com');
     setPassword('admin');
     toast({
       title: 'Credenciais preenchidas',
-      description: 'Email: admin@admin.com | Senha: admin',
+      description: 'Email: erisman@admin.com | Senha: admin',
     });
   };
 
@@ -292,10 +232,7 @@ const Login: React.FC = () => {
                       type="button"
                       variant="outline"
                       className="w-full border-[#F5A623] text-[#F5A623] hover:bg-[#F5A623] hover:text-white"
-                      onClick={() => {
-                        setEmail('erisman@admin.com');
-                        setPassword('admin');
-                      }}
+                      onClick={handleQuickAdminLogin}
                       disabled={isLoading}
                     >
                       🚀 Preencher Login Admin

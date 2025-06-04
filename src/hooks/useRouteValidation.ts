@@ -42,9 +42,14 @@ export const useRouteValidation = () => {
   const { user, profile, loading } = useAuth();
 
   useEffect(() => {
-    if (loading) return;
+    // Não validar durante o loading
+    if (loading) {
+      console.log('⏳ Aguardando carregamento da auth...');
+      return;
+    }
 
     const currentPath = location.pathname;
+    console.log('🔍 Validando rota:', currentPath, 'User:', !!user, 'Profile:', !!profile);
     
     // Verificar se é uma rota pública
     const isPublicRoute = routeConfig.publicRoutes.some(route => 
@@ -53,13 +58,14 @@ export const useRouteValidation = () => {
 
     // Se é rota pública, permitir acesso
     if (isPublicRoute) {
+      console.log('✅ Rota pública acessível:', currentPath);
       return;
     }
 
     // Se não está autenticado e não é rota pública, redirecionar para login
     if (!user || !profile) {
       console.log('❌ Usuário não autenticado, redirecionando para login');
-      navigate('/login');
+      navigate('/login', { replace: true });
       return;
     }
 
@@ -70,7 +76,7 @@ export const useRouteValidation = () => {
 
     if (isAdminRoute && profile.role !== 'admin') {
       console.log('❌ Acesso negado: rota admin para usuário não-admin');
-      navigate('/dashboard');
+      navigate('/dashboard', { replace: true });
       return;
     }
 
@@ -79,11 +85,12 @@ export const useRouteValidation = () => {
       currentPath.startsWith(route)
     );
 
-    if (isProtectedRoute && !user) {
-      console.log('❌ Rota protegida sem autenticação');
-      navigate('/login');
+    if (isProtectedRoute) {
+      console.log('✅ Rota protegida acessível para usuário autenticado:', currentPath);
       return;
     }
+
+    console.log('✅ Validação de rota concluída para:', currentPath);
 
   }, [location.pathname, user, profile, loading, navigate]);
 
