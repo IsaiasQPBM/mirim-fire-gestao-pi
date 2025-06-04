@@ -1,72 +1,132 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Send, Users, User, X } from 'lucide-react';
-import Header from '@/components/Header';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { useForm } from 'react-hook-form';
-import { toast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-
-interface FormValues {
-  recipientType: 'individual' | 'group';
-  recipient: string;
-  subject: string;
-  message: string;
-}
+import Header from '@/components/Header';
+import { toast } from '@/hooks/use-toast';
+import { MessageSquare, Send, Users, User, Megaphone } from 'lucide-react';
+import { communicationsService, Communication } from '@/services/communicationsService';
+import { mockClasses } from '@/data/mockCurriculumData';
+import { supabase } from '@/integrations/supabase/client';
 
 const ComposeMessage: React.FC = () => {
-  const [userRole, setUserRole] = useState<string>(localStorage.getItem('userRole') || '');
-  const [userName, setUserName] = useState<string>(localStorage.getItem('userName') || '');
-  const [selectedUsers, setSelectedUsers] = useState<{id: string, name: string}[]>([]);
   const navigate = useNavigate();
-
-  const form = useForm<FormValues>({
-    defaultValues: {
-      recipientType: 'individual',
-      recipient: '',
-      subject: '',
-      message: ''
-    }
+  
+  const [userRole, setUserRole] = useState<string>('');
+  const [userName, setUserName] = useState<string>('');
+  const [loading, setLoading] = useState(false);
+  const [users, setUsers] = useState<any[]>([]);
+  
+  const [formData, setFormData] = useState<Partial<Communication>>({
+    title: '',
+    content: '',
+    message_type: 'individual',
+    priority: 'normal',
+    recipient_id: '',
+    class_id: ''
   });
+  
+  useEffect(() => {
+    // Check if user is logged in
+    const storedUserRole = localStorage.getItem('userRole');
+    const storedUserName = localStorage.getItem('userName');
 
-  const handleAddUser = (id: string, name: string) => {
-    if (!selectedUsers.some(user => user.id === id)) {
-      setSelectedUsers(prev => [...prev, {id, name}]);
+    if (!storedUserRole || !storedUserName) {
+      navigate('/');
+      return;
+    }
+
+    setUserRole(storedUserRole);
+    setUserName(storedUserName);
+    
+    fetchUsers();
+  }, [navigate]);
+
+  const fetchUsers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, full_name, role')
+        .order('full_name');
+
+      if (error) throw error;
+      setUsers(data || []);
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao carregar usuários',
+        description: error.message,
+      });
     }
   };
 
-  const handleRemoveUser = (id: string) => {
-    setSelectedUsers(prev => prev.filter(user => user.id !== id));
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      await communicationsService.sendMessage(formData as Communication);
+      
+      toast({
+        title: 'Mensagem enviada',
+        description: 'Sua mensagem foi enviada com sucesso!',
+      });
+      
+      // Reset form
+      setFormData({
+        title: '',
+        content: '',
+        message_type: 'individual',
+        priority: 'normal',
+        recipient_id: '',
+        class_id: ''
+      });
+      
+      // Redirect to messages inbox
+      navigate('/communication/messages');
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao enviar mensagem',
+        description: error.message,
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const onSubmit = (data: FormValues) => {
-    console.log('Sending message with data:', data);
-    console.log('Selected users:', selectedUsers);
-    
-    toast({
-      title: "Mensagem enviada com sucesso!",
-      description: "Sua mensagem foi enviada para os destinatários selecionados.",
-    });
-    
-    navigate('/communication/messages');
+  const getMessageTypeIcon = (type: string) => {
+    switch (type) {
+      case 'individual':
+        return <User className="h-4 w-4" />;
+      case 'group':
+        return <Users className="h-4 w-4" />;
+      case 'announcement':
+        return <Megaphone className="h-4 w-4" />;
+      default:
+        return <MessageSquare className="h-4 w-4" />;
+    }
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'low':
+        return 'bg-gray-500';
+      case 'normal':
+        return 'bg-blue-500';
+      case 'high':
+        return 'bg-yellow-500';
+      case 'urgent':
+        return 'bg-red-500';
+      default:
+        return 'bg-blue-500';
+    }
   };
 
   return (
@@ -74,173 +134,203 @@ const ComposeMessage: React.FC = () => {
       <Header />
       
       <main className="flex-1 p-6 overflow-y-auto">
-        <Button variant="ghost" onClick={() => navigate('/communication/messages')} className="mb-6">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Voltar para Caixa de Entrada
-        </Button>
-
-        <Card className="max-w-4xl mx-auto shadow-md">
-          <CardHeader>
-            <CardTitle>Nova Mensagem</CardTitle>
-          </CardHeader>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
-              <CardContent className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="recipientType"
-                  render={({ field }) => (
-                    <FormItem className="space-y-2">
-                      <FormLabel>Tipo de Destinatário</FormLabel>
-                      <FormControl>
-                        <Select 
-                          value={field.value} 
-                          onValueChange={(value: 'individual' | 'group') => field.onChange(value)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione o tipo de destinatário" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="individual">Usuário Individual</SelectItem>
-                            <SelectItem value="group">Grupo</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {form.watch('recipientType') === 'individual' ? (
-                  <div className="space-y-4">
-                    <FormField
-                      control={form.control}
-                      name="recipient"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Destinatário</FormLabel>
-                          <Select 
-                            value={field.value} 
-                            onValueChange={(value) => {
-                              field.onChange(value);
-                              
-                              // Add to selected users list for display
-                              let userName = '';
-                              if (value === 'user-1') userName = 'João Silva';
-                              else if (value === 'user-2') userName = 'Maria Oliveira';
-                              else if (value === 'user-3') userName = 'Pedro Santos';
-                              
-                              if (userName) {
-                                handleAddUser(value, userName);
-                              }
-                            }}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione um destinatário" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="user-1">João Silva (Admin)</SelectItem>
-                              <SelectItem value="user-2">Maria Oliveira (Instrutor)</SelectItem>
-                              <SelectItem value="user-3">Pedro Santos (Aluno)</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {selectedUsers.length > 0 && (
-                      <div>
-                        <p className="text-sm font-medium mb-2">Destinatários selecionados:</p>
-                        <div className="flex flex-wrap gap-2">
-                          {selectedUsers.map(user => (
-                            <Badge key={user.id} variant="secondary" className="flex items-center gap-1">
-                              <User className="h-3 w-3" />
-                              {user.name}
-                              <Button 
-                                variant="ghost" 
-                                size="icon"
-                                className="h-4 w-4 p-0 ml-1 hover:bg-transparent"
-                                onClick={() => handleRemoveUser(user.id)}
-                              >
-                                <X className="h-3 w-3" />
-                              </Button>
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center mb-6">
+            <MessageSquare className="h-6 w-6 text-cbmepi-red mr-2" />
+            <h1 className="text-2xl font-bold text-cbmepi-black">Nova Mensagem</h1>
+          </div>
+          
+          <Card className="border border-gray-200 shadow-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Send className="h-5 w-5" />
+                <span>Compor Mensagem</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <Label htmlFor="message_type">Tipo de Mensagem</Label>
+                    <Select
+                      value={formData.message_type}
+                      onValueChange={(value) => setFormData({ ...formData, message_type: value as Communication['message_type'] })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="individual">
+                          <div className="flex items-center space-x-2">
+                            <User className="h-4 w-4" />
+                            <span>Individual</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="group">
+                          <div className="flex items-center space-x-2">
+                            <Users className="h-4 w-4" />
+                            <span>Grupo/Turma</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="announcement">
+                          <div className="flex items-center space-x-2">
+                            <Megaphone className="h-4 w-4" />
+                            <span>Anúncio Geral</span>
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                ) : (
-                  <FormField
-                    control={form.control}
-                    name="recipient"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Grupo</FormLabel>
-                        <Select 
-                          value={field.value} 
-                          onValueChange={field.onChange}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione um grupo" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="group-1">Instrutores</SelectItem>
-                            <SelectItem value="group-2">Turma A</SelectItem>
-                            <SelectItem value="group-3">Primeiros Socorros</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  
+                  <div>
+                    <Label htmlFor="priority">Prioridade</Label>
+                    <Select
+                      value={formData.priority}
+                      onValueChange={(value) => setFormData({ ...formData, priority: value as Communication['priority'] })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="low">
+                          <div className="flex items-center space-x-2">
+                            <Badge className="bg-gray-500 text-xs">Baixa</Badge>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="normal">
+                          <div className="flex items-center space-x-2">
+                            <Badge className="bg-blue-500 text-xs">Normal</Badge>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="high">
+                          <div className="flex items-center space-x-2">
+                            <Badge className="bg-yellow-500 text-xs">Alta</Badge>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="urgent">
+                          <div className="flex items-center space-x-2">
+                            <Badge className="bg-red-500 text-xs">Urgente</Badge>
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {formData.message_type === 'individual' && (
+                  <div>
+                    <Label htmlFor="recipient_id">Destinatário</Label>
+                    <Select
+                      value={formData.recipient_id}
+                      onValueChange={(value) => setFormData({ ...formData, recipient_id: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione um usuário" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {users.map(user => (
+                          <SelectItem key={user.id} value={user.id}>
+                            <div className="flex items-center space-x-2">
+                              <span>{user.full_name}</span>
+                              <Badge variant="outline" className="text-xs">
+                                {user.role === 'admin' ? 'Admin' :
+                                 user.role === 'instructor' ? 'Instrutor' : 'Aluno'}
+                              </Badge>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 )}
 
-                <FormField
-                  control={form.control}
-                  name="subject"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Assunto</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Digite o assunto da mensagem" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="message"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Mensagem</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Digite sua mensagem aqui..." 
-                          className="min-h-[200px]"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-              <CardFooter className="flex justify-between">
-                <Button variant="outline" type="button" onClick={() => navigate('/communication/messages')}>
-                  Cancelar
-                </Button>
-                <Button type="submit">
-                  <Send className="mr-2 h-4 w-4" />
-                  Enviar Mensagem
-                </Button>
-              </CardFooter>
-            </form>
-          </Form>
-        </Card>
+                {formData.message_type === 'group' && (
+                  <div>
+                    <Label htmlFor="class_id">Turma</Label>
+                    <Select
+                      value={formData.class_id}
+                      onValueChange={(value) => setFormData({ ...formData, class_id: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione uma turma" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {mockClasses.map(cls => (
+                          <SelectItem key={cls.id} value={cls.id}>
+                            {cls.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                
+                <div>
+                  <Label htmlFor="title">Assunto</Label>
+                  <Input
+                    id="title"
+                    placeholder="Digite o assunto da mensagem"
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="content">Mensagem</Label>
+                  <Textarea
+                    id="content"
+                    placeholder="Digite sua mensagem aqui..."
+                    className="min-h-32 resize-y"
+                    value={formData.content}
+                    onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                    required
+                  />
+                </div>
+                
+                <div className="flex justify-between items-center pt-4">
+                  <div className="flex items-center space-x-2">
+                    {getMessageTypeIcon(formData.message_type || 'individual')}
+                    <span className="text-sm text-gray-600">
+                      {formData.message_type === 'individual' ? 'Mensagem Individual' :
+                       formData.message_type === 'group' ? 'Mensagem para Turma' : 'Anúncio Geral'}
+                    </span>
+                    <Badge className={getPriorityColor(formData.priority || 'normal')}>
+                      {formData.priority === 'low' ? 'Baixa' :
+                       formData.priority === 'normal' ? 'Normal' :
+                       formData.priority === 'high' ? 'Alta' : 'Urgente'}
+                    </Badge>
+                  </div>
+                  
+                  <div className="flex space-x-3">
+                    <Button 
+                      type="button" 
+                      variant="outline"
+                      onClick={() => navigate('/communication/messages')}
+                      disabled={loading}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button 
+                      type="submit" 
+                      className="bg-cbmepi-orange hover:bg-cbmepi-orange/90 text-white"
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <>Enviando...</>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4 mr-2" />
+                          Enviar Mensagem
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
       </main>
     </div>
   );

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
@@ -8,17 +9,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Header from '@/components/Header';
 import { toast } from '@/hooks/use-toast';
 import { CalendarDays, Plus, BookOpen, PenLine, Calendar as CalendarIcon } from 'lucide-react';
-import { mockCalendarEvents } from '@/data/mockCurriculumData';
-import { CalendarEvent } from '@/data/curriculumTypes';
+import { calendarService } from '@/services/calendarService';
+import EventDialog from '@/components/calendar/EventDialog';
 
 const Calendar: React.FC = () => {
   const navigate = useNavigate();
   
   const [userRole, setUserRole] = useState<string>('');
   const [userName, setUserName] = useState<string>('');
-  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [events, setEvents] = useState<any[]>([]);
   const [date, setDate] = useState<Date>(new Date());
-  const [selectedDateEvents, setSelectedDateEvents] = useState<CalendarEvent[]>([]);
+  const [selectedDateEvents, setSelectedDateEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
     // Check if user is logged in
@@ -33,9 +35,24 @@ const Calendar: React.FC = () => {
     setUserRole(storedUserRole);
     setUserName(storedUserName);
     
-    // Fetch events (mock data)
-    setEvents(mockCalendarEvents);
+    fetchEvents();
   }, [navigate]);
+
+  const fetchEvents = async () => {
+    try {
+      setLoading(true);
+      const data = await calendarService.getEvents();
+      setEvents(data);
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao carregar eventos',
+        description: error.message,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Update selectedDateEvents when date or events change
   useEffect(() => {
@@ -45,7 +62,7 @@ const Calendar: React.FC = () => {
     selectedDate.setHours(0, 0, 0, 0);
 
     const filteredEvents = events.filter(event => {
-      const eventDate = new Date(event.startDate);
+      const eventDate = new Date(event.start_date);
       eventDate.setHours(0, 0, 0, 0);
       return eventDate.getTime() === selectedDate.getTime();
     });
@@ -56,8 +73,7 @@ const Calendar: React.FC = () => {
   // Function to get dates with events as a Set (for the modifiers)
   const getEventDates = () => {
     const eventDates = events.map(event => {
-      const date = new Date(event.startDate);
-      // Reset time part for comparison
+      const date = new Date(event.start_date);
       date.setHours(0, 0, 0, 0);
       return date;
     });
@@ -74,7 +90,7 @@ const Calendar: React.FC = () => {
     hasEvent: { 
       fontWeight: 'bold',
       textDecoration: 'underline',
-      backgroundColor: 'rgba(255, 87, 34, 0.1)' // Slight orange background
+      backgroundColor: 'rgba(255, 87, 34, 0.1)'
     }
   };
 
@@ -121,12 +137,7 @@ const Calendar: React.FC = () => {
             </div>
             
             {isAdmin && (
-              <Button 
-                className="bg-cbmepi-orange hover:bg-cbmepi-orange/90 text-white"
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Novo Evento
-              </Button>
+              <EventDialog selectedDate={date} onEventCreated={fetchEvents} />
             )}
           </div>
           
@@ -181,12 +192,7 @@ const Calendar: React.FC = () => {
                       </p>
                       {isAdmin && (
                         <div className="mt-6">
-                          <Button 
-                            className="bg-cbmepi-orange hover:bg-cbmepi-orange/90 text-white"
-                          >
-                            <Plus className="mr-2 h-4 w-4" />
-                            Adicionar Evento
-                          </Button>
+                          <EventDialog selectedDate={date} onEventCreated={fetchEvents} />
                         </div>
                       )}
                     </div>
@@ -208,8 +214,8 @@ const Calendar: React.FC = () => {
                             >
                               <div className="flex justify-between items-start">
                                 <div className="flex items-start space-x-3">
-                                  <div className={`p-2 rounded-lg ${getEventBadgeColor(event.type)} text-white`}>
-                                    {getEventIcon(event.type)}
+                                  <div className={`p-2 rounded-lg ${getEventBadgeColor(event.event_type)} text-white`}>
+                                    {getEventIcon(event.event_type)}
                                   </div>
                                   <div>
                                     <h3 className="font-medium text-gray-900">{event.title}</h3>
@@ -217,25 +223,29 @@ const Calendar: React.FC = () => {
                                   </div>
                                 </div>
                                 
-                                <Badge className={getEventBadgeColor(event.type)}>
-                                  {event.type === 'lesson' ? 'Aula' : 
-                                   event.type === 'exam' ? 'Avaliação' : 'Evento'}
+                                <Badge className={getEventBadgeColor(event.event_type)}>
+                                  {event.event_type === 'lesson' ? 'Aula' : 
+                                   event.event_type === 'exam' ? 'Avaliação' : 'Evento'}
                                 </Badge>
                               </div>
                               
                               <div className="mt-3 pl-10 text-sm text-gray-500">
-                                Horário: {new Date(event.startDate).toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})} - 
-                                {new Date(event.endDate).toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})}
+                                Horário: {new Date(event.start_date).toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})} - 
+                                {new Date(event.end_date).toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})}
                               </div>
                               
-                              {(event.classId || event.disciplineId) && (
+                              {(event.classes || event.disciplines) && (
                                 <div className="mt-1 pl-10">
-                                  <Badge variant="outline" className="mr-2">
-                                    {event.classId ? 'Turma' : ''}
-                                  </Badge>
-                                  <Badge variant="outline">
-                                    {event.disciplineId ? 'Disciplina' : ''}
-                                  </Badge>
+                                  {event.classes && (
+                                    <Badge variant="outline" className="mr-2">
+                                      {event.classes.name}
+                                    </Badge>
+                                  )}
+                                  {event.disciplines && (
+                                    <Badge variant="outline">
+                                      {event.disciplines.name}
+                                    </Badge>
+                                  )}
                                 </div>
                               )}
                             </div>

@@ -6,10 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Header from '@/components/Header';
 import { toast } from '@/hooks/use-toast';
 import { PenLine, Plus, Search, Calendar, Clock, BookOpen } from 'lucide-react';
-import { mockLessons, mockClasses, mockDisciplines } from '@/data/mockCurriculumData';
+import { lessonsService, Lesson } from '@/services/lessonsService';
+import { mockClasses, mockDisciplines } from '@/data/mockCurriculumData';
+import LessonDialog from '@/components/lessons/LessonDialog';
 
 const LessonPlanning: React.FC = () => {
   const navigate = useNavigate();
@@ -19,6 +23,24 @@ const LessonPlanning: React.FC = () => {
   const [lessons, setLessons] = useState<any[]>([]);
   const [filteredLessons, setFilteredLessons] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedLesson, setSelectedLesson] = useState<any>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogMode, setDialogMode] = useState<'edit' | 'view'>('edit');
+  const [loading, setLoading] = useState(true);
+  
+  // Form state for creating new lessons
+  const [formData, setFormData] = useState<Partial<Lesson>>({
+    title: '',
+    description: '',
+    lesson_date: '',
+    start_time: '',
+    end_time: '',
+    class_id: '',
+    discipline_id: '',
+    content: '',
+    resources: [],
+    status: 'planned'
+  });
   
   useEffect(() => {
     // Check if user is logged in
@@ -44,21 +66,25 @@ const LessonPlanning: React.FC = () => {
     setUserRole(storedUserRole);
     setUserName(storedUserName);
     
-    // Enhance lessons with class and discipline information
-    const enhancedLessons = mockLessons.map(lesson => {
-      const classInfo = mockClasses.find(c => c.id === lesson.classId);
-      const disciplineInfo = mockDisciplines.find(d => d.id === lesson.disciplineId);
-      
-      return {
-        ...lesson,
-        className: classInfo?.name || 'Turma desconhecida',
-        disciplineName: disciplineInfo?.name || 'Disciplina desconhecida',
-      };
-    });
-    
-    setLessons(enhancedLessons);
-    setFilteredLessons(enhancedLessons);
+    fetchLessons();
   }, [navigate]);
+
+  const fetchLessons = async () => {
+    try {
+      setLoading(true);
+      const data = await lessonsService.getLessons();
+      setLessons(data);
+      setFilteredLessons(data);
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao carregar aulas',
+        description: error.message,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!searchQuery.trim()) {
@@ -70,13 +96,59 @@ const LessonPlanning: React.FC = () => {
     
     const filtered = lessons.filter(lesson => 
       lesson.title.toLowerCase().includes(lowerCaseQuery) ||
-      lesson.description.toLowerCase().includes(lowerCaseQuery) ||
-      lesson.className.toLowerCase().includes(lowerCaseQuery) ||
-      lesson.disciplineName.toLowerCase().includes(lowerCaseQuery)
+      lesson.description?.toLowerCase().includes(lowerCaseQuery) ||
+      lesson.classes?.name.toLowerCase().includes(lowerCaseQuery) ||
+      lesson.disciplines?.name.toLowerCase().includes(lowerCaseQuery)
     );
     
     setFilteredLessons(filtered);
   }, [searchQuery, lessons]);
+
+  const handleCreateLesson = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      await lessonsService.createLesson(formData as Lesson);
+      toast({
+        title: 'Aula criada',
+        description: 'O planejamento foi salvo com sucesso!',
+      });
+      
+      // Reset form
+      setFormData({
+        title: '',
+        description: '',
+        lesson_date: '',
+        start_time: '',
+        end_time: '',
+        class_id: '',
+        discipline_id: '',
+        content: '',
+        resources: [],
+        status: 'planned'
+      });
+      
+      fetchLessons();
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao criar aula',
+        description: error.message,
+      });
+    }
+  };
+
+  const handleEditLesson = (lesson: any) => {
+    setSelectedLesson(lesson);
+    setDialogMode('edit');
+    setDialogOpen(true);
+  };
+
+  const handleViewLesson = (lesson: any) => {
+    setSelectedLesson(lesson);
+    setDialogMode('view');
+    setDialogOpen(true);
+  };
 
   const getLessonStatusBadge = (status: string) => {
     switch (status) {
@@ -114,13 +186,6 @@ const LessonPlanning: React.FC = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              
-              <Button 
-                className="bg-cbmepi-orange hover:bg-cbmepi-orange/90 text-white"
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Nova Aula
-              </Button>
             </div>
           </div>
           
@@ -144,7 +209,7 @@ const LessonPlanning: React.FC = () => {
                         <div className="flex justify-between items-start">
                           <div>
                             <CardTitle className="text-lg">{lesson.title}</CardTitle>
-                            <div className="text-sm text-gray-500">{lesson.disciplineName}</div>
+                            <div className="text-sm text-gray-500">{lesson.disciplines?.name}</div>
                           </div>
                           {getLessonStatusBadge(lesson.status)}
                         </div>
@@ -155,15 +220,15 @@ const LessonPlanning: React.FC = () => {
                         <div className="space-y-2">
                           <div className="flex items-center text-sm">
                             <Calendar className="h-4 w-4 mr-2 text-gray-500" />
-                            <span>{new Date(lesson.date).toLocaleDateString('pt-BR')}</span>
+                            <span>{new Date(lesson.lesson_date).toLocaleDateString('pt-BR')}</span>
                           </div>
                           <div className="flex items-center text-sm">
                             <Clock className="h-4 w-4 mr-2 text-gray-500" />
-                            <span>{lesson.startTime} - {lesson.endTime}</span>
+                            <span>{lesson.start_time} - {lesson.end_time}</span>
                           </div>
                           <div className="flex items-center text-sm">
                             <BookOpen className="h-4 w-4 mr-2 text-gray-500" />
-                            <span>{lesson.className}</span>
+                            <span>{lesson.classes?.name}</span>
                           </div>
                         </div>
                         
@@ -172,6 +237,7 @@ const LessonPlanning: React.FC = () => {
                             variant="outline"
                             size="sm"
                             className="text-cbmepi-orange border-cbmepi-orange hover:bg-cbmepi-orange hover:text-white"
+                            onClick={() => handleEditLesson(lesson)}
                           >
                             Editar Plano
                           </Button>
@@ -213,7 +279,7 @@ const LessonPlanning: React.FC = () => {
                         <div className="flex justify-between items-start">
                           <div>
                             <CardTitle className="text-lg">{lesson.title}</CardTitle>
-                            <div className="text-sm text-gray-500">{lesson.disciplineName}</div>
+                            <div className="text-sm text-gray-500">{lesson.disciplines?.name}</div>
                           </div>
                           {getLessonStatusBadge(lesson.status)}
                         </div>
@@ -224,15 +290,15 @@ const LessonPlanning: React.FC = () => {
                         <div className="space-y-2">
                           <div className="flex items-center text-sm">
                             <Calendar className="h-4 w-4 mr-2 text-gray-500" />
-                            <span>{new Date(lesson.date).toLocaleDateString('pt-BR')}</span>
+                            <span>{new Date(lesson.lesson_date).toLocaleDateString('pt-BR')}</span>
                           </div>
                           <div className="flex items-center text-sm">
                             <Clock className="h-4 w-4 mr-2 text-gray-500" />
-                            <span>{lesson.startTime} - {lesson.endTime}</span>
+                            <span>{lesson.start_time} - {lesson.end_time}</span>
                           </div>
                           <div className="flex items-center text-sm">
                             <BookOpen className="h-4 w-4 mr-2 text-gray-500" />
-                            <span>{lesson.className}</span>
+                            <span>{lesson.classes?.name}</span>
                           </div>
                         </div>
                         
@@ -240,6 +306,7 @@ const LessonPlanning: React.FC = () => {
                           <Button
                             variant="outline"
                             size="sm"
+                            onClick={() => handleViewLesson(lesson)}
                           >
                             Ver Detalhes
                           </Button>
@@ -266,103 +333,126 @@ const LessonPlanning: React.FC = () => {
                   <CardTitle>Criar Novo Plano de Aula</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-6">
+                  <form onSubmit={handleCreateLesson} className="space-y-6">
                     <div>
-                      <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-                        Título da Aula
-                      </label>
-                      <Input id="title" placeholder="Ex: Introdução à Prevenção de Incêndios" />
+                      <Label htmlFor="title">Título da Aula</Label>
+                      <Input 
+                        id="title" 
+                        placeholder="Ex: Introdução à Prevenção de Incêndios"
+                        value={formData.title}
+                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        required
+                      />
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
-                        <label htmlFor="class" className="block text-sm font-medium text-gray-700 mb-1">
-                          Turma
-                        </label>
-                        <select
-                          id="class"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-cbmepi-orange"
+                        <Label htmlFor="class_id">Turma</Label>
+                        <Select
+                          value={formData.class_id}
+                          onValueChange={(value) => setFormData({ ...formData, class_id: value })}
                         >
-                          <option value="">Selecione uma turma</option>
-                          {mockClasses.map(classItem => (
-                            <option key={classItem.id} value={classItem.id}>
-                              {classItem.name}
-                            </option>
-                          ))}
-                        </select>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione uma turma" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {mockClasses.map(classItem => (
+                              <SelectItem key={classItem.id} value={classItem.id}>
+                                {classItem.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                       
                       <div>
-                        <label htmlFor="discipline" className="block text-sm font-medium text-gray-700 mb-1">
-                          Disciplina
-                        </label>
-                        <select
-                          id="discipline"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-cbmepi-orange"
+                        <Label htmlFor="discipline_id">Disciplina</Label>
+                        <Select
+                          value={formData.discipline_id}
+                          onValueChange={(value) => setFormData({ ...formData, discipline_id: value })}
                         >
-                          <option value="">Selecione uma disciplina</option>
-                          {mockDisciplines.map(discipline => (
-                            <option key={discipline.id} value={discipline.id}>
-                              {discipline.name}
-                            </option>
-                          ))}
-                        </select>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione uma disciplina" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {mockDisciplines.map(discipline => (
+                              <SelectItem key={discipline.id} value={discipline.id}>
+                                {discipline.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       <div>
-                        <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
-                          Data
-                        </label>
-                        <Input id="date" type="date" />
+                        <Label htmlFor="lesson_date">Data</Label>
+                        <Input 
+                          id="lesson_date" 
+                          type="date"
+                          value={formData.lesson_date}
+                          onChange={(e) => setFormData({ ...formData, lesson_date: e.target.value })}
+                          required
+                        />
                       </div>
                       
                       <div>
-                        <label htmlFor="startTime" className="block text-sm font-medium text-gray-700 mb-1">
-                          Hora de Início
-                        </label>
-                        <Input id="startTime" type="time" />
+                        <Label htmlFor="start_time">Hora de Início</Label>
+                        <Input 
+                          id="start_time" 
+                          type="time"
+                          value={formData.start_time}
+                          onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
+                          required
+                        />
                       </div>
                       
                       <div>
-                        <label htmlFor="endTime" className="block text-sm font-medium text-gray-700 mb-1">
-                          Hora de Término
-                        </label>
-                        <Input id="endTime" type="time" />
+                        <Label htmlFor="end_time">Hora de Término</Label>
+                        <Input 
+                          id="end_time" 
+                          type="time"
+                          value={formData.end_time}
+                          onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
+                          required
+                        />
                       </div>
                     </div>
                     
                     <div>
-                      <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                        Descrição da Aula
-                      </label>
+                      <Label htmlFor="description">Descrição da Aula</Label>
                       <Textarea
                         id="description"
                         placeholder="Descreva o conteúdo e objetivos da aula"
                         className="min-h-24 resize-y"
+                        value={formData.description}
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       />
                     </div>
                     
                     <div>
-                      <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-1">
-                        Conteúdo Programático
-                      </label>
+                      <Label htmlFor="content">Conteúdo Programático</Label>
                       <Textarea
                         id="content"
                         placeholder="Detalhe os tópicos que serão abordados na aula"
                         className="min-h-32 resize-y"
+                        value={formData.content}
+                        onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                       />
                     </div>
                     
                     <div>
-                      <label htmlFor="resources" className="block text-sm font-medium text-gray-700 mb-1">
-                        Recursos Necessários
-                      </label>
+                      <Label htmlFor="resources">Recursos Necessários</Label>
                       <Textarea
                         id="resources"
-                        placeholder="Liste os materiais e recursos necessários para a aula"
+                        placeholder="Liste os materiais e recursos necessários para a aula (um por linha)"
                         className="min-h-24 resize-y"
+                        value={formData.resources?.join('\n') || ''}
+                        onChange={(e) => setFormData({ 
+                          ...formData, 
+                          resources: e.target.value.split('\n').filter(r => r.trim()) 
+                        })}
                       />
                     </div>
                     
@@ -370,23 +460,43 @@ const LessonPlanning: React.FC = () => {
                       <Button 
                         type="button" 
                         variant="outline"
+                        onClick={() => setFormData({
+                          title: '',
+                          description: '',
+                          lesson_date: '',
+                          start_time: '',
+                          end_time: '',
+                          class_id: '',
+                          discipline_id: '',
+                          content: '',
+                          resources: [],
+                          status: 'planned'
+                        })}
                       >
                         Cancelar
                       </Button>
                       <Button 
-                        type="button" 
+                        type="submit" 
                         className="bg-cbmepi-orange hover:bg-cbmepi-orange/90 text-white"
                       >
                         Salvar Planejamento
                       </Button>
                     </div>
-                  </div>
+                  </form>
                 </CardContent>
               </Card>
             </TabsContent>
           </Tabs>
         </div>
       </main>
+      
+      <LessonDialog
+        lesson={selectedLesson}
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onLessonUpdated={fetchLessons}
+        mode={dialogMode}
+      />
     </div>
   );
 };
