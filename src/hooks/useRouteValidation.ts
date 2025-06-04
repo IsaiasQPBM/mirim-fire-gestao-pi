@@ -58,6 +58,7 @@ export const useRouteValidation = () => {
 
     // Se não está autenticado e não é rota pública, redirecionar para login
     if (!user || !profile) {
+      console.log('❌ Usuário não autenticado, redirecionando para login');
       navigate('/login');
       return;
     }
@@ -68,6 +69,7 @@ export const useRouteValidation = () => {
     );
 
     if (isAdminRoute && profile.role !== 'admin') {
+      console.log('❌ Acesso negado: rota admin para usuário não-admin');
       navigate('/dashboard');
       return;
     }
@@ -78,6 +80,7 @@ export const useRouteValidation = () => {
     );
 
     if (isProtectedRoute && !user) {
+      console.log('❌ Rota protegida sem autenticação');
       navigate('/login');
       return;
     }

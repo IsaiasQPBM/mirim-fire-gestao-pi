@@ -5,12 +5,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
-import { Target, Heart, Users, Shield, AlertCircle, RefreshCw, Wrench } from 'lucide-react';
+import { Target, Heart, Users, Shield, AlertCircle, RefreshCw, Wrench, Trash2 } from 'lucide-react';
 import CBMEPILogo from '@/components/CBMEPILogo';
 import InfoCard from '@/components/InfoCard';
 import Footer from '@/components/Footer';
 import { useToast } from '@/hooks/use-toast';
 import { MigrationService } from '@/services/migration/migrationService';
+import { databaseCleanupService } from '@/services/databaseCleanupService';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -18,6 +19,7 @@ const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isDiagnosing, setIsDiagnosing] = useState(false);
   const [isCreatingAdmin, setIsCreatingAdmin] = useState(false);
+  const [isCleaning, setIsCleaning] = useState(false);
   const [showAdminTools, setShowAdminTools] = useState(false);
   const { signIn, user, loading } = useAuth();
   const navigate = useNavigate();
@@ -67,11 +69,11 @@ const Login: React.FC = () => {
         console.error('❌ Erro no login:', error);
         
         let errorMessage = 'Erro no login';
-        if (error.includes('Invalid login credentials') || error.includes('Invalid')) {
+        if (error.includes('Email ou senha incorretos') || error.includes('Invalid')) {
           errorMessage = 'Email ou senha incorretos.';
-        } else if (error.includes('Email not confirmed')) {
+        } else if (error.includes('Email não confirmado')) {
           errorMessage = 'Email não confirmado. Verifique sua caixa de entrada.';
-        } else if (error.includes('Too many requests')) {
+        } else if (error.includes('Muitas tentativas')) {
           errorMessage = 'Muitas tentativas. Aguarde alguns minutos.';
         }
         
@@ -82,7 +84,7 @@ const Login: React.FC = () => {
         });
 
         // Show admin tools if trying to login as admin
-        if (email === 'admin@admin.com') {
+        if (email.includes('admin')) {
           setShowAdminTools(true);
         }
       }
@@ -170,6 +172,32 @@ const Login: React.FC = () => {
       title: 'Credenciais preenchidas',
       description: 'Email: admin@admin.com | Senha: admin',
     });
+  };
+
+  const handleCleanDatabase = async () => {
+    setIsCleaning(true);
+    
+    try {
+      console.log('🧹 Iniciando limpeza do banco de dados...');
+      const result = await databaseCleanupService.cleanupDatabase();
+      
+      toast({
+        variant: result.success ? 'default' : 'destructive',
+        title: result.success ? 'Limpeza Concluída' : 'Erro na Limpeza',
+        description: result.message,
+      });
+      
+      console.log('📊 Resultado da limpeza:', result);
+    } catch (error) {
+      console.error('💥 Erro na limpeza:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Erro na limpeza',
+        description: 'Falha ao limpar o banco de dados.',
+      });
+    } finally {
+      setIsCleaning(false);
+    }
   };
 
   const infoCards = [
@@ -264,7 +292,10 @@ const Login: React.FC = () => {
                       type="button"
                       variant="outline"
                       className="w-full border-[#F5A623] text-[#F5A623] hover:bg-[#F5A623] hover:text-white"
-                      onClick={handleQuickAdminLogin}
+                      onClick={() => {
+                        setEmail('erisman@admin.com');
+                        setPassword('admin');
+                      }}
                       disabled={isLoading}
                     >
                       🚀 Preencher Login Admin
@@ -275,7 +306,7 @@ const Login: React.FC = () => {
                     <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                       <div className="flex items-center gap-2 mb-3">
                         <AlertCircle className="w-5 h-5 text-yellow-600" />
-                        <h3 className="font-semibold text-yellow-800">Ferramentas de Diagnóstico Admin</h3>
+                        <h3 className="font-semibold text-yellow-800">Ferramentas de Administração</h3>
                       </div>
                       
                       <div className="space-y-2">
@@ -284,44 +315,26 @@ const Login: React.FC = () => {
                           variant="outline"
                           size="sm"
                           className="w-full"
-                          onClick={handleDiagnoseAdmin}
-                          disabled={isDiagnosing}
+                          onClick={handleCleanDatabase}
+                          disabled={isCleaning}
                         >
-                          {isDiagnosing ? (
+                          {isCleaning ? (
                             <>
                               <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                              Diagnosticando...
-                            </>
-                          ) : (
-                            '🔍 Diagnosticar Problema'
-                          )}
-                        </Button>
-                        
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="w-full"
-                          onClick={handleCreateAdmin}
-                          disabled={isCreatingAdmin}
-                        >
-                          {isCreatingAdmin ? (
-                            <>
-                              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                              Configurando...
+                              Limpando...
                             </>
                           ) : (
                             <>
-                              <Wrench className="w-4 h-4 mr-2" />
-                              Criar/Reparar Admin
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Limpar Banco de Dados
                             </>
                           )}
                         </Button>
                       </div>
 
                       <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded text-sm">
-                        <strong>Credenciais padrão:</strong><br />
-                        Email: admin@admin.com<br />
+                        <strong>Credenciais admin:</strong><br />
+                        Email: erisman@admin.com<br />
                         Senha: admin
                       </div>
                     </div>

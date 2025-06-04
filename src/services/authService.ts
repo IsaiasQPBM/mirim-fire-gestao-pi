@@ -59,19 +59,33 @@ class AuthService {
     try {
       console.log('🔐 Tentativa de login:', { email: data.email });
       
-      // Validar se email e password estão preenchidos
+      // Validar entrada
       if (!data.email || !data.password) {
         throw new Error('Email e senha são obrigatórios');
       }
 
+      // Limpar email de espaços
+      const cleanEmail = data.email.trim().toLowerCase();
+      
       const { data: authData, error } = await supabase.auth.signInWithPassword({
-        email: data.email.trim(),
+        email: cleanEmail,
         password: data.password,
       });
 
       if (error) {
         console.error('❌ Erro no login:', error);
-        return { user: null, profile: null, error: error.message };
+        
+        // Mapear erros comuns para mensagens mais amigáveis
+        let errorMessage = error.message;
+        if (error.message.includes('Invalid login credentials')) {
+          errorMessage = 'Email ou senha incorretos';
+        } else if (error.message.includes('Email not confirmed')) {
+          errorMessage = 'Email não confirmado. Verifique sua caixa de entrada';
+        } else if (error.message.includes('Too many requests')) {
+          errorMessage = 'Muitas tentativas. Aguarde alguns minutos';
+        }
+        
+        return { user: null, profile: null, error: errorMessage };
       }
 
       console.log('✅ Login realizado:', authData.user?.id);
@@ -121,19 +135,20 @@ class AuthService {
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('❌ Erro ao buscar perfil:', error);
-        if (error.code === 'PGRST116') {
-          console.log('ℹ️ Perfil não encontrado - usuário pode não ter perfil criado ainda');
-          return null;
-        }
-        throw error;
+        return null;
       }
       
-      console.log('✅ Perfil encontrado:', data);
-      return data;
+      if (data) {
+        console.log('✅ Perfil encontrado:', data);
+        return data;
+      }
+      
+      console.log('ℹ️ Perfil não encontrado');
+      return null;
     } catch (error: any) {
       console.error('💥 Erro no getProfile:', error);
       return null;
