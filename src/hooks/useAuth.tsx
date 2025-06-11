@@ -67,9 +67,58 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let mounted = true;
 
+    // Configurar listener de mudanças de auth PRIMEIRO (sem async/await)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log('📡 Auth event:', event, session?.user?.email);
+        
+        if (!mounted) return;
+
+        if (event === 'SIGNED_IN' && session?.user) {
+          // Apenas operações síncronas aqui
+          setUser(session.user);
+          
+          // Usar setTimeout para diferir operações assíncronas
+          setTimeout(async () => {
+            if (mounted) {
+              try {
+                const profileData = await getProfile(session.user.id);
+                
+                if (profileData && mounted) {
+                  const authUser = createAuthUser(session.user, profileData);
+                  setProfile(authUser);
+                  
+                  if (authUser) {
+                    localStorage.setItem('userId', session.user.id);
+                    localStorage.setItem('userName', authUser.full_name);
+                    localStorage.setItem('userRole', authUser.role);
+                  }
+                }
+              } catch (error) {
+                console.error('💥 Erro ao carregar perfil após login:', error);
+              } finally {
+                if (mounted) {
+                  setLoading(false);
+                }
+              }
+            }
+          }, 0);
+        } else if (event === 'SIGNED_OUT') {
+          // Apenas operações síncronas
+          setUser(null);
+          setProfile(null);
+          localStorage.removeItem('userId');
+          localStorage.removeItem('userName');
+          localStorage.removeItem('userRole');
+          setLoading(false);
+        }
+      }
+    );
+
+    // DEPOIS verificar sessão existente
     const initializeAuth = async () => {
       try {
-        console.log('🔄 Inicializando autenticação...');
+        console.log('🔄 Verificando sessão existente...');
         
         const { data: { session }, error } = await supabase.auth.getSession();
         
@@ -82,7 +131,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         if (session?.user && mounted) {
-          console.log('👤 Sessão encontrada para:', session.user.email);
+          console.log('👤 Sessão existente encontrada:', session.user.email);
           setUser(session.user);
           
           const profileData = await getProfile(session.user.id);
@@ -107,43 +156,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
     };
-
-    // Configurar listener de mudanças de auth
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('📡 Auth event:', event, session?.user?.email);
-        
-        if (!mounted) return;
-
-        if (event === 'SIGNED_IN' && session?.user) {
-          setUser(session.user);
-          
-          // Usar setTimeout para evitar deadlock
-          setTimeout(async () => {
-            if (mounted) {
-              const profileData = await getProfile(session.user.id);
-              
-              if (profileData && mounted) {
-                const authUser = createAuthUser(session.user, profileData);
-                setProfile(authUser);
-                
-                if (authUser) {
-                  localStorage.setItem('userId', session.user.id);
-                  localStorage.setItem('userName', authUser.full_name);
-                  localStorage.setItem('userRole', authUser.role);
-                }
-              }
-            }
-          }, 0);
-        } else if (event === 'SIGNED_OUT') {
-          setUser(null);
-          setProfile(null);
-          localStorage.removeItem('userId');
-          localStorage.removeItem('userName');
-          localStorage.removeItem('userRole');
-        }
-      }
-    );
 
     // Inicializar auth
     initializeAuth();
