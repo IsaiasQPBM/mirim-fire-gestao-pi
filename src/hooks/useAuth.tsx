@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { authService, type AuthUser } from '@/services/authService';
@@ -134,24 +133,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.log('👤 Sessão existente encontrada:', session.user.email);
           setUser(session.user);
           
-          const profileData = await getProfile(session.user.id);
-          
-          if (mounted && profileData) {
-            const authUser = createAuthUser(session.user, profileData);
-            setProfile(authUser);
-            
-            if (authUser) {
-              localStorage.setItem('userId', session.user.id);
-              localStorage.setItem('userName', authUser.full_name);
-              localStorage.setItem('userRole', authUser.role);
+          // Usar setTimeout para diferir a busca do perfil
+          setTimeout(async () => {
+            if (mounted) {
+              try {
+                const profileData = await getProfile(session.user.id);
+                
+                if (mounted && profileData) {
+                  const authUser = createAuthUser(session.user, profileData);
+                  setProfile(authUser);
+                  
+                  if (authUser) {
+                    localStorage.setItem('userId', session.user.id);
+                    localStorage.setItem('userName', authUser.full_name);
+                    localStorage.setItem('userRole', authUser.role);
+                  }
+                }
+              } catch (error) {
+                console.error('💥 Erro ao carregar perfil na inicialização:', error);
+              } finally {
+                if (mounted) {
+                  console.log('✅ Inicialização da auth concluída');
+                  setLoading(false);
+                }
+              }
             }
+          }, 0);
+        } else {
+          if (mounted) {
+            console.log('✅ Inicialização da auth concluída - sem sessão');
+            setLoading(false);
           }
         }
       } catch (error) {
         console.error('💥 Erro na inicialização da auth:', error);
-      } finally {
         if (mounted) {
-          console.log('✅ Inicialização da auth concluída');
           setLoading(false);
         }
       }
