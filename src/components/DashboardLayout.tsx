@@ -1,43 +1,61 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Footer from './Footer';
-import RouteValidator from './RouteValidator';
 import { cn } from '@/lib/utils';
 import RouteLogger from './RouteLogger';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
-import { Loader2 } from 'lucide-react';
 
 const DashboardLayout: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const { user, profile, loading } = useAuth();
+  const [userRole, setUserRole] = useState<'admin' | 'instructor' | 'student'>('student');
+  const [userName, setUserName] = useState<string>('');
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
 
-  // Mostrar loading enquanto verifica autenticação
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-8 h-8 animate-spin text-[#F5A623]" />
-          <p className="text-gray-600">Carregando...</p>
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    // Check if user is logged in
+    const storedUserRole = localStorage.getItem('userRole');
+    const storedUserName = localStorage.getItem('userName');
 
-  // Redirecionar para login se não autenticado
-  if (!user || !profile) {
-    navigate('/login');
-    return null;
-  }
+    if (!storedUserRole || !storedUserName) {
+      navigate('/login');
+      return;
+    }
+
+    // Set user data
+    setUserRole(storedUserRole as 'admin' | 'instructor' | 'student');
+    setUserName(storedUserName);
+
+    // Set userId if not already set
+    if (!localStorage.getItem('userId')) {
+      // Default userId based on role
+      if (storedUserRole === 'admin') {
+        localStorage.setItem('userId', 'user-1');
+      } else if (storedUserRole === 'instructor') {
+        localStorage.setItem('userId', 'user-2');
+      } else {
+        localStorage.setItem('userId', 'user-3');
+      }
+    }
+
+    // Check if we need to redirect due to a direct path access
+    if (location.pathname === '/disciplines') {
+      // This is already supported by our direct route
+    } else if (location.pathname === '/classes') {
+      // This is already supported by our direct route
+    } else if (location.pathname === '/courses') {
+      // This is already supported by our direct route
+    } else if (location.pathname === '/lessons/planning') {
+      // This is already supported by our direct route
+    }
+  }, [navigate, location]);
 
   const handleRouteChange = (path: string, timestamp: number) => {
     // Log route changes for analytics
-    console.log(`User ${profile.full_name} (${profile.role}) accessed: ${path}`);
+    console.log(`User ${userName} (${userRole}) accessed: ${path}`);
     
     // Example: Report frequent 404s to admin
     const notFoundLog = JSON.parse(localStorage.getItem('notFoundLog') || '[]');
@@ -46,7 +64,7 @@ const DashboardLayout: React.FC = () => {
     const lastHour = timestamp - 3600000;
     const recent404s = notFoundLog.filter((log: any) => log.timestamp > lastHour);
     
-    if (recent404s.length > 5 && profile.role === 'admin') {
+    if (recent404s.length > 5 && userRole === 'admin') {
       toast({
         title: "Alerta de Navegação",
         description: `Foram detectados ${recent404s.length} erros de navegação na última hora.`,
@@ -55,36 +73,37 @@ const DashboardLayout: React.FC = () => {
     }
   };
 
+  // Don't render until we have user role
+  if (!userRole) return null;
+
   return (
-    <RouteValidator>
-      <div className="min-h-screen flex flex-col">
-        {/* Route logger for analytics */}
-        <RouteLogger onRouteChange={handleRouteChange} />
+    <div className="min-h-screen flex flex-col">
+      {/* Route logger for analytics */}
+      <RouteLogger onRouteChange={handleRouteChange} />
+      
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar */}
+        <Sidebar 
+          userRole={userRole} 
+          userName={userName}
+          isCollapsed={isCollapsed}
+          setIsCollapsed={setIsCollapsed}
+        />
         
-        <div className="flex flex-1 overflow-hidden">
-          {/* Sidebar */}
-          <Sidebar 
-            userRole={profile.role} 
-            userName={profile.full_name}
-            isCollapsed={isCollapsed}
-            setIsCollapsed={setIsCollapsed}
-          />
+        {/* Main Content */}
+        <div className={cn(
+          "flex-1 flex flex-col transition-all duration-300",
+          isCollapsed ? 'ml-16' : 'ml-64'
+        )}>
+          <main className="flex-1 overflow-y-auto bg-gray-50">
+            <Outlet />
+          </main>
           
-          {/* Main Content */}
-          <div className={cn(
-            "flex-1 flex flex-col transition-all duration-300",
-            isCollapsed ? 'ml-16' : 'ml-64'
-          )}>
-            <main className="flex-1 overflow-y-auto bg-gray-50">
-              <Outlet />
-            </main>
-            
-            {/* Footer */}
-            <Footer />
-          </div>
+          {/* Footer */}
+          <Footer />
         </div>
       </div>
-    </RouteValidator>
+    </div>
   );
 };
 

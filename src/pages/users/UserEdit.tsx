@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -103,7 +104,7 @@ const UserEdit: React.FC = () => {
   if (userRole !== 'admin') {
     return (
       <div className="p-6">
-        <Header />
+        <Header title="Editar Usuário" userRole={userRole} userName={userName} />
         <div className="mt-8 text-center">
           <h2 className="text-xl font-bold text-red-600">Acesso Restrito</h2>
           <p className="mt-2">Você não tem permissão para acessar esta página.</p>
@@ -129,7 +130,7 @@ const UserEdit: React.FC = () => {
   if (!user) {
     return (
       <div className="p-6">
-        <Header />
+        <Header title="Editar Usuário" userRole={userRole} userName={userName} />
         <div className="mt-8 text-center">
           <h2 className="text-xl font-bold text-red-600">Usuário não encontrado</h2>
           <p className="mt-2">O usuário que você está procurando não existe.</p>
@@ -192,7 +193,7 @@ const UserEdit: React.FC = () => {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <Header />
+      <Header title="Editar Usuário" userRole={userRole} userName={userName} />
       
       <div className="max-w-3xl mx-auto mt-6">
         <Tabs defaultValue="profile" className="space-y-6">

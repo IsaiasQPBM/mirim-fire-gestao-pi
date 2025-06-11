@@ -47,6 +47,7 @@ import {
 } from "@/components/ui/tooltip";
 import Header from '@/components/Header';
 import { getStudentById, Student, getTimelineEventsByStudentId, getAttendanceByStudentId, getCommunicationsByStudentId, getAcademicRecordByStudentId } from '@/data/studentTypes';
+import { Line, Bar } from 'recharts';
 import { useToast } from '@/hooks/use-toast';
 import TimelineComponent from '@/components/students/Timeline';
 import AttendanceChart from '@/components/students/AttendanceChart';
@@ -54,20 +55,12 @@ import PerformanceChart from '@/components/students/PerformanceChart';
 import PedagogicalObservations from '@/components/students/PedagogicalObservations';
 import StudentCommunications from '@/components/students/StudentCommunications';
 import DocumentsList from '@/components/students/DocumentsList';
-import StudentEditForm from '@/components/students/StudentEditForm';
-import MessageDialog from '@/components/students/MessageDialog';
-import ProfilePrintDialog from '@/components/students/ProfilePrintDialog';
-import ObservationDialog from '@/components/students/ObservationDialog';
 
 const StudentDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [student, setStudent] = useState<Student | undefined>(undefined);
   const [loading, setLoading] = useState(true);
-  const [showEditForm, setShowEditForm] = useState(false);
-  const [showMessageDialog, setShowMessageDialog] = useState(false);
-  const [showPrintDialog, setShowPrintDialog] = useState(false);
-  const [showObservationDialog, setShowObservationDialog] = useState(false);
   const { toast } = useToast();
   
   const userRole = localStorage.getItem('userRole') as 'admin' | 'instructor' | 'student' || 'student';
@@ -129,34 +122,27 @@ const StudentDetail: React.FC = () => {
   };
   
   const handleEditStudent = () => {
-    setShowEditForm(true);
+    toast({
+      title: "Função em desenvolvimento",
+      description: "A edição de alunos estará disponível em breve.",
+      variant: "default",
+    });
   };
   
   const handleSendMessage = () => {
-    setShowMessageDialog(true);
+    toast({
+      title: "Função em desenvolvimento",
+      description: "O envio de mensagens estará disponível em breve.",
+      variant: "default",
+    });
   };
   
   const handlePrintProfile = () => {
-    setShowPrintDialog(true);
-  };
-
-  const handleAddObservation = () => {
-    setShowObservationDialog(true);
-  };
-
-  const handleSaveStudent = (updatedStudent: Student) => {
-    setStudent(updatedStudent);
-    setShowEditForm(false);
-  };
-
-  const handleSaveMessage = (subject: string, message: string) => {
-    // Here you would typically save to a backend
-    console.log('Sending message:', { subject, message, to: student?.fullName });
-  };
-
-  const handleSaveObservation = (observation: any) => {
-    // Here you would typically save to a backend
-    console.log('Saving observation:', observation);
+    toast({
+      title: "Função em desenvolvimento",
+      description: "A impressão de perfil estará disponível em breve.",
+      variant: "default",
+    });
   };
 
   if (loading) {
@@ -170,7 +156,7 @@ const StudentDetail: React.FC = () => {
   if (!student) {
     return (
       <div className="p-6">
-        <Header />
+        <Header title="Perfil do Aluno" userRole={userRole} userName={userName} />
         <Breadcrumb className="mb-6">
           <BreadcrumbList>
             <BreadcrumbItem>
@@ -203,7 +189,7 @@ const StudentDetail: React.FC = () => {
   if (!canAccessStudentDetail()) {
     return (
       <div className="p-6">
-        <Header />
+        <Header title="Perfil do Aluno" userRole={userRole} userName={userName} />
         <Breadcrumb className="mb-6">
           <BreadcrumbList>
             <BreadcrumbItem>
@@ -240,7 +226,7 @@ const StudentDetail: React.FC = () => {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <Header />
+      <Header title="Perfil do Aluno" userRole={userRole} userName={userName} />
       
       <div className="max-w-7xl mx-auto mt-6">
         <Breadcrumb className="mb-6">
@@ -281,16 +267,6 @@ const StudentDetail: React.FC = () => {
                 >
                   <MessageSquare size={16} className="mr-1" />
                   Mensagem
-                </Button>
-
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="bg-white hover:bg-gray-100"
-                  onClick={handleAddObservation}
-                >
-                  <Clipboard size={16} className="mr-1" />
-                  Observação
                 </Button>
               </div>
             )}
@@ -685,38 +661,6 @@ const StudentDetail: React.FC = () => {
           </CardFooter>
         </Card>
       </div>
-
-      {/* Dialog Components */}
-      {showEditForm && student && (
-        <StudentEditForm
-          student={student}
-          onClose={() => setShowEditForm(false)}
-          onSave={handleSaveStudent}
-        />
-      )}
-
-      {showMessageDialog && student && (
-        <MessageDialog
-          studentName={student.fullName}
-          onClose={() => setShowMessageDialog(false)}
-          onSend={handleSaveMessage}
-        />
-      )}
-
-      {showPrintDialog && student && (
-        <ProfilePrintDialog
-          student={student}
-          onClose={() => setShowPrintDialog(false)}
-        />
-      )}
-
-      {showObservationDialog && student && (
-        <ObservationDialog
-          studentName={student.fullName}
-          onClose={() => setShowObservationDialog(false)}
-          onSave={handleSaveObservation}
-        />
-      )}
     </div>
   );
 };

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -45,7 +46,7 @@ const UserPermissions: React.FC = () => {
   if (userRole !== 'admin') {
     return (
       <div className="p-6">
-        <Header />
+        <Header title="Permissões de Usuário" userRole={userRole} userName={userName} />
         <div className="mt-8 text-center">
           <h2 className="text-xl font-bold text-red-600">Acesso Restrito</h2>
           <p className="mt-2">Você não tem permissão para acessar esta página.</p>
@@ -71,7 +72,7 @@ const UserPermissions: React.FC = () => {
   if (!user) {
     return (
       <div className="p-6">
-        <Header />
+        <Header title="Permissões de Usuário" userRole={userRole} userName={userName} />
         <div className="mt-8 text-center">
           <h2 className="text-xl font-bold text-red-600">Usuário não encontrado</h2>
           <p className="mt-2">O usuário que você está procurando não existe.</p>
@@ -126,7 +127,7 @@ const UserPermissions: React.FC = () => {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <Header />
+      <Header title="Permissões de Usuário" userRole={userRole} userName={userName} />
       
       <div className="max-w-4xl mx-auto mt-6">
         <Card className="border-t-4 border-t-cbmepi-orange shadow-md">

@@ -19,6 +19,8 @@ interface PlaceholderPageProps {
 }
 
 const PlaceholderPage: React.FC<PlaceholderPageProps> = ({ title = 'Página em Desenvolvimento' }) => {
+  const [userRole, setUserRole] = useState<string>(localStorage.getItem('userRole') || '');
+  const [userName, setUserName] = useState<string>(localStorage.getItem('userName') || '');
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -76,7 +78,7 @@ const PlaceholderPage: React.FC<PlaceholderPageProps> = ({ title = 'Página em D
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
-      <Header />
+      <Header title={title} userRole={userRole} userName={userName} />
       
       <div className="px-6 py-3 bg-white border-b">
         <Breadcrumb>

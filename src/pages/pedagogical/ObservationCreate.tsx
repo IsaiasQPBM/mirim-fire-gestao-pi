@@ -25,26 +25,21 @@ import {
 } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import { useForm } from 'react-hook-form';
-import { studentsService } from '@/services/studentsService';
-import { observationsService } from '@/services/observationsService';
-import { useAuth } from '@/hooks/useAuth';
+import { mockUsers } from '@/data/userTypes';
+import { ObservationType, PriorityLevel } from '@/data/pedagogicalTypes';
 
 interface FormValues {
   studentId: string;
   date: string;
-  type: 'behavioral' | 'academic' | 'attendance' | 'health' | 'personal';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
+  type: ObservationType;
+  priority: PriorityLevel;
   description: string;
-  followUpRequired: boolean;
-  followUpDate?: string;
 }
 
 const ObservationCreate = () => {
-  const [students, setStudents] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState<string>('');
+  const [userName, setUserName] = useState<string>('');
   const navigate = useNavigate();
-  const { user } = useAuth();
-  
   const form = useForm<FormValues>({
     defaultValues: {
       studentId: '',
@@ -52,100 +47,42 @@ const ObservationCreate = () => {
       type: 'academic',
       priority: 'medium',
       description: '',
-      followUpRequired: false,
-      followUpDate: '',
     }
   });
 
   useEffect(() => {
-    const loadStudents = async () => {
-      try {
-        const { data, error } = await studentsService.getAll();
-        if (error) {
-          toast({
-            title: "Erro",
-            description: "Não foi possível carregar a lista de alunos.",
-            variant: "destructive"
-          });
-          return;
-        }
-        setStudents(data || []);
-      } catch (error) {
-        console.error('Error loading students:', error);
-        toast({
-          title: "Erro",
-          description: "Erro inesperado ao carregar alunos.",
-          variant: "destructive"
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
+    // Check if user is logged in
+    const storedUserRole = localStorage.getItem('userRole');
+    const storedUserName = localStorage.getItem('userName');
 
-    loadStudents();
-  }, []);
-
-  const onSubmit = async (data: FormValues) => {
-    if (!user?.id) {
-      toast({
-        title: "Erro",
-        description: "Usuário não autenticado.",
-        variant: "destructive"
-      });
+    if (!storedUserRole || !storedUserName) {
+      navigate('/');
       return;
     }
 
-    try {
-      const { error } = await observationsService.create({
-        student_id: data.studentId,
-        instructor_id: user.id,
-        type: data.type,
-        priority: data.priority,
-        description: data.description,
-        date: data.date,
-        follow_up_required: data.followUpRequired,
-        follow_up_date: data.followUpDate || undefined,
-      });
+    setUserRole(storedUserRole);
+    setUserName(storedUserName);
+  }, [navigate]);
 
-      if (error) {
-        toast({
-          title: "Erro",
-          description: `Erro ao salvar observação: ${error}`,
-          variant: "destructive"
-        });
-        return;
-      }
+  const students = mockUsers.filter(user => user.role === 'student');
 
-      toast({
-        title: 'Observação registrada com sucesso',
-        description: 'A observação foi salva no sistema.',
-      });
+  const onSubmit = (data: FormValues) => {
+    // In a real app, this would be an API call
+    console.log('Form submitted:', data);
 
-      navigate('/pedagogical/observations');
-    } catch (error) {
-      console.error('Error creating observation:', error);
-      toast({
-        title: "Erro",
-        description: "Erro inesperado ao salvar observação.",
-        variant: "destructive"
-      });
-    }
+    toast({
+      title: 'Observação registrada com sucesso',
+      description: 'A observação foi salva no sistema.',
+    });
+
+    navigate('/pedagogical/observations');
   };
 
-  if (loading) {
-    return (
-      <div className="flex flex-col min-h-screen bg-gray-50">
-        <Header />
-        <main className="flex-1 p-6 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cbmepi-orange"></div>
-        </main>
-      </div>
-    );
-  }
+  if (!userRole) return null;
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
-      <Header />
+      <Header title="Nova Observação Pedagógica" userRole={userRole} userName={userName} />
       
       <main className="flex-1 p-6 overflow-y-auto">
         <div className="max-w-3xl mx-auto">
@@ -172,7 +109,7 @@ const ObservationCreate = () => {
                             <SelectContent>
                               {students.map((student) => (
                                 <SelectItem key={student.id} value={student.id}>
-                                  {student.profiles?.full_name || 'Nome não disponível'}
+                                  {student.fullName}
                                 </SelectItem>
                               ))}
                             </SelectContent>

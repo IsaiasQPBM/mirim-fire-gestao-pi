@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { User, BookOpen, Award, AlertTriangle, Activity } from 'lucide-react';
@@ -168,7 +169,7 @@ const StudentDashboard = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
-      <Header />
+      <Header title={`Dashboard do Aluno: ${student.fullName}`} userRole={userRole} userName={userName} />
       
       <main className="flex-1 p-6 overflow-y-auto">
         <div className="max-w-7xl mx-auto">

@@ -1,143 +1,60 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
-import { useAuth } from '@/hooks/useAuth';
-import { Target, Heart, Users, Shield, AlertCircle, RefreshCw, Trash2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { Target, Heart, Users, Shield } from 'lucide-react';
 import CBMEPILogo from '@/components/CBMEPILogo';
 import InfoCard from '@/components/InfoCard';
 import Footer from '@/components/Footer';
-import { useToast } from '@/hooks/use-toast';
-import { databaseCleanupService } from '@/services/databaseCleanupService';
 
 const Login: React.FC = () => {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isCleaning, setIsCleaning] = useState(false);
-  const [showAdminTools, setShowAdminTools] = useState(false);
-  const { signIn, user, loading } = useAuth();
-  const navigate = useNavigate();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  // Redirect if already authenticated
-  useEffect(() => {
-    console.log('🔐 Login - Auth State:', { user: !!user, loading });
-    
-    if (!loading && user) {
-      console.log('✅ Usuário já autenticado, redirecionando para dashboard');
-      navigate('/dashboard', { replace: true });
-    }
-  }, [user, loading, navigate]);
-
-  // Don't render login form if already authenticated
-  if (!loading && user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F5A623] via-[#E8941A] to-cbmepi-red">
-        <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
-          <p className="text-white">Redirecionando...</p>
-        </div>
-      </div>
-    );
-  }
-
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!email || !password) {
-      toast({
-        variant: 'destructive',
-        title: 'Campos obrigatórios',
-        description: 'Por favor, preencha email e senha.',
-      });
-      return;
-    }
-    
     setIsLoading(true);
     
-    console.log('🔐 Tentativa de login:', { email, password: '***' });
-    
-    try {
-      const { error } = await signIn(email.trim(), password);
+    // Mock login functionality - in a real app, you would call an API here
+    setTimeout(() => {
+      setIsLoading(false);
       
-      if (!error) {
-        console.log('✅ Login bem-sucedido');
-        toast({
-          title: "Login realizado com sucesso",
-          description: "Redirecionando para o dashboard...",
-        });
-        // Navigation will be handled by useEffect above
-      } else {
-        console.error('❌ Erro no login:', error);
+      // Simple validation
+      if (username && password) {
+        // Mock roles for demonstration
+        let role = 'student';
         
-        let errorMessage = 'Erro no login';
-        if (error.includes('Email ou senha incorretos') || error.includes('Invalid')) {
-          errorMessage = 'Email ou senha incorretos.';
-        } else if (error.includes('Email não confirmado')) {
-          errorMessage = 'Email não confirmado. Verifique sua caixa de entrada.';
-        } else if (error.includes('Muitas tentativas')) {
-          errorMessage = 'Muitas tentativas. Aguarde alguns minutos.';
+        if (username.includes('admin')) {
+          role = 'admin';
+        } else if (username.includes('instrutor')) {
+          role = 'instructor';
         }
         
+        // In a real app, we'd store these in a secure way
+        localStorage.setItem('userName', username);
+        localStorage.setItem('userRole', role);
+        
+        toast({
+          title: 'Login realizado com sucesso',
+          description: `Bem-vindo ao Sistema de Gestão do Projeto Bombeiro Mirim.`,
+        });
+        
+        navigate('/dashboard');
+      } else {
         toast({
           variant: 'destructive',
           title: 'Erro no login',
-          description: errorMessage,
+          description: 'Usuário ou senha incorretos. Tente novamente.',
         });
-
-        // Show admin tools if trying to login as admin
-        if (email.includes('admin') || email.includes('erisman')) {
-          setShowAdminTools(true);
-        }
       }
-    } catch (error: any) {
-      console.error('💥 Erro crítico no login:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Erro crítico',
-        description: 'Erro inesperado durante o login.',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleQuickAdminLogin = () => {
-    setEmail('erisman@admin.com');
-    setPassword('admin');
-    toast({
-      title: 'Credenciais preenchidas',
-      description: 'Email: erisman@admin.com | Senha: admin',
-    });
-  };
-
-  const handleCleanDatabase = async () => {
-    setIsCleaning(true);
-    
-    try {
-      console.log('🧹 Iniciando limpeza do banco de dados...');
-      const result = await databaseCleanupService.cleanupDatabase();
-      
-      toast({
-        variant: result.success ? 'default' : 'destructive',
-        title: result.success ? 'Limpeza Concluída' : 'Erro na Limpeza',
-        description: result.message,
-      });
-      
-      console.log('📊 Resultado da limpeza:', result);
-    } catch (error) {
-      console.error('💥 Erro na limpeza:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Erro na limpeza',
-        description: 'Falha ao limpar o banco de dados.',
-      });
-    } finally {
-      setIsCleaning(false);
-    }
+    }, 1000);
   };
 
   const infoCards = [
@@ -147,7 +64,7 @@ const Login: React.FC = () => {
       icon: Target
     },
     {
-      title: "Nossos Valores", 
+      title: "Nossos Valores",
       description: "Disciplina, respeito, solidariedade, coragem e responsabilidade social são os pilares que norteiam nossa formação.",
       icon: Heart
     },
@@ -165,129 +82,69 @@ const Login: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F5A623] via-[#E8941A] to-cbmepi-red flex flex-col">
+      {/* Main content */}
       <div className="flex-1 flex flex-col items-center justify-center p-4">
-        <div className="w-full max-w-6xl">
-          <div className="flex flex-col items-center mb-8">
-            <div className="mb-8">
-              <CBMEPILogo 
-                size="large" 
-                withText={true} 
-                logoUrl="/lovable-uploads/70642b09-ab9d-4305-be14-917eb3908cb7.png"
-              />
+        <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+          {/* Left side - Login form */}
+          <div className="w-full max-w-md mx-auto animate-fade-in">
+            <div className="mb-8 flex justify-center">
+              <CBMEPILogo size="large" withText={true} />
             </div>
             
-            <div className="w-full max-w-md">
-              <Card className="border-2 border-white/20 shadow-2xl backdrop-blur-sm bg-white/95">
-                <CardHeader className="text-center">
-                  <h1 className="text-2xl font-bold text-cbmepi-black">Sistema de Gestão</h1>
-                  <p className="text-gray-600">Projeto Bombeiro Mirim</p>
-                </CardHeader>
-                
-                <CardContent>
-                  <form onSubmit={handleLogin} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="Digite seu email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        className="border-[#F5A623] focus:ring-[#F5A623] focus:border-[#F5A623]"
-                        disabled={isLoading}
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="password">Senha</Label>
-                      <Input
-                        id="password"
-                        type="password"
-                        placeholder="Digite sua senha"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        className="border-[#F5A623] focus:ring-[#F5A623] focus:border-[#F5A623]"
-                        disabled={isLoading}
-                      />
-                    </div>
-                    
-                    <Button 
-                      type="submit" 
-                      className="w-full bg-gradient-to-r from-[#F5A623] to-[#E8941A] hover:from-[#E8941A] hover:to-[#D6831A] text-white shadow-lg transition-all duration-300"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? (
-                        <>
-                          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                          Entrando...
-                        </>
-                      ) : (
-                        'Entrar'
-                      )}
-                    </Button>
-
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full border-[#F5A623] text-[#F5A623] hover:bg-[#F5A623] hover:text-white"
-                      onClick={handleQuickAdminLogin}
-                      disabled={isLoading}
-                    >
-                      🚀 Preencher Login Admin
-                    </Button>
-                  </form>
-
-                  {showAdminTools && (
-                    <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                      <div className="flex items-center gap-2 mb-3">
-                        <AlertCircle className="w-5 h-5 text-yellow-600" />
-                        <h3 className="font-semibold text-yellow-800">Ferramentas de Administração</h3>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="w-full"
-                          onClick={handleCleanDatabase}
-                          disabled={isCleaning}
-                        >
-                          {isCleaning ? (
-                            <>
-                              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                              Limpando...
-                            </>
-                          ) : (
-                            <>
-                              <Trash2 className="w-4 h-4 mr-2" />
-                              Limpar Banco de Dados
-                            </>
-                          )}
-                        </Button>
-                      </div>
-
-                      <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded text-sm">
-                        <strong>Credenciais admin:</strong><br />
-                        Email: erisman@admin.com<br />
-                        Senha: admin
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-                
-                <CardFooter className="flex justify-center border-t pt-4">
-                  <p className="text-xs text-gray-500 text-center">
-                    ETI - Corpo de Bombeiros Militar do Estado do Piauí
-                  </p>
-                </CardFooter>
-              </Card>
-            </div>
+            <Card className="border-2 border-white/20 shadow-2xl backdrop-blur-sm bg-white/95">
+              <CardHeader className="text-center">
+                <h1 className="text-2xl font-bold text-cbmepi-black">Sistema de Gestão</h1>
+                <p className="text-gray-600">Projeto Bombeiro Mirim</p>
+              </CardHeader>
+              
+              <CardContent>
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="username">Usuário</Label>
+                    <Input
+                      id="username"
+                      type="text"
+                      placeholder="Digite seu usuário"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      required
+                      className="border-[#F5A623] focus:ring-[#F5A623] focus:border-[#F5A623]"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Senha</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="Digite sua senha"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className="border-[#F5A623] focus:ring-[#F5A623] focus:border-[#F5A623]"
+                    />
+                  </div>
+                  
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-gradient-to-r from-[#F5A623] to-[#E8941A] hover:from-[#E8941A] hover:to-[#D6831A] text-white shadow-lg transition-all duration-300"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? 'Entrando...' : 'Entrar'}
+                  </Button>
+                </form>
+              </CardContent>
+              
+              <CardFooter className="flex justify-center border-t pt-4">
+                <p className="text-xs text-gray-500 text-center">
+                  ETI - Corpo de Bombeiros Militar do Estado do Piauí
+                </p>
+              </CardFooter>
+            </Card>
           </div>
 
-          <div className="w-full max-w-4xl mx-auto">
+          {/* Right side - Info cards */}
+          <div className="w-full max-w-2xl mx-auto">
             <div className="text-center mb-8 text-white">
               <h2 className="text-3xl font-bold mb-4">Projeto Bombeiro Mirim</h2>
               <p className="text-lg opacity-90">
@@ -311,6 +168,7 @@ const Login: React.FC = () => {
         </div>
       </div>
 
+      {/* Footer */}
       <Footer className="bg-black/20 text-white border-white/20" />
     </div>
   );

@@ -26,15 +26,15 @@ const CBMEPILogo: React.FC<CBMEPILogoProps> = ({
 
   return (
     <div className={`flex flex-col items-center ${withText ? 'gap-3' : ''}`}>
-      <div className={`${dimensions[size]} relative flex items-center justify-center rounded-full shadow-lg overflow-hidden`}>
+      <div className={`${dimensions[size]} relative flex items-center justify-center rounded-full bg-gradient-to-br from-[#F5A623] to-[#E8941A] border-4 border-cbmepi-red shadow-lg`}>
         {logoUrl ? (
           <img 
             src={logoUrl} 
             alt="Logo Bombeiro Mirim" 
-            className="w-full h-full object-cover rounded-full border-4 border-white"
+            className="w-full h-full rounded-full object-cover"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-[#F5A623] to-[#E8941A] border-4 border-cbmepi-red rounded-full flex items-center justify-center">
+          <div className="absolute inset-0 flex items-center justify-center">
             <div className="relative w-3/4 h-3/4">
               {/* Stylized representation of the CBMEPI emblem */}
               <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#F5A623] to-[#E8941A] flex items-center justify-center overflow-hidden">

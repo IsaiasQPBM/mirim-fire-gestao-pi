@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -95,7 +96,11 @@ const DisciplineView: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
-      <Header />
+      <Header 
+        title={discipline.name} 
+        userRole={userRole} 
+        userName={userName} 
+      />
       
       <main className="flex-1 p-6 overflow-y-auto">
         <div className="max-w-7xl mx-auto">
