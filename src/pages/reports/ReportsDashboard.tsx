@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -40,9 +39,10 @@ const ReportsDashboard: React.FC = () => {
   const handleGenerateReport = (reportType: string) => {
     switch (reportType) {
       case 'student-bulletin':
-        // Mock student data for demonstration
+        // Mock student data for demonstration with all required properties
         const mockStudent = {
           id: 'student-1',
+          userId: 'user-1',
           fullName: 'João Silva',
           registrationNumber: '2024001',
           birthDate: '2010-05-15',
@@ -70,7 +70,11 @@ const ReportsDashboard: React.FC = () => {
             }
           ],
           classIds: ['class-1'],
-          notes: 'Aluno dedicado e participativo.'
+          courseIds: ['course-1'],
+          documents: [],
+          notes: 'Aluno dedicado e participativo.',
+          createdAt: '2024-02-01T10:00:00',
+          updatedAt: '2024-02-01T10:00:00'
         };
         PDFService.generateStudentBulletin(mockStudent);
         toast({
