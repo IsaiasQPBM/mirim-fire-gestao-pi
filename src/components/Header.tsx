@@ -19,12 +19,12 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ title, userRole, userName }) => {
-  const userId = localStorage.getItem('userId') || 'user-1'; // Default to user-1 if not found
+  const userId = localStorage.getItem('userId') || 'user-1';
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col w-full">
       {/* Top header with user information */}
-      <header className="bg-white border-b border-gray-200 py-4 px-6 flex justify-between items-center">
+      <header className="bg-white border-b border-gray-200 py-4 px-6 flex justify-between items-center w-full">
         <div className="flex items-center">
           <h1 className="text-2xl font-bold text-cbmepi-black">{title}</h1>
 
@@ -60,11 +60,6 @@ const Header: React.FC<HeaderProps> = ({ title, userRole, userName }) => {
           {/* Search bar - only visible on larger screens */}
           <div className="hidden md:block w-64">
             <GlobalSearch />
-          </div>
-          
-          {/* Mobile search icon */}
-          <div className="md:hidden">
-            <GlobalSearch variant="minimal" />
           </div>
           
           {/* Notifications icon */}

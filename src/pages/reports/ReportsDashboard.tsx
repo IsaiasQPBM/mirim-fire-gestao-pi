@@ -1,114 +1,230 @@
 
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { FileCog, FileText, Download, Calendar, BarChartHorizontal, PieChart, Users, Info } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import Header from '@/components/Header';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { reportTypes } from '@/data/communicationTypes';
+import { Badge } from '@/components/ui/badge';
+import Header from '@/components/Header';
+import { 
+  Users, 
+  UserCheck, 
+  TrendingUp, 
+  Calendar,
+  BarChart3,
+  FileText,
+  Download
+} from 'lucide-react';
+import { PDFService } from '@/components/PDFService';
 import { useToast } from '@/hooks/use-toast';
-import { useIsMobile } from '@/hooks/use-mobile';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 const ReportsDashboard: React.FC = () => {
-  const [userRole, setUserRole] = useState<string>(localStorage.getItem('userRole') || '');
-  const [userName, setUserName] = useState<string>(localStorage.getItem('userName') || '');
-  const { toast } = useToast();
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
+  const { toast } = useToast();
+  
+  const [userRole, setUserRole] = useState<string>('');
+  const [userName, setUserName] = useState<string>('');
 
-  // Filter report types based on user role
-  const filteredReports = userRole === 'student' 
-    ? reportTypes.filter(report => report.category === 'student') 
-    : reportTypes;
+  useEffect(() => {
+    const storedUserRole = localStorage.getItem('userRole');
+    const storedUserName = localStorage.getItem('userName');
 
-  const getReportIcon = (iconName: string) => {
-    switch(iconName) {
-      case 'user':
-        return <Users className="h-6 w-6 text-blue-500" />;
-      case 'users':
-        return <Users className="h-6 w-6 text-purple-500" />;
-      case 'chart-bar':
-        return <BarChartHorizontal className="h-6 w-6 text-green-500" />;
-      case 'calendar':
-        return <Calendar className="h-6 w-6 text-orange-500" />;
-      case 'chart-pie':
-        return <PieChart className="h-6 w-6 text-red-500" />;
-      default:
-        return <FileText className="h-6 w-6 text-gray-500" />;
-    }
-  };
-
-  const handleReportSelection = (reportId: string) => {
-    // Some reports may not be fully implemented yet
-    const implementedReports = ['student-bulletin'];
-    
-    if (!implementedReports.includes(reportId)) {
-      toast({
-        title: "Funcionalidade em desenvolvimento",
-        description: "Este relatório estará disponível em breve.",
-        variant: "default",
-      });
+    if (!storedUserRole || !storedUserName) {
+      navigate('/');
       return;
     }
-    
-    navigate(`/reports/${reportId}`);
+
+    setUserRole(storedUserRole);
+    setUserName(storedUserName);
+  }, [navigate]);
+
+  const handleGenerateReport = (reportType: string) => {
+    switch (reportType) {
+      case 'student-bulletin':
+        // Mock student data for demonstration
+        const mockStudent = {
+          id: 'student-1',
+          fullName: 'João Silva',
+          registrationNumber: '2024001',
+          birthDate: '2010-05-15',
+          email: 'joao.silva@email.com',
+          phone: '(86) 99999-9999',
+          enrollmentDate: '2024-02-01',
+          status: 'active' as const,
+          address: {
+            street: 'Rua das Flores',
+            number: '123',
+            complement: 'Apt 101',
+            neighborhood: 'Centro',
+            city: 'Teresina',
+            state: 'PI',
+            zipCode: '64000-000'
+          },
+          guardians: [
+            {
+              id: 'guardian-1',
+              name: 'Maria Silva',
+              relationship: 'Mãe',
+              phone: '(86) 88888-8888',
+              email: 'maria.silva@email.com',
+              isEmergencyContact: true
+            }
+          ],
+          classIds: ['class-1'],
+          notes: 'Aluno dedicado e participativo.'
+        };
+        PDFService.generateStudentBulletin(mockStudent);
+        toast({
+          title: "Boletim gerado",
+          description: "O boletim individual foi preparado para impressão.",
+        });
+        break;
+      case 'attendance':
+        PDFService.generateAttendanceReport();
+        toast({
+          title: "Relatório gerado",
+          description: "O relatório de frequência foi preparado para impressão.",
+        });
+        break;
+      case 'class-performance':
+        PDFService.generateClassPerformanceReport();
+        toast({
+          title: "Relatório gerado",
+          description: "O relatório de desempenho por turma foi preparado para impressão.",
+        });
+        break;
+      case 'approval-stats':
+        PDFService.generateApprovalStatsReport();
+        toast({
+          title: "Relatório gerado",
+          description: "As estatísticas de aprovação foram preparadas para impressão.",
+        });
+        break;
+      case 'comparative':
+        PDFService.generateComparativeReport();
+        toast({
+          title: "Relatório gerado",
+          description: "A análise comparativa foi preparada para impressão.",
+        });
+        break;
+      default:
+        toast({
+          title: "Funcionalidade em desenvolvimento",
+          description: "Este relatório será implementado em breve.",
+          variant: "destructive",
+        });
+    }
   };
+
+  const reportCards = [
+    {
+      id: 'student-bulletin',
+      title: 'Boletim Individual',
+      description: 'Gerar boletim individual de desempenho do aluno',
+      icon: <Users className="h-8 w-8" />,
+      iconColor: 'text-blue-600',
+      bgColor: 'bg-blue-50',
+      borderColor: 'border-blue-200',
+      available: true
+    },
+    {
+      id: 'class-performance',
+      title: 'Desempenho por Turma',
+      description: 'Relatório de desempenho acadêmico por turma',
+      icon: <UserCheck className="h-8 w-8" />,
+      iconColor: 'text-purple-600',
+      bgColor: 'bg-purple-50',
+      borderColor: 'border-purple-200',
+      available: true
+    },
+    {
+      id: 'approval-stats',
+      title: 'Estatísticas de Aprovação',
+      description: 'Estatísticas de aprovação e reprovação por disciplina',
+      icon: <TrendingUp className="h-8 w-8" />,
+      iconColor: 'text-green-600',
+      bgColor: 'bg-green-50',
+      borderColor: 'border-green-200',
+      available: true
+    },
+    {
+      id: 'attendance',
+      title: 'Relatório de Frequência',
+      description: 'Relatório detalhado de frequência de alunos',
+      icon: <Calendar className="h-8 w-8" />,
+      iconColor: 'text-orange-600',
+      bgColor: 'bg-orange-50',
+      borderColor: 'border-orange-200',
+      available: true
+    },
+    {
+      id: 'comparative',
+      title: 'Análise Comparativa',
+      description: 'Análise comparativa de desempenho entre períodos',
+      icon: <BarChart3 className="h-8 w-8" />,
+      iconColor: 'text-red-600',
+      bgColor: 'bg-red-50',
+      borderColor: 'border-red-200',
+      available: true
+    }
+  ];
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
-      <Header title="Relatórios" userRole={userRole} userName={userName} />
+      <Header 
+        title="Central de Relatórios" 
+        userRole={userRole} 
+        userName={userName} 
+      />
       
-      <main className="flex-1 p-4 md:p-6 overflow-y-auto">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-cbmepi-black">Central de Relatórios</h2>
-          <p className="text-gray-600">
-            Gere relatórios personalizados para acompanhar o desempenho e estatísticas do Pelotão Mirim.
-          </p>
-        </div>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-          {filteredReports.map((report) => (
-            <Card key={report.id} className="shadow-md hover:shadow-lg transition-shadow">
-              <CardHeader className="pb-2">
-                <div className="flex justify-between items-start">
-                  <CardTitle className="text-lg">{report.name}</CardTitle>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className="p-2 rounded-full bg-gray-100">
-                          {getReportIcon(report.icon)}
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="text-sm">{report.description}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-                <CardDescription>{report.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="pb-2">
-                <div className="rounded-md bg-gray-100 p-4 flex justify-center items-center min-h-[120px]">
-                  <FileCog className="w-12 h-12 text-gray-400" />
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button 
-                  className="w-full"
-                  onClick={() => handleReportSelection(report.id)}
-                >
-                  <FileText className="mr-2 h-4 w-4" />
-                  Gerar Relatório
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
+      <main className="flex-1 p-6 overflow-y-auto">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-8">
+            <p className="text-gray-600 mt-2">
+              Gere relatórios personalizados para acompanhar o desempenho e estatísticas do Pelotão Mirim.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {reportCards.map((report) => (
+              <Card 
+                key={report.id} 
+                className={`transition-all duration-200 hover:shadow-lg ${report.borderColor} border-2`}
+              >
+                <CardHeader className={`${report.bgColor} rounded-t-lg`}>
+                  <div className="flex items-center justify-between">
+                    <div className={`p-3 rounded-lg bg-white ${report.iconColor}`}>
+                      {report.icon}
+                    </div>
+                    {report.available && (
+                      <Badge className="bg-green-100 text-green-800 border-green-300">
+                        Disponível
+                      </Badge>
+                    )}
+                  </div>
+                </CardHeader>
+                
+                <CardContent className="p-6">
+                  <CardTitle className="text-lg mb-2">
+                    {report.title}
+                  </CardTitle>
+                  <CardDescription className="text-gray-600 mb-4">
+                    {report.description}
+                  </CardDescription>
+                  
+                  <div className="flex gap-2">
+                    <Button 
+                      className="flex-1 bg-cbmepi-orange hover:bg-cbmepi-orange/90"
+                      onClick={() => handleGenerateReport(report.id)}
+                      disabled={!report.available}
+                    >
+                      <Download className="mr-2 h-4 w-4" />
+                      Gerar PDF
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       </main>
     </div>

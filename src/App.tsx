@@ -122,13 +122,16 @@ function App() {
         <Route path="/pedagogical/observations/create" element={<ObservationCreate />} />
         <Route path="/pedagogical/student-dashboard" element={<StudentDashboard />} />
         
-        {/* Communication */}
+        {/* Communication - Fixed routes */}
         <Route path="/communications/messages" element={<MessagesInbox />} />
         <Route path="/communication/messages" element={<MessagesInbox />} />
         <Route path="/communications/compose" element={<ComposeMessage />} />
         <Route path="/communications/messages/new" element={<MessagesNew />} />
         <Route path="/communication/messages/new" element={<MessagesNew />} />
         <Route path="/communications/announcements" element={<AnnouncementsList />} />
+        <Route path="/communication/announcements" element={<AnnouncementsList />} />
+        <Route path="/communications/announcements/new" element={<PlaceholderPage title="Novo Comunicado" />} />
+        <Route path="/communication/announcements/new" element={<PlaceholderPage title="Novo Comunicado" />} />
         
         {/* Reports */}
         <Route path="/reports" element={<ReportsDashboard />} />
