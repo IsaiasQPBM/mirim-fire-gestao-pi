@@ -84,75 +84,88 @@ const Login: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-[#F5A623] via-[#E8941A] to-cbmepi-red flex flex-col">
       {/* Main content */}
       <div className="flex-1 flex flex-col items-center justify-center p-4">
-        <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-          {/* Left side - Login form */}
-          <div className="w-full max-w-md mx-auto animate-fade-in">
-            <div className="mb-8 flex justify-center">
+        <div className="w-full max-w-6xl">
+          
+          {/* Logo e título centralizados */}
+          <div className="text-center mb-8">
+            <div className="mb-6 flex justify-center">
               <CBMEPILogo size="large" withText={true} />
             </div>
             
-            <Card className="border-2 border-white/20 shadow-2xl backdrop-blur-sm bg-white/95">
-              <CardHeader className="text-center">
-                <h1 className="text-2xl font-bold text-cbmepi-black">Sistema de Gestão</h1>
-                <p className="text-gray-600">Projeto Bombeiro Mirim</p>
-              </CardHeader>
-              
-              <CardContent>
-                <form onSubmit={handleLogin} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="username">Usuário</Label>
-                    <Input
-                      id="username"
-                      type="text"
-                      placeholder="Digite seu usuário"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      required
-                      className="border-[#F5A623] focus:ring-[#F5A623] focus:border-[#F5A623]"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Senha</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="Digite sua senha"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      className="border-[#F5A623] focus:ring-[#F5A623] focus:border-[#F5A623]"
-                    />
-                  </div>
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-gradient-to-r from-[#F5A623] to-[#E8941A] hover:from-[#E8941A] hover:to-[#D6831A] text-white shadow-lg transition-all duration-300"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? 'Entrando...' : 'Entrar'}
-                  </Button>
-                </form>
-              </CardContent>
-              
-              <CardFooter className="flex justify-center border-t pt-4">
-                <p className="text-xs text-gray-500 text-center">
-                  ETI - Corpo de Bombeiros Militar do Estado do Piauí
-                </p>
-              </CardFooter>
-            </Card>
+            <div className="text-white mb-8">
+              <h1 className="text-4xl font-bold mb-4">Sistema de Gestão</h1>
+              <p className="text-xl opacity-90">
+                Projeto Bombeiro Mirim - CBMEPI
+              </p>
+            </div>
           </div>
 
-          {/* Right side - Info cards */}
-          <div className="w-full max-w-2xl mx-auto">
+          {/* Card de login centralizado */}
+          <div className="flex justify-center mb-12">
+            <div className="w-full max-w-md">
+              <Card className="border-2 border-white/20 shadow-2xl backdrop-blur-sm bg-white/95">
+                <CardHeader className="text-center">
+                  <h2 className="text-2xl font-bold text-cbmepi-black">Acesso ao Sistema</h2>
+                  <p className="text-gray-600">Digite suas credenciais para entrar</p>
+                </CardHeader>
+                
+                <CardContent>
+                  <form onSubmit={handleLogin} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="username">Usuário</Label>
+                      <Input
+                        id="username"
+                        type="text"
+                        placeholder="Digite seu usuário"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        required
+                        className="border-[#F5A623] focus:ring-[#F5A623] focus:border-[#F5A623]"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="password">Senha</Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        placeholder="Digite sua senha"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        className="border-[#F5A623] focus:ring-[#F5A623] focus:border-[#F5A623]"
+                      />
+                    </div>
+                    
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-gradient-to-r from-[#F5A623] to-[#E8941A] hover:from-[#E8941A] hover:to-[#D6831A] text-white shadow-lg transition-all duration-300"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? 'Entrando...' : 'Entrar'}
+                    </Button>
+                  </form>
+                </CardContent>
+                
+                <CardFooter className="flex justify-center border-t pt-4">
+                  <p className="text-xs text-gray-500 text-center">
+                    ETI - Corpo de Bombeiros Militar do Estado do Piauí
+                  </p>
+                </CardFooter>
+              </Card>
+            </div>
+          </div>
+
+          {/* Cards informativos abaixo do login */}
+          <div className="w-full max-w-4xl mx-auto">
             <div className="text-center mb-8 text-white">
-              <h2 className="text-3xl font-bold mb-4">Projeto Bombeiro Mirim</h2>
+              <h2 className="text-3xl font-bold mb-4">Sobre o Projeto</h2>
               <p className="text-lg opacity-90">
                 Formando cidadãos conscientes e preparados para o futuro
               </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {infoCards.map((card, index) => (
                 <div key={card.title} className={`animation-delay-${index * 100}`}>
                   <InfoCard

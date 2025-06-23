@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
@@ -35,7 +36,8 @@ import {
   CheckCircle,
   BarChart,
   MapPin,
-  Users
+  Users,
+  Plus
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -47,7 +49,6 @@ import {
 } from "@/components/ui/tooltip";
 import Header from '@/components/Header';
 import { getStudentById, Student, getTimelineEventsByStudentId, getAttendanceByStudentId, getCommunicationsByStudentId, getAcademicRecordByStudentId } from '@/data/studentTypes';
-import { Line, Bar } from 'recharts';
 import { useToast } from '@/hooks/use-toast';
 import TimelineComponent from '@/components/students/Timeline';
 import AttendanceChart from '@/components/students/AttendanceChart';
@@ -55,12 +56,19 @@ import PerformanceChart from '@/components/students/PerformanceChart';
 import PedagogicalObservations from '@/components/students/PedagogicalObservations';
 import StudentCommunications from '@/components/students/StudentCommunications';
 import DocumentsList from '@/components/students/DocumentsList';
+import StudentEditForm from '@/components/students/StudentEditForm';
+import MessageModal from '@/components/students/MessageModal';
+import ProfilePrint from '@/components/students/ProfilePrint';
+import ObservationForm from '@/components/students/ObservationForm';
 
 const StudentDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [student, setStudent] = useState<Student | undefined>(undefined);
   const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [showObservationForm, setShowObservationForm] = useState(false);
   const { toast } = useToast();
   
   const userRole = localStorage.getItem('userRole') as 'admin' | 'instructor' | 'student' || 'student';
@@ -122,27 +130,32 @@ const StudentDetail: React.FC = () => {
   };
   
   const handleEditStudent = () => {
-    toast({
-      title: "Função em desenvolvimento",
-      description: "A edição de alunos estará disponível em breve.",
-      variant: "default",
-    });
+    setIsEditing(true);
+  };
+  
+  const handleSaveStudent = (updatedStudent: Student) => {
+    setStudent(updatedStudent);
+    setIsEditing(false);
+  };
+  
+  const handleCancelEdit = () => {
+    setIsEditing(false);
   };
   
   const handleSendMessage = () => {
-    toast({
-      title: "Função em desenvolvimento",
-      description: "O envio de mensagens estará disponível em breve.",
-      variant: "default",
-    });
+    setShowMessageModal(true);
   };
   
   const handlePrintProfile = () => {
+    // A funcionalidade de impressão está no componente ProfilePrint
     toast({
-      title: "Função em desenvolvimento",
-      description: "A impressão de perfil estará disponível em breve.",
-      variant: "default",
+      title: "Preparando impressão",
+      description: "Abrindo janela de impressão do perfil...",
     });
+  };
+
+  const handleAddObservation = () => {
+    setShowObservationForm(true);
   };
 
   if (loading) {
@@ -214,6 +227,42 @@ const StudentDetail: React.FC = () => {
           >
             Voltar para Dashboard
           </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Se estiver em modo de edição, mostrar o formulário
+  if (isEditing) {
+    return (
+      <div className="p-6 bg-gray-50 min-h-screen">
+        <Header title="Editar Aluno" userRole={userRole} userName={userName} />
+        <div className="max-w-7xl mx-auto mt-6">
+          <Breadcrumb className="mb-6">
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/students">Alunos</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink href={`/students/${student.id}`}>{student.fullName}</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Editar</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          
+          <StudentEditForm 
+            student={student}
+            onSave={handleSaveStudent}
+            onCancel={handleCancelEdit}
+          />
         </div>
       </div>
     );
@@ -597,7 +646,20 @@ const StudentDetail: React.FC = () => {
               
               {/* Observations Tab */}
               <TabsContent value="observations">
-                <PedagogicalObservations studentId={student.id} />
+                <div className="space-y-4">
+                  {['admin', 'instructor'].includes(userRole) && (
+                    <div className="flex justify-end">
+                      <Button 
+                        onClick={handleAddObservation}
+                        className="bg-cbmepi-orange hover:bg-cbmepi-orange/90"
+                      >
+                        <Plus size={16} className="mr-1" />
+                        Nova Observação
+                      </Button>
+                    </div>
+                  )}
+                  <PedagogicalObservations studentId={student.id} />
+                </div>
               </TabsContent>
               
               {/* Documents Tab */}
@@ -631,14 +693,9 @@ const StudentDetail: React.FC = () => {
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handlePrintProfile}
-                      >
-                        <FileText size={16} className="mr-1" />
-                        Imprimir Perfil
-                      </Button>
+                      <div>
+                        <ProfilePrint student={student} />
+                      </div>
                     </TooltipTrigger>
                     <TooltipContent>
                       <p className="text-xs">Exportar perfil do aluno como PDF</p>
@@ -661,6 +718,25 @@ const StudentDetail: React.FC = () => {
           </CardFooter>
         </Card>
       </div>
+
+      {/* Modals */}
+      {showMessageModal && (
+        <MessageModal
+          isOpen={showMessageModal}
+          onClose={() => setShowMessageModal(false)}
+          studentName={student.fullName}
+          studentId={student.id}
+        />
+      )}
+
+      {showObservationForm && (
+        <ObservationForm
+          isOpen={showObservationForm}
+          onClose={() => setShowObservationForm(false)}
+          studentName={student.fullName}
+          studentId={student.id}
+        />
+      )}
     </div>
   );
 };
