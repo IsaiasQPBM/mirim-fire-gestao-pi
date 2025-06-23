@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
@@ -514,7 +515,7 @@ const StudentDetail: React.FC = () => {
                       <CardTitle className="text-base flex items-center">
                         <GraduationCap size={18} className="mr-2 text-cbmepi-orange" />
                         Histórico Acadêmico
-                      CardTitle>
+                      </CardTitle>
                       <CardDescription>
                         Cursos e disciplinas do aluno
                       </CardDescription>
@@ -604,7 +605,7 @@ const StudentDetail: React.FC = () => {
                       <CardTitle className="text-base flex items-center">
                         <BarChart size={18} className="mr-2 text-cbmepi-orange" />
                         Desempenho Acadêmico
-                      CardTitle>
+                      </CardTitle>
                     </CardHeader>
                     <CardContent className="h-80">
                       <PerformanceChart studentId={student.id} />
@@ -617,7 +618,7 @@ const StudentDetail: React.FC = () => {
                       <CardTitle className="text-base flex items-center">
                         <CheckCircle size={18} className="mr-2 text-cbmepi-orange" />
                         Frequência
-                      CardTitle>
+                      </CardTitle>
                     </CardHeader>
                     <CardContent className="h-80">
                       <AttendanceChart studentId={student.id} />
@@ -631,7 +632,7 @@ const StudentDetail: React.FC = () => {
                     <CardTitle className="text-base flex items-center">
                       <Clock size={18} className="mr-2 text-cbmepi-orange" />
                       Linha do Tempo
-                    CardTitle>
+                    </CardTitle>
                     <CardDescription>
                       Histórico de atividades, avaliações e marcos importantes
                     </CardDescription>
