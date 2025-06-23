@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -87,6 +88,32 @@ const ClassView: React.FC = () => {
       default:
         return <Badge>Desconhecido</Badge>;
     }
+  };
+
+  const handleViewProfile = (studentId: string) => {
+    navigate(`/students/${studentId}`);
+  };
+
+  const handleAddInstructor = () => {
+    toast({
+      title: "Adicionar Instrutor",
+      description: "Funcionalidade em desenvolvimento. Em breve será possível adicionar instrutores.",
+    });
+  };
+
+  const handleAddStudent = () => {
+    toast({
+      title: "Adicionar Aluno",
+      description: "Funcionalidade em desenvolvimento. Em breve será possível matricular alunos.",
+    });
+  };
+
+  const handleNewLesson = () => {
+    navigate(`/classes/${id}/lessons/new`);
+  };
+
+  const handleEditLesson = (lessonId: string) => {
+    navigate(`/classes/${id}/lessons/${lessonId}/edit`);
   };
 
   const isAdmin = userRole === 'admin';
@@ -214,6 +241,7 @@ const ClassView: React.FC = () => {
                 {isAdmin && (
                   <Button 
                     className="bg-cbmepi-orange hover:bg-cbmepi-orange/90 text-white"
+                    onClick={handleAddStudent}
                   >
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Adicionar Aluno
@@ -232,6 +260,7 @@ const ClassView: React.FC = () => {
                     <div className="mt-6">
                       <Button 
                         className="bg-cbmepi-orange hover:bg-cbmepi-orange/90 text-white"
+                        onClick={handleAddStudent}
                       >
                         <PlusCircle className="mr-2 h-4 w-4" />
                         Matricular Primeiro Aluno
@@ -247,7 +276,7 @@ const ClassView: React.FC = () => {
                         <TableRow>
                           <TableHead>ID</TableHead>
                           <TableHead>Aluno</TableHead>
-                          {isAdmin && <TableHead className="text-right">Ações</TableHead>}
+                          <TableHead className="text-right">Ações</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -255,13 +284,15 @@ const ClassView: React.FC = () => {
                           <TableRow key={studentId}>
                             <TableCell className="font-medium">{studentId}</TableCell>
                             <TableCell>Nome do Aluno (Simulado)</TableCell>
-                            {isAdmin && (
-                              <TableCell className="text-right">
-                                <Button variant="outline" size="sm">
-                                  Ver Perfil
-                                </Button>
-                              </TableCell>
-                            )}
+                            <TableCell className="text-right">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleViewProfile(studentId)}
+                              >
+                                Ver Perfil
+                              </Button>
+                            </TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -278,6 +309,7 @@ const ClassView: React.FC = () => {
                 {isAdmin && (
                   <Button 
                     className="bg-cbmepi-orange hover:bg-cbmepi-orange/90 text-white"
+                    onClick={handleAddInstructor}
                   >
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Adicionar Instrutor
@@ -296,6 +328,7 @@ const ClassView: React.FC = () => {
                     <div className="mt-6">
                       <Button 
                         className="bg-cbmepi-orange hover:bg-cbmepi-orange/90 text-white"
+                        onClick={handleAddInstructor}
                       >
                         <PlusCircle className="mr-2 h-4 w-4" />
                         Designar Primeiro Instrutor
@@ -342,6 +375,7 @@ const ClassView: React.FC = () => {
                 {isInstructor && (
                   <Button 
                     className="bg-cbmepi-orange hover:bg-cbmepi-orange/90 text-white"
+                    onClick={handleNewLesson}
                   >
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Nova Aula
@@ -360,6 +394,7 @@ const ClassView: React.FC = () => {
                     <div className="mt-6">
                       <Button 
                         className="bg-cbmepi-orange hover:bg-cbmepi-orange/90 text-white"
+                        onClick={handleNewLesson}
                       >
                         <PlusCircle className="mr-2 h-4 w-4" />
                         Programar Primeira Aula
@@ -411,6 +446,7 @@ const ClassView: React.FC = () => {
                               variant="outline" 
                               size="sm"
                               className="text-cbmepi-orange border-cbmepi-orange hover:bg-cbmepi-orange hover:text-white"
+                              onClick={() => handleEditLesson(lesson.id)}
                             >
                               <PenLine className="mr-2 h-4 w-4" />
                               Editar Aula
