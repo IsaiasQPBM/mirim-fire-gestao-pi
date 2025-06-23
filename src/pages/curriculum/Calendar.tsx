@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Header from '@/components/Header';
+import EventModal from '@/components/calendar/EventModal';
 import { toast } from '@/hooks/use-toast';
 import { CalendarDays, Plus, BookOpen, PenLine, Calendar as CalendarIcon } from 'lucide-react';
 import { mockCalendarEvents } from '@/data/mockCurriculumData';
@@ -20,6 +21,7 @@ const Calendar: React.FC = () => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [date, setDate] = useState<Date>(new Date());
   const [selectedDateEvents, setSelectedDateEvents] = useState<CalendarEvent[]>([]);
+  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
   
   useEffect(() => {
     // Check if user is logged in
@@ -53,6 +55,10 @@ const Calendar: React.FC = () => {
 
     setSelectedDateEvents(filteredEvents);
   }, [date, events]);
+
+  const handleSaveEvent = (newEvent: CalendarEvent) => {
+    setEvents(prev => [...prev, newEvent]);
+  };
 
   // Function to get dates with events as a Set (for the modifiers)
   const getEventDates = () => {
@@ -127,6 +133,7 @@ const Calendar: React.FC = () => {
             
             {isAdmin && (
               <Button 
+                onClick={() => setIsEventModalOpen(true)}
                 className="bg-cbmepi-orange hover:bg-cbmepi-orange/90 text-white"
               >
                 <Plus className="mr-2 h-4 w-4" />
@@ -339,6 +346,14 @@ const Calendar: React.FC = () => {
           </div>
         </div>
       </main>
+
+      {/* Event Modal */}
+      <EventModal
+        isOpen={isEventModalOpen}
+        onClose={() => setIsEventModalOpen(false)}
+        onSave={handleSaveEvent}
+        selectedDate={date}
+      />
     </div>
   );
 };

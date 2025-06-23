@@ -36,12 +36,17 @@ import ObservationCreate from './pages/pedagogical/ObservationCreate';
 import StudentDashboard from './pages/pedagogical/StudentDashboard';
 import MessagesInbox from './pages/communication/MessagesInbox';
 import ComposeMessage from './pages/communication/ComposeMessage';
+import MessagesNew from './pages/communication/MessagesNew';
 import AnnouncementsList from './pages/communication/AnnouncementsList';
 import ReportsDashboard from './pages/reports/ReportsDashboard';
 import StudentBulletin from './pages/reports/StudentBulletin';
+import ApprovalStats from './pages/reports/ApprovalStats';
+import AttendanceReport from './pages/reports/AttendanceReport';
 import NotFound from './pages/NotFound';
 import Index from './pages/Index';
 import Login from './pages/Login';
+import Profile from './pages/Profile';
+import Settings from './pages/Settings';
 import PlaceholderPage from './pages/PlaceholderPage';
 import DashboardLayout from './components/DashboardLayout';
 
@@ -55,9 +60,9 @@ function App() {
       {/* Protected routes with DashboardLayout */}
       <Route element={<DashboardLayout />}>
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/profile" element={<PlaceholderPage title="Perfil do Usuário" />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/help" element={<PlaceholderPage title="Ajuda do Sistema" />} />
-        <Route path="/settings" element={<PlaceholderPage title="Configurações" />} />
+        <Route path="/settings" element={<Settings />} />
         
         {/* Users */}
         <Route path="/users" element={<UsersList />} />
@@ -112,18 +117,26 @@ function App() {
         <Route path="/pedagogical/assessments/:id/take" element={<AssessmentTake />} />
         <Route path="/pedagogical/assessments/:id/results" element={<ResultsView />} />
         <Route path="/pedagogical/question-bank" element={<QuestionBank />} />
+        <Route path="/pedagogical/questionbank" element={<QuestionBank />} />
         <Route path="/pedagogical/observations" element={<ObservationsList />} />
         <Route path="/pedagogical/observations/create" element={<ObservationCreate />} />
         <Route path="/pedagogical/student-dashboard" element={<StudentDashboard />} />
         
         {/* Communication */}
         <Route path="/communications/messages" element={<MessagesInbox />} />
+        <Route path="/communication/messages" element={<MessagesInbox />} />
         <Route path="/communications/compose" element={<ComposeMessage />} />
+        <Route path="/communications/messages/new" element={<MessagesNew />} />
+        <Route path="/communication/messages/new" element={<MessagesNew />} />
         <Route path="/communications/announcements" element={<AnnouncementsList />} />
         
         {/* Reports */}
         <Route path="/reports" element={<ReportsDashboard />} />
         <Route path="/reports/student-bulletin" element={<StudentBulletin />} />
+        <Route path="/reports/approval-stats" element={<ApprovalStats />} />
+        <Route path="/reports/attendance" element={<AttendanceReport />} />
+        <Route path="/reports/comparative" element={<PlaceholderPage title="Relatório Comparativo" />} />
+        <Route path="/reports/class-performance" element={<PlaceholderPage title="Desempenho da Turma" />} />
         
         {/* Placeholders for missing pages */}
         <Route path="/placeholder" element={<PlaceholderPage />} />

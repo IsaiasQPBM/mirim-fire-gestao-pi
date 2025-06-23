@@ -40,17 +40,6 @@ const DashboardLayout: React.FC = () => {
         localStorage.setItem('userId', 'user-3');
       }
     }
-
-    // Check if we need to redirect due to a direct path access
-    if (location.pathname === '/disciplines') {
-      // This is already supported by our direct route
-    } else if (location.pathname === '/classes') {
-      // This is already supported by our direct route
-    } else if (location.pathname === '/courses') {
-      // This is already supported by our direct route
-    } else if (location.pathname === '/lessons/planning') {
-      // This is already supported by our direct route
-    }
   }, [navigate, location]);
 
   const handleRouteChange = (path: string, timestamp: number) => {
@@ -77,11 +66,11 @@ const DashboardLayout: React.FC = () => {
   if (!userRole) return null;
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Route logger for analytics */}
       <RouteLogger onRouteChange={handleRouteChange} />
       
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1">
         {/* Sidebar */}
         <Sidebar 
           userRole={userRole} 
@@ -92,10 +81,10 @@ const DashboardLayout: React.FC = () => {
         
         {/* Main Content */}
         <div className={cn(
-          "flex-1 flex flex-col transition-all duration-300",
+          "flex-1 flex flex-col transition-all duration-300 min-h-screen",
           isCollapsed ? 'ml-16' : 'ml-64'
         )}>
-          <main className="flex-1 overflow-y-auto bg-gray-50">
+          <main className="flex-1 bg-gray-50">
             <Outlet />
           </main>
           

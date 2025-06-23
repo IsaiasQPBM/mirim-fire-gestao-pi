@@ -2,27 +2,30 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Header from '@/components/Header';
-import { toast } from '@/hooks/use-toast';
-import { PenLine, Plus, Search, Calendar, Clock, BookOpen } from 'lucide-react';
-import { mockLessons, mockClasses, mockDisciplines } from '@/data/mockCurriculumData';
+import LessonModal from '@/components/lessons/LessonModal';
+import { useToast } from '@/hooks/use-toast';
+import { BookOpen, Calendar, Clock, Plus, Edit, Eye, Save, Search } from 'lucide-react';
 
 const LessonPlanning: React.FC = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   
   const [userRole, setUserRole] = useState<string>('');
   const [userName, setUserName] = useState<string>('');
   const [lessons, setLessons] = useState<any[]>([]);
-  const [filteredLessons, setFilteredLessons] = useState<any[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterClass, setFilterClass] = useState('all');
+  const [isLessonModalOpen, setIsLessonModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
+  const [selectedLesson, setSelectedLesson] = useState<any>(null);
+
   useEffect(() => {
-    // Check if user is logged in
     const storedUserRole = localStorage.getItem('userRole');
     const storedUserName = localStorage.getItem('userName');
 
@@ -31,66 +34,98 @@ const LessonPlanning: React.FC = () => {
       return;
     }
 
-    // Only admin and instructors can access this page
-    if (storedUserRole !== 'admin' && storedUserRole !== 'instructor') {
-      navigate('/dashboard');
-      toast({
-        title: "Acesso negado",
-        description: "Você não tem permissão para acessar o planejamento de aulas",
-        variant: "destructive"
-      });
-      return;
-    }
-
     setUserRole(storedUserRole);
     setUserName(storedUserName);
     
-    // Enhance lessons with class and discipline information
-    const enhancedLessons = mockLessons.map(lesson => {
-      const classInfo = mockClasses.find(c => c.id === lesson.classId);
-      const disciplineInfo = mockDisciplines.find(d => d.id === lesson.disciplineId);
-      
-      return {
-        ...lesson,
-        className: classInfo?.name || 'Turma desconhecida',
-        disciplineName: disciplineInfo?.name || 'Disciplina desconhecida',
-      };
-    });
-    
-    setLessons(enhancedLessons);
-    setFilteredLessons(enhancedLessons);
+    // Load mock lessons
+    setLessons([
+      {
+        id: 'lesson-1',
+        title: 'Introdução aos Primeiros Socorros',
+        description: 'Conceitos básicos de primeiros socorros',
+        content: 'Aula teórica sobre os fundamentos dos primeiros socorros...',
+        classId: 'class-1',
+        disciplineId: 'disc-1',
+        lessonDate: '2024-07-01',
+        startTime: '08:00',
+        endTime: '10:00',
+        status: 'planned',
+        resources: ['Projetor', 'Boneco de treino'],
+      },
+      {
+        id: 'lesson-2',
+        title: 'Prevenção de Incêndios',
+        description: 'Técnicas de prevenção e combate a incêndios',
+        content: 'Aula prática sobre uso de extintores...',
+        classId: 'class-2',
+        disciplineId: 'disc-2',
+        lessonDate: '2024-07-02',
+        startTime: '14:00',
+        endTime: '16:00',
+        status: 'completed',
+        resources: ['Extintores', 'Área de treino'],
+      },
+    ]);
   }, [navigate]);
 
-  useEffect(() => {
-    if (!searchQuery.trim()) {
-      setFilteredLessons(lessons);
-      return;
-    }
-    
-    const lowerCaseQuery = searchQuery.toLowerCase();
-    
-    const filtered = lessons.filter(lesson => 
-      lesson.title.toLowerCase().includes(lowerCaseQuery) ||
-      lesson.description.toLowerCase().includes(lowerCaseQuery) ||
-      lesson.className.toLowerCase().includes(lowerCaseQuery) ||
-      lesson.disciplineName.toLowerCase().includes(lowerCaseQuery)
-    );
-    
-    setFilteredLessons(filtered);
-  }, [searchQuery, lessons]);
+  const handleCreateLesson = () => {
+    setModalMode('create');
+    setSelectedLesson(null);
+    setIsLessonModalOpen(true);
+  };
 
-  const getLessonStatusBadge = (status: string) => {
-    switch (status) {
-      case 'planned':
-        return <Badge className="bg-blue-500">Planejada</Badge>;
-      case 'completed':
-        return <Badge className="bg-green-500">Concluída</Badge>;
-      case 'cancelled':
-        return <Badge className="bg-red-500">Cancelada</Badge>;
-      default:
-        return <Badge>Desconhecido</Badge>;
+  const handleEditLesson = (lesson: any) => {
+    setModalMode('edit');
+    setSelectedLesson(lesson);
+    setIsLessonModalOpen(true);
+  };
+
+  const handleViewDetails = (lesson: any) => {
+    toast({
+      title: "Detalhes da Aula",
+      description: `Visualizando: ${lesson.title}`,
+    });
+    // Here you could open a detailed view modal
+  };
+
+  const handleSaveLesson = (lessonData: any) => {
+    if (modalMode === 'create') {
+      setLessons(prev => [...prev, lessonData]);
+    } else {
+      setLessons(prev => prev.map(l => l.id === lessonData.id ? lessonData : l));
     }
   };
+
+  const handleSavePlanning = () => {
+    toast({
+      title: "Planejamento salvo",
+      description: "O planejamento de aulas foi salvo com sucesso.",
+    });
+  };
+
+  const filteredLessons = lessons.filter(lesson => {
+    const matchesSearch = lesson.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         lesson.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesClass = filterClass === 'all' || lesson.classId === filterClass;
+    return matchesSearch && matchesClass;
+  });
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'planned':
+        return <Badge className="bg-blue-100 text-blue-800">Planejada</Badge>;
+      case 'in_progress':
+        return <Badge className="bg-yellow-100 text-yellow-800">Em Andamento</Badge>;
+      case 'completed':
+        return <Badge className="bg-green-100 text-green-800">Concluída</Badge>;
+      case 'cancelled':
+        return <Badge className="bg-red-100 text-red-800">Cancelada</Badge>;
+      default:
+        return <Badge className="bg-gray-100 text-gray-800">Indefinido</Badge>;
+    }
+  };
+
+  const isAdmin = userRole === 'admin' || userRole === 'instructor';
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
@@ -103,295 +138,158 @@ const LessonPlanning: React.FC = () => {
       <main className="flex-1 p-6 overflow-y-auto">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center space-x-2">
-              <PenLine className="h-6 w-6 text-cbmepi-red" />
+            <div className="flex items-center">
+              <BookOpen className="h-6 w-6 text-cbmepi-red mr-2" />
               <h1 className="text-2xl font-bold text-cbmepi-black">Planejamento de Aulas</h1>
             </div>
             
-            <div className="flex space-x-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                <Input
-                  type="text"
-                  placeholder="Pesquisar aulas..."
-                  className="pl-10 w-64"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              
-              <Button 
-                className="bg-cbmepi-orange hover:bg-cbmepi-orange/90 text-white"
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Nova Aula
-              </Button>
+            <div className="flex items-center space-x-4">
+              {isAdmin && (
+                <>
+                  <Button 
+                    onClick={handleSavePlanning}
+                    variant="outline"
+                    className="border-cbmepi-orange text-cbmepi-orange hover:bg-cbmepi-orange hover:text-white"
+                  >
+                    <Save className="mr-2 h-4 w-4" />
+                    Salvar Planejamento
+                  </Button>
+                  <Button 
+                    onClick={handleCreateLesson}
+                    className="bg-cbmepi-orange hover:bg-cbmepi-orange/90 text-white"
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Nova Aula
+                  </Button>
+                </>
+              )}
             </div>
           </div>
-          
-          <Tabs defaultValue="upcoming" className="space-y-6">
-            <TabsList className="bg-white border border-gray-200">
-              <TabsTrigger value="upcoming">Próximas Aulas</TabsTrigger>
-              <TabsTrigger value="completed">Aulas Concluídas</TabsTrigger>
-              <TabsTrigger value="planning">Criar Planejamento</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="upcoming" className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredLessons
-                  .filter(lesson => lesson.status === 'planned')
-                  .map(lesson => (
-                    <Card 
-                      key={lesson.id}
-                      className="border border-gray-200 shadow-sm"
-                    >
-                      <CardHeader className="pb-3">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <CardTitle className="text-lg">{lesson.title}</CardTitle>
-                            <div className="text-sm text-gray-500">{lesson.disciplineName}</div>
-                          </div>
-                          {getLessonStatusBadge(lesson.status)}
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-gray-600 line-clamp-3 mb-4">{lesson.description}</p>
-                        
-                        <div className="space-y-2">
-                          <div className="flex items-center text-sm">
-                            <Calendar className="h-4 w-4 mr-2 text-gray-500" />
-                            <span>{new Date(lesson.date).toLocaleDateString('pt-BR')}</span>
-                          </div>
-                          <div className="flex items-center text-sm">
-                            <Clock className="h-4 w-4 mr-2 text-gray-500" />
-                            <span>{lesson.startTime} - {lesson.endTime}</span>
-                          </div>
-                          <div className="flex items-center text-sm">
-                            <BookOpen className="h-4 w-4 mr-2 text-gray-500" />
-                            <span>{lesson.className}</span>
-                          </div>
-                        </div>
-                        
-                        <div className="mt-4 flex justify-end">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-cbmepi-orange border-cbmepi-orange hover:bg-cbmepi-orange hover:text-white"
-                          >
-                            Editar Plano
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+
+          {/* Filters */}
+          <Card className="mb-6">
+            <CardContent className="p-4">
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Buscar aulas..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
                 
-                {filteredLessons.filter(lesson => lesson.status === 'planned').length === 0 && (
-                  <div className="col-span-1 md:col-span-2 lg:col-span-3 text-center py-12 bg-white rounded-lg shadow">
-                    <PenLine className="mx-auto h-12 w-12 text-gray-400" />
-                    <h3 className="mt-2 text-lg font-medium text-gray-900">Nenhuma aula planejada</h3>
-                    <p className="mt-1 text-sm text-gray-500">
-                      {searchQuery ? `Não foram encontradas aulas com "${searchQuery}".` : 'Não há aulas planejadas no momento.'}
-                    </p>
-                    <div className="mt-6">
-                      <Button 
-                        className="bg-cbmepi-orange hover:bg-cbmepi-orange/90 text-white"
-                      >
-                        <Plus className="mr-2 h-4 w-4" />
-                        Planejar Aula
-                      </Button>
-                    </div>
-                  </div>
-                )}
+                <Select value={filterClass} onValueChange={setFilterClass}>
+                  <SelectTrigger className="w-full md:w-48">
+                    <SelectValue placeholder="Filtrar por turma" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas as Turmas</SelectItem>
+                    <SelectItem value="class-1">Turma A - Manhã</SelectItem>
+                    <SelectItem value="class-2">Turma B - Tarde</SelectItem>
+                    <SelectItem value="class-3">Turma C - Noite</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-            </TabsContent>
-            
-            <TabsContent value="completed" className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredLessons
-                  .filter(lesson => lesson.status === 'completed')
-                  .map(lesson => (
-                    <Card 
-                      key={lesson.id}
-                      className="border border-gray-200 shadow-sm"
-                    >
-                      <CardHeader className="pb-3">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <CardTitle className="text-lg">{lesson.title}</CardTitle>
-                            <div className="text-sm text-gray-500">{lesson.disciplineName}</div>
-                          </div>
-                          {getLessonStatusBadge(lesson.status)}
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-gray-600 line-clamp-3 mb-4">{lesson.description}</p>
-                        
-                        <div className="space-y-2">
-                          <div className="flex items-center text-sm">
-                            <Calendar className="h-4 w-4 mr-2 text-gray-500" />
-                            <span>{new Date(lesson.date).toLocaleDateString('pt-BR')}</span>
-                          </div>
-                          <div className="flex items-center text-sm">
-                            <Clock className="h-4 w-4 mr-2 text-gray-500" />
-                            <span>{lesson.startTime} - {lesson.endTime}</span>
-                          </div>
-                          <div className="flex items-center text-sm">
-                            <BookOpen className="h-4 w-4 mr-2 text-gray-500" />
-                            <span>{lesson.className}</span>
-                          </div>
-                        </div>
-                        
-                        <div className="mt-4 flex justify-end">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                          >
-                            Ver Detalhes
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                
-                {filteredLessons.filter(lesson => lesson.status === 'completed').length === 0 && (
-                  <div className="col-span-1 md:col-span-2 lg:col-span-3 text-center py-12 bg-white rounded-lg shadow">
-                    <PenLine className="mx-auto h-12 w-12 text-gray-400" />
-                    <h3 className="mt-2 text-lg font-medium text-gray-900">Nenhuma aula concluída</h3>
-                    <p className="mt-1 text-sm text-gray-500">
-                      {searchQuery ? `Não foram encontradas aulas com "${searchQuery}".` : 'Não há aulas concluídas registradas no sistema.'}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="planning" className="space-y-6">
-              <Card className="border border-gray-200 shadow-sm">
+            </CardContent>
+          </Card>
+
+          {/* Lessons List */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            {filteredLessons.map(lesson => (
+              <Card key={lesson.id} className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
                 <CardHeader>
-                  <CardTitle>Criar Novo Plano de Aula</CardTitle>
+                  <div className="flex justify-between items-start">
+                    <CardTitle className="text-lg">{lesson.title}</CardTitle>
+                    {getStatusBadge(lesson.status)}
+                  </div>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    <div>
-                      <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-                        Título da Aula
-                      </label>
-                      <Input id="title" placeholder="Ex: Introdução à Prevenção de Incêndios" />
+                
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-gray-600">{lesson.description}</p>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center text-sm text-gray-500">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      {new Date(lesson.lessonDate).toLocaleDateString('pt-BR')}
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label htmlFor="class" className="block text-sm font-medium text-gray-700 mb-1">
-                          Turma
-                        </label>
-                        <select
-                          id="class"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-cbmepi-orange"
-                        >
-                          <option value="">Selecione uma turma</option>
-                          {mockClasses.map(classItem => (
-                            <option key={classItem.id} value={classItem.id}>
-                              {classItem.name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      
-                      <div>
-                        <label htmlFor="discipline" className="block text-sm font-medium text-gray-700 mb-1">
-                          Disciplina
-                        </label>
-                        <select
-                          id="discipline"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-cbmepi-orange"
-                        >
-                          <option value="">Selecione uma disciplina</option>
-                          {mockDisciplines.map(discipline => (
-                            <option key={discipline.id} value={discipline.id}>
-                              {discipline.name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+                    <div className="flex items-center text-sm text-gray-500">
+                      <Clock className="h-4 w-4 mr-2" />
+                      {lesson.startTime} - {lesson.endTime}
                     </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div>
-                        <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
-                          Data
-                        </label>
-                        <Input id="date" type="date" />
-                      </div>
-                      
-                      <div>
-                        <label htmlFor="startTime" className="block text-sm font-medium text-gray-700 mb-1">
-                          Hora de Início
-                        </label>
-                        <Input id="startTime" type="time" />
-                      </div>
-                      
-                      <div>
-                        <label htmlFor="endTime" className="block text-sm font-medium text-gray-700 mb-1">
-                          Hora de Término
-                        </label>
-                        <Input id="endTime" type="time" />
-                      </div>
+                  </div>
+                  
+                  {lesson.resources && lesson.resources.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {lesson.resources.map((resource: string, index: number) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {resource}
+                        </Badge>
+                      ))}
                     </div>
+                  )}
+                  
+                  <div className="flex justify-between items-center pt-4 border-t">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleViewDetails(lesson)}
+                    >
+                      <Eye className="mr-1 h-3 w-3" />
+                      Ver Detalhes
+                    </Button>
                     
-                    <div>
-                      <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                        Descrição da Aula
-                      </label>
-                      <Textarea
-                        id="description"
-                        placeholder="Descreva o conteúdo e objetivos da aula"
-                        className="min-h-24 resize-y"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-1">
-                        Conteúdo Programático
-                      </label>
-                      <Textarea
-                        id="content"
-                        placeholder="Detalhe os tópicos que serão abordados na aula"
-                        className="min-h-32 resize-y"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="resources" className="block text-sm font-medium text-gray-700 mb-1">
-                        Recursos Necessários
-                      </label>
-                      <Textarea
-                        id="resources"
-                        placeholder="Liste os materiais e recursos necessários para a aula"
-                        className="min-h-24 resize-y"
-                      />
-                    </div>
-                    
-                    <div className="pt-4 flex justify-end space-x-3">
-                      <Button 
-                        type="button" 
+                    {isAdmin && (
+                      <Button
                         variant="outline"
+                        size="sm"
+                        onClick={() => handleEditLesson(lesson)}
                       >
-                        Cancelar
+                        <Edit className="mr-1 h-3 w-3" />
+                        Editar Plano
                       </Button>
-                      <Button 
-                        type="button" 
-                        className="bg-cbmepi-orange hover:bg-cbmepi-orange/90 text-white"
-                      >
-                        Salvar Planejamento
-                      </Button>
-                    </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
-            </TabsContent>
-          </Tabs>
+            ))}
+          </div>
+
+          {filteredLessons.length === 0 && (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <BookOpen className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhuma aula encontrada</h3>
+                <p className="text-gray-500 mb-4">
+                  {searchTerm || filterClass !== 'all' 
+                    ? 'Nenhuma aula corresponde aos filtros aplicados.' 
+                    : 'Nenhuma aula foi planejada ainda.'}
+                </p>
+                {isAdmin && (
+                  <Button 
+                    onClick={handleCreateLesson}
+                    className="bg-cbmepi-orange hover:bg-cbmepi-orange/90"
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Criar Primeira Aula
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </div>
       </main>
+
+      {/* Lesson Modal */}
+      <LessonModal
+        isOpen={isLessonModalOpen}
+        onClose={() => setIsLessonModalOpen(false)}
+        onSave={handleSaveLesson}
+        mode={modalMode}
+        lessonData={selectedLesson}
+      />
     </div>
   );
 };
