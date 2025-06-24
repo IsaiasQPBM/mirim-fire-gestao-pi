@@ -1,6 +1,4 @@
-
 import { Student } from '@/data/studentTypes';
-import { generatePDF } from './PDFGenerator';
 
 // Serviço para geração de PDFs reais
 export class PDFService {
