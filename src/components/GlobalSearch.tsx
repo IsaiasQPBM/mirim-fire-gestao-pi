@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -99,39 +99,43 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ variant = 'default' }) => {
   }, [isOpen]);
 
   return (
-    <SearchDialog
-      isOpen={isOpen}
-      onOpenChange={setIsOpen}
-      query={query}
-      onQueryChange={setQuery}
-      results={results}
-      recentSearches={recentSearches}
-      isSearching={isSearching}
-      onSearch={handleSearch}
-      onClearSearch={clearSearch}
-      onNavigateToResult={navigateToResult}
-    >
-      <DialogTrigger asChild>
-        {variant === 'minimal' ? (
-          <Button variant="ghost" size="icon" className="text-gray-600">
-            <Search className="h-5 w-5" />
-          </Button>
-        ) : (
-          <div className="flex items-center relative rounded-md border border-input bg-white focus-within:ring-1 focus-within:ring-primary">
-            <Search size={18} className="absolute left-3 text-gray-400" />
-            <Input 
-              readOnly
-              onClick={() => setIsOpen(true)}
-              placeholder={isMobile ? "Buscar..." : "Buscar no sistema... (Ctrl+K)"}
-              className="pl-10 border-none rounded-md bg-transparent w-full h-9" 
-            />
-            <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-400">
-              {!isMobile && <span>Ctrl+K</span>}
+    <>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogTrigger asChild>
+          {variant === 'minimal' ? (
+            <Button variant="ghost" size="icon" className="text-gray-600">
+              <Search className="h-5 w-5" />
+            </Button>
+          ) : (
+            <div className="flex items-center relative rounded-md border border-input bg-white focus-within:ring-1 focus-within:ring-primary">
+              <Search size={18} className="absolute left-3 text-gray-400" />
+              <Input 
+                readOnly
+                onClick={() => setIsOpen(true)}
+                placeholder={isMobile ? "Buscar..." : "Buscar no sistema... (Ctrl+K)"}
+                className="pl-10 border-none rounded-md bg-transparent w-full h-9" 
+              />
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-400">
+                {!isMobile && <span>Ctrl+K</span>}
+              </div>
             </div>
-          </div>
-        )}
-      </DialogTrigger>
-    </SearchDialog>
+          )}
+        </DialogTrigger>
+      </Dialog>
+
+      <SearchDialog
+        isOpen={isOpen}
+        onOpenChange={setIsOpen}
+        query={query}
+        onQueryChange={setQuery}
+        results={results}
+        recentSearches={recentSearches}
+        isSearching={isSearching}
+        onSearch={handleSearch}
+        onClearSearch={clearSearch}
+        onNavigateToResult={navigateToResult}
+      />
+    </>
   );
 };
 
