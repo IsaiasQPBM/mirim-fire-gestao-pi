@@ -26,7 +26,9 @@ import {
   Edit,
   Users,
   Plus,
-  GraduationCap
+  GraduationCap,
+  BarChart3,
+  Calendar
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -305,6 +307,28 @@ const StudentDetail: React.FC = () => {
                   </Badge>
                 )}
               </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="flex flex-wrap gap-2 mt-6">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate(`/students/${id}/grades`)}
+                className="flex items-center gap-2"
+              >
+                <BarChart3 size={16} />
+                Ver Notas
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate(`/students/${id}/schedule`)}
+                className="flex items-center gap-2"
+              >
+                <Calendar size={16} />
+                Cronograma
+              </Button>
             </div>
             
             <Tabs defaultValue="info" className="mt-8">
