@@ -20,7 +20,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     <div className="flex h-screen w-full bg-gray-50 overflow-hidden">
       {/* Sidebar */}
       <div className="flex-shrink-0">
-        <Sidebar />
+        <Sidebar userRole={userRole as 'admin' | 'instructor' | 'student'} userName={userName} />
       </div>
       
       {/* Main Content */}
