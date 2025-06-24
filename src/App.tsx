@@ -1,168 +1,157 @@
 
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Toaster } from '@/components/ui/toaster';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
-// Pages
-import Index from './pages/Index';
-import Login from './pages/Login';
+import { Route, Routes } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
-import Profile from './pages/Profile';
-import Settings from './pages/Settings';
-import NotFound from './pages/NotFound';
-import PlaceholderPage from './pages/PlaceholderPage';
-
-// User management
 import UsersList from './pages/users/UsersList';
 import UserProfile from './pages/users/UserProfile';
 import UserCreate from './pages/users/UserCreate';
 import UserEdit from './pages/users/UserEdit';
 import UserPermissions from './pages/users/UserPermissions';
-
-// Student management
 import StudentsList from './pages/students/StudentsList';
 import StudentDetail from './pages/students/StudentDetail';
 import StudentRegistration from './pages/students/StudentRegistration';
-import StudentGrades from './pages/students/StudentGrades';
-import StudentSchedule from './pages/students/StudentSchedule';
-
-// Curriculum management
-import CoursesList from './pages/curriculum/CoursesList';
-import CourseView from './pages/curriculum/CourseView';
-import CourseCreate from './pages/curriculum/CourseCreate';
-import CourseEdit from './pages/curriculum/CourseEdit';
 import ClassesList from './pages/curriculum/ClassesList';
 import ClassView from './pages/curriculum/ClassView';
 import ClassCreate from './pages/curriculum/ClassCreate';
 import ClassEdit from './pages/curriculum/ClassEdit';
+import CoursesList from './pages/curriculum/CoursesList';
+import CourseView from './pages/curriculum/CourseView';
+import CourseCreate from './pages/curriculum/CourseCreate';
+import CourseEdit from './pages/curriculum/CourseEdit';
+import CurriculumView from './pages/curriculum/CurriculumView';
 import DisciplinesList from './pages/curriculum/DisciplinesList';
 import DisciplineView from './pages/curriculum/DisciplineView';
 import DisciplineCreate from './pages/curriculum/DisciplineCreate';
 import DisciplineEdit from './pages/curriculum/DisciplineEdit';
-import Calendar from './pages/curriculum/Calendar';
-import CurriculumView from './pages/curriculum/CurriculumView';
 import LessonPlanning from './pages/curriculum/LessonPlanning';
-
-// Pedagogical
+import Calendar from './pages/curriculum/Calendar';
 import AssessmentsList from './pages/pedagogical/AssessmentsList';
-import AssessmentView from './pages/pedagogical/AssessmentView';
 import AssessmentCreate from './pages/pedagogical/AssessmentCreate';
 import AssessmentEdit from './pages/pedagogical/AssessmentEdit';
+import AssessmentView from './pages/pedagogical/AssessmentView';
 import AssessmentTake from './pages/pedagogical/AssessmentTake';
+import ResultsView from './pages/pedagogical/ResultsView';
+import QuestionBank from './pages/pedagogical/QuestionBank';
 import ObservationsList from './pages/pedagogical/ObservationsList';
 import ObservationCreate from './pages/pedagogical/ObservationCreate';
-import QuestionBank from './pages/pedagogical/QuestionBank';
-import ResultsView from './pages/pedagogical/ResultsView';
 import StudentDashboard from './pages/pedagogical/StudentDashboard';
-
-// Reports
-import ReportsDashboard from './pages/reports/ReportsDashboard';
-import AttendanceReport from './pages/reports/AttendanceReport';
-import ApprovalStats from './pages/reports/ApprovalStats';
-import StudentBulletin from './pages/reports/StudentBulletin';
-
-// Communication
 import MessagesInbox from './pages/communication/MessagesInbox';
-import MessagesNew from './pages/communication/MessagesNew';
 import ComposeMessage from './pages/communication/ComposeMessage';
+import MessagesNew from './pages/communication/MessagesNew';
 import AnnouncementsList from './pages/communication/AnnouncementsList';
-import AnnouncementCreate from './pages/communication/AnnouncementCreate';
-import NotificationsList from './pages/communication/NotificationsList';
-
-import RouteLogger from './components/RouteLogger';
-
-const queryClient = new QueryClient();
+import ReportsDashboard from './pages/reports/ReportsDashboard';
+import StudentBulletin from './pages/reports/StudentBulletin';
+import ApprovalStats from './pages/reports/ApprovalStats';
+import AttendanceReport from './pages/reports/AttendanceReport';
+import NotFound from './pages/NotFound';
+import Index from './pages/Index';
+import Login from './pages/Login';
+import Profile from './pages/Profile';
+import Settings from './pages/Settings';
+import PlaceholderPage from './pages/PlaceholderPage';
+import DashboardLayout from './components/DashboardLayout';
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <Router>
-        <RouteLogger />
-        <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-          
-          {/* Main dashboard */}
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/settings" element={<Settings />} />
-          
-          {/* User management routes */}
-          <Route path="/users" element={<UsersList />} />
-          <Route path="/users/new" element={<UserCreate />} />
-          <Route path="/users/:id" element={<UserProfile />} />
-          <Route path="/users/:id/edit" element={<UserEdit />} />
-          <Route path="/users/:id/permissions" element={<UserPermissions />} />
-          
-          {/* Student management routes */}
-          <Route path="/students" element={<StudentsList />} />
-          <Route path="/students/new" element={<StudentRegistration />} />
-          <Route path="/students/:id" element={<StudentDetail />} />
-          <Route path="/students/:id/grades" element={<StudentGrades />} />
-          <Route path="/students/:id/schedule" element={<StudentSchedule />} />
-          
-          {/* Curriculum routes */}
-          <Route path="/courses" element={<CoursesList />} />
-          <Route path="/courses/new" element={<CourseCreate />} />
-          <Route path="/courses/:id" element={<CourseView />} />
-          <Route path="/courses/:id/edit" element={<CourseEdit />} />
-          
-          <Route path="/classes" element={<ClassesList />} />
-          <Route path="/classes/new" element={<ClassCreate />} />
-          <Route path="/classes/:id" element={<ClassView />} />
-          <Route path="/classes/:id/edit" element={<ClassEdit />} />
-          
-          <Route path="/disciplines" element={<DisciplinesList />} />
-          <Route path="/disciplines/new" element={<DisciplineCreate />} />
-          <Route path="/disciplines/:id" element={<DisciplineView />} />
-          <Route path="/disciplines/:id/edit" element={<DisciplineEdit />} />
-          
-          <Route path="/calendar" element={<Calendar />} />
-          <Route path="/curriculum" element={<CurriculumView />} />
-          <Route path="/lessons/planning" element={<LessonPlanning />} />
-          
-          {/* Pedagogical routes */}
-          <Route path="/assessments" element={<AssessmentsList />} />
-          <Route path="/assessments/new" element={<AssessmentCreate />} />
-          <Route path="/assessments/:id" element={<AssessmentView />} />
-          <Route path="/assessments/:id/edit" element={<AssessmentEdit />} />
-          <Route path="/assessments/:id/take" element={<AssessmentTake />} />
-          
-          <Route path="/observations" element={<ObservationsList />} />
-          <Route path="/observations/new" element={<ObservationCreate />} />
-          <Route path="/questions" element={<QuestionBank />} />
-          <Route path="/results" element={<ResultsView />} />
-          <Route path="/student-dashboard" element={<StudentDashboard />} />
-          
-          {/* Reports routes */}
-          <Route path="/reports" element={<ReportsDashboard />} />
-          <Route path="/reports/attendance" element={<AttendanceReport />} />
-          <Route path="/reports/approval-stats" element={<ApprovalStats />} />
-          <Route path="/reports/student-bulletin" element={<StudentBulletin />} />
-          
-          {/* Communication routes */}
-          <Route path="/messages" element={<MessagesInbox />} />
-          <Route path="/messages/new" element={<MessagesNew />} />
-          <Route path="/messages/compose" element={<ComposeMessage />} />
-          <Route path="/announcements" element={<AnnouncementsList />} />
-          <Route path="/announcements/new" element={<AnnouncementCreate />} />
-          <Route path="/notifications" element={<NotificationsList />} />
-          
-          {/* Placeholder routes for development */}
-          <Route path="/turmas" element={<PlaceholderPage title="Gerenciar Turmas" />} />
-          <Route path="/disciplinas" element={<PlaceholderPage title="Disciplinas" />} />
-          <Route path="/alunos" element={<PlaceholderPage title="Alunos" />} />
-          <Route path="/relatorios" element={<PlaceholderPage title="Relatórios" />} />
-          <Route path="/comunicacoes" element={<PlaceholderPage title="Comunicações" />} />
-          <Route path="/configuracoes" element={<PlaceholderPage title="Configurações" />} />
-          
-          {/* 404 fallback */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <Toaster />
-      </Router>
-    </QueryClientProvider>
+    <Routes>
+      {/* Public routes */}
+      <Route path="/" element={<Index />} />
+      <Route path="/login" element={<Login />} />
+      
+      {/* Protected routes with DashboardLayout */}
+      <Route element={<DashboardLayout />}>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/help" element={<PlaceholderPage title="Ajuda do Sistema" />} />
+        <Route path="/settings" element={<Settings />} />
+        
+        {/* Users */}
+        <Route path="/users" element={<UsersList />} />
+        <Route path="/users/create" element={<UserCreate />} />
+        <Route path="/users/:id" element={<UserProfile />} />
+        <Route path="/users/:id/edit" element={<UserEdit />} />
+        <Route path="/users/:id/permissions" element={<UserPermissions />} />
+        
+        {/* Students */}
+        <Route path="/students" element={<StudentsList />} />
+        <Route path="/students/new" element={<StudentRegistration />} />
+        <Route path="/students/:id" element={<StudentDetail />} />
+        
+        {/* Curriculum */}
+        <Route path="/curriculum" element={<CurriculumView />} />
+        <Route path="/curriculum/classes" element={<ClassesList />} />
+        <Route path="/curriculum/classes/create" element={<ClassCreate />} />
+        <Route path="/curriculum/classes/:id" element={<ClassView />} />
+        <Route path="/curriculum/classes/:id/edit" element={<ClassEdit />} />
+        <Route path="/curriculum/courses" element={<CoursesList />} />
+        <Route path="/curriculum/courses/create" element={<CourseCreate />} />
+        <Route path="/curriculum/courses/:id" element={<CourseView />} />
+        <Route path="/curriculum/courses/:id/edit" element={<CourseEdit />} />
+        <Route path="/curriculum/disciplines" element={<DisciplinesList />} />
+        <Route path="/curriculum/disciplines/create" element={<DisciplineCreate />} />
+        <Route path="/curriculum/disciplines/:id" element={<DisciplineView />} />
+        <Route path="/curriculum/disciplines/:id/edit" element={<DisciplineEdit />} />
+        <Route path="/curriculum/lessons" element={<LessonPlanning />} />
+        <Route path="/curriculum/calendar" element={<Calendar />} />
+        
+        {/* Direct access routes to match sidebar links */}
+        <Route path="/disciplines" element={<DisciplinesList />} />
+        <Route path="/disciplines/create" element={<DisciplineCreate />} />
+        <Route path="/disciplines/:id" element={<DisciplineView />} />
+        <Route path="/disciplines/:id/edit" element={<DisciplineEdit />} />
+        <Route path="/classes" element={<ClassesList />} />
+        <Route path="/classes/create" element={<ClassCreate />} />
+        <Route path="/classes/:id" element={<ClassView />} />
+        <Route path="/classes/:id/edit" element={<ClassEdit />} />
+        <Route path="/courses" element={<CoursesList />} />
+        <Route path="/courses/create" element={<CourseCreate />} />
+        <Route path="/courses/:id" element={<CourseView />} />
+        <Route path="/courses/:id/edit" element={<CourseEdit />} />
+        <Route path="/lessons/planning" element={<LessonPlanning />} />
+        <Route path="/calendar" element={<Calendar />} />
+        
+        {/* Pedagogical */}
+        <Route path="/pedagogical/assessments" element={<AssessmentsList />} />
+        <Route path="/pedagogical/assessments/create" element={<AssessmentCreate />} />
+        <Route path="/pedagogical/assessments/:id" element={<AssessmentView />} />
+        <Route path="/pedagogical/assessments/:id/edit" element={<AssessmentEdit />} />
+        <Route path="/pedagogical/assessments/:id/take" element={<AssessmentTake />} />
+        <Route path="/pedagogical/assessments/:id/results" element={<ResultsView />} />
+        <Route path="/pedagogical/question-bank" element={<QuestionBank />} />
+        <Route path="/pedagogical/questionbank" element={<QuestionBank />} />
+        <Route path="/pedagogical/observations" element={<ObservationsList />} />
+        <Route path="/pedagogical/observations/create" element={<ObservationCreate />} />
+        <Route path="/pedagogical/student-dashboard" element={<StudentDashboard />} />
+        
+        {/* Communication - Fixed routes */}
+        <Route path="/communications/messages" element={<MessagesInbox />} />
+        <Route path="/communication/messages" element={<MessagesInbox />} />
+        <Route path="/communications/compose" element={<ComposeMessage />} />
+        <Route path="/communications/messages/new" element={<MessagesNew />} />
+        <Route path="/communication/messages/new" element={<MessagesNew />} />
+        <Route path="/communications/announcements" element={<AnnouncementsList />} />
+        <Route path="/communication/announcements" element={<AnnouncementsList />} />
+        <Route path="/communications/announcements/new" element={<PlaceholderPage title="Novo Comunicado" />} />
+        <Route path="/communication/announcements/new" element={<PlaceholderPage title="Novo Comunicado" />} />
+        
+        {/* Reports */}
+        <Route path="/reports" element={<ReportsDashboard />} />
+        <Route path="/reports/student-bulletin" element={<StudentBulletin />} />
+        <Route path="/reports/approval-stats" element={<ApprovalStats />} />
+        <Route path="/reports/attendance" element={<AttendanceReport />} />
+        <Route path="/reports/comparative" element={<PlaceholderPage title="Relatório Comparativo" />} />
+        <Route path="/reports/class-performance" element={<PlaceholderPage title="Desempenho da Turma" />} />
+        
+        {/* Placeholders for missing pages */}
+        <Route path="/placeholder" element={<PlaceholderPage />} />
+        
+        {/* Placeholders for common sections that might be missing */}
+        <Route path="/schedule" element={<PlaceholderPage title="Cronograma" />} />
+        <Route path="/grades" element={<PlaceholderPage title="Notas" />} />
+      </Route>
+
+      {/* 404 route */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 }
 
