@@ -1,3 +1,4 @@
+
 import { Student } from '@/data/studentTypes';
 import { generatePDF } from './PDFGenerator';
 
@@ -640,7 +641,8 @@ export class PDFService {
                 <td>${cls.subject}</td>
                 <td>${cls.instructor}</td>
               </tr>
-            `).join('')}
+            `).join('')
+          ).join('')}
         </tbody>
       </table>
     `;
