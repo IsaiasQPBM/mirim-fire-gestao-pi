@@ -1,14 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  Card, 
-  CardContent, 
-  CardFooter
-} from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -17,37 +11,17 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { 
-  User, 
-  BookOpen, 
-  Clipboard,
-  MessageSquare,
-  FileText,
-  Edit,
-  Users,
-  Plus,
-  GraduationCap
-} from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import Header from '@/components/Header';
 import { getStudentById, Student } from '@/data/studentTypes';
 import { useToast } from '@/hooks/use-toast';
-import PedagogicalObservations from '@/components/students/PedagogicalObservations';
-import StudentCommunications from '@/components/students/StudentCommunications';
-import DocumentsList from '@/components/students/DocumentsList';
 import StudentEditForm from '@/components/students/StudentEditForm';
 import MessageModal from '@/components/students/MessageModal';
 import ObservationForm from '@/components/students/ObservationForm';
-import StudentHeader from '@/components/students/StudentHeader';
-import StudentInfo from '@/components/students/StudentInfo';
-import StudentAcademic from '@/components/students/StudentAcademic';
+import StudentDetailHeader from '@/components/students/StudentDetailHeader';
+import StudentDetailTabs from '@/components/students/StudentDetailTabs';
+import StudentDetailActions from '@/components/students/StudentDetailActions';
 import { PDFService } from '@/components/PDFService';
 
 const StudentDetail: React.FC = () => {
@@ -113,22 +87,15 @@ const StudentDetail: React.FC = () => {
       .toUpperCase();
   };
   
-  const handleEditStudent = () => {
-    setIsEditing(true);
-  };
-  
+  const handleEditStudent = () => setIsEditing(true);
   const handleSaveStudent = (updatedStudent: Student) => {
     setStudent(updatedStudent);
     setIsEditing(false);
   };
-  
-  const handleCancelEdit = () => {
-    setIsEditing(false);
-  };
-  
-  const handleSendMessage = () => {
-    setShowMessageModal(true);
-  };
+  const handleCancelEdit = () => setIsEditing(false);
+  const handleSendMessage = () => setShowMessageModal(true);
+  const handleAddObservation = () => setShowObservationForm(true);
+  const handleBackToList = () => navigate('/students');
   
   const handlePrintProfile = () => {
     if (student) {
@@ -138,10 +105,6 @@ const StudentDetail: React.FC = () => {
         description: "O boletim individual do aluno foi gerado para impressão.",
       });
     }
-  };
-
-  const handleAddObservation = () => {
-    setShowObservationForm(true);
   };
 
   if (loading) {
@@ -274,8 +237,8 @@ const StudentDetail: React.FC = () => {
           </BreadcrumbList>
         </Breadcrumb>
 
-        <Card className="overflow-hidden border-t-4 border-t-cbmepi-orange shadow-md">
-          <StudentHeader
+        <div className="space-y-6">
+          <StudentDetailHeader
             student={student}
             userRole={userRole}
             getInitials={getInitials}
@@ -285,135 +248,22 @@ const StudentDetail: React.FC = () => {
             onSendMessage={handleSendMessage}
           />
           
-          <CardContent className="pt-20 pb-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <h2 className="text-2xl font-bold text-cbmepi-black">{student.fullName}</h2>
-                <div className="flex items-center gap-1 text-gray-600 mt-1">
-                  <GraduationCap size={16} />
-                  <span className="text-sm">Matrícula: {student.registrationNumber}</span>
-                </div>
-              </div>
-              
-              <div className="flex flex-wrap gap-2">
-                <Badge className={getStatusColor(student.status)}>
-                  {getStatusLabel(student.status)}
-                </Badge>
-                {student.classIds.length > 0 && (
-                  <Badge variant="outline">
-                    {student.classIds.length} {student.classIds.length === 1 ? 'Turma' : 'Turmas'}
-                  </Badge>
-                )}
-              </div>
-            </div>
+          <Card>
+            <StudentDetailTabs
+              student={student}
+              userRole={userRole}
+              formatDate={formatDate}
+              onAddObservation={handleAddObservation}
+            />
             
-            <Tabs defaultValue="info" className="mt-8">
-              <TabsList className="grid grid-cols-2 md:grid-cols-5 mb-6">
-                <TabsTrigger value="info">
-                  <User size={16} className="mr-2 hidden md:inline" />
-                  Informações
-                </TabsTrigger>
-                <TabsTrigger value="academic">
-                  <BookOpen size={16} className="mr-2 hidden md:inline" />
-                  Acadêmico
-                </TabsTrigger>
-                <TabsTrigger value="observations">
-                  <Clipboard size={16} className="mr-2 hidden md:inline" />
-                  Observações
-                </TabsTrigger>
-                <TabsTrigger value="documents">
-                  <FileText size={16} className="mr-2 hidden md:inline" />
-                  Documentos
-                </TabsTrigger>
-                <TabsTrigger value="communications">
-                  <MessageSquare size={16} className="mr-2 hidden md:inline" />
-                  Comunicações
-                </TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="info">
-                <StudentInfo student={student} formatDate={formatDate} />
-              </TabsContent>
-              
-              <TabsContent value="academic">
-                <StudentAcademic studentId={student.id} formatDate={formatDate} />
-              </TabsContent>
-              
-              <TabsContent value="observations">
-                <div className="space-y-4">
-                  {['admin', 'instructor'].includes(userRole) && (
-                    <div className="flex justify-end">
-                      <Button 
-                        onClick={handleAddObservation}
-                        className="bg-cbmepi-orange hover:bg-cbmepi-orange/90"
-                      >
-                        <Plus size={16} className="mr-1" />
-                        Nova Observação
-                      </Button>
-                    </div>
-                  )}
-                  <PedagogicalObservations studentId={student.id} />
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="documents">
-                <DocumentsList student={student} userRole={userRole} />
-              </TabsContent>
-              
-              <TabsContent value="communications">
-                <StudentCommunications 
-                  studentId={student.id} 
-                  studentName={student.fullName} 
-                  userRole={userRole}
-                />
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-          
-          <CardFooter className="border-t bg-gray-50 py-4">
-            <div className="flex justify-between items-center w-full">
-              <Button 
-                variant="outline"
-                size="sm"
-                onClick={() => navigate('/students')}
-              >
-                <Users size={16} className="mr-1" />
-                Voltar para Lista
-              </Button>
-              
-              <div className="flex gap-2">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handlePrintProfile}
-                      >
-                        <FileText size={16} className="mr-1" />
-                        Exportar PDF
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="text-xs">Exportar boletim individual como PDF</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                
-                {['admin', 'instructor'].includes(userRole) && (
-                  <Button
-                    size="sm"
-                    className="bg-cbmepi-orange hover:bg-cbmepi-orange/90"
-                    onClick={handleEditStudent}
-                  >
-                    <Edit size={16} className="mr-1" />
-                    Editar Aluno
-                  </Button>
-                )}
-              </div>
-            </div>
-          </CardFooter>
-        </Card>
+            <StudentDetailActions
+              userRole={userRole}
+              onBackToList={handleBackToList}
+              onPrintProfile={handlePrintProfile}
+              onEditStudent={handleEditStudent}
+            />
+          </Card>
+        </div>
       </div>
 
       {showMessageModal && (

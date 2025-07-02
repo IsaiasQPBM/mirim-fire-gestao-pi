@@ -91,6 +91,46 @@
   }
   body {
     @apply bg-background text-foreground;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    width: 100%;
+    overflow-x: hidden;
+  }
+  
+  html {
+    width: 100%;
+    overflow-x: hidden;
+  }
+  
+  #root {
+    width: 100%;
+    min-height: 100vh;
+  }
+}
+
+/* Layout fixes */
+@layer utilities {
+  .layout-container {
+    @apply w-full min-h-screen flex flex-col;
+  }
+  
+  .main-content {
+    @apply flex-1 w-full;
+  }
+  
+  .page-wrapper {
+    @apply w-full min-h-screen bg-gray-50;
+  }
+  
+  .content-wrapper {
+    @apply w-full max-w-none mx-auto;
+  }
+  
+  /* Remove any mysterious spacing */
+  .no-space {
+    margin: 0 !important;
+    padding: 0 !important;
   }
 }
 
@@ -114,23 +154,100 @@
   
   /* Responsive utilities */
   .responsive-grid {
-    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
   }
   
   .responsive-padding {
-    @apply p-4 md:p-6 lg:p-8;
+    @apply p-4 sm:p-6 lg:p-8;
   }
   
   .responsive-text {
-    @apply text-sm md:text-base lg:text-lg;
+    @apply text-sm sm:text-base lg:text-lg;
   }
   
   .mobile-first-flex {
-    @apply flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-4;
+    @apply flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4;
+  }
+  
+  /* Better mobile spacing */
+  .mobile-spacing {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+  
+  .section-spacing {
+    @apply space-y-4 sm:space-y-6 lg:space-y-8;
   }
 }
 
-/* Animation classes */
+/* Enhanced responsive design */
+@media (max-width: 640px) {
+  .mobile-hide {
+    display: none !important;
+  }
+  
+  .mobile-full-width {
+    width: 100% !important;
+  }
+  
+  .mobile-text-center {
+    text-align: center !important;
+  }
+  
+  .mobile-stack {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  
+  .mobile-stack > * {
+    margin-bottom: 0.75rem;
+  }
+  
+  .mobile-stack > *:last-child {
+    margin-bottom: 0;
+  }
+  
+  /* Better mobile cards */
+  .mobile-card {
+    @apply mx-2 rounded-lg;
+  }
+  
+  /* Mobile navigation improvements */
+  .mobile-nav {
+    @apply fixed bottom-0 left-0 right-0 bg-white border-t z-50;
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .tablet-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  
+  .tablet-hide {
+    display: none !important;
+  }
+  
+  .tablet-spacing {
+    @apply px-6 py-4;
+  }
+}
+
+/* Desktop optimizations */
+@media (min-width: 1025px) {
+  .desktop-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+  }
+  
+  .desktop-sidebar {
+    @apply w-64 fixed left-0 top-0 h-full;
+  }
+  
+  .desktop-main {
+    @apply ml-64;
+  }
+}
+
+/* Animation classes remain the same */
 .animate-fade-in {
   animation: fadeIn 0.5s ease-in-out;
 }
@@ -202,45 +319,6 @@
   box-shadow: 0 0 20px rgba(245, 166, 35, 0.4);
 }
 
-/* Mobile-specific styles */
-@media (max-width: 768px) {
-  .mobile-hide {
-    display: none;
-  }
-  
-  .mobile-full-width {
-    width: 100%;
-  }
-  
-  .mobile-text-center {
-    text-align: center;
-  }
-  
-  .mobile-stack {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .mobile-stack > * {
-    margin-bottom: 0.5rem;
-  }
-  
-  .mobile-stack > *:last-child {
-    margin-bottom: 0;
-  }
-}
-
-/* Tablet-specific styles */
-@media (min-width: 769px) and (max-width: 1024px) {
-  .tablet-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .tablet-hide {
-    display: none;
-  }
-}
-
 /* Animation keyframes */
 @keyframes fadeIn {
   from {
@@ -309,7 +387,7 @@
 
 /* Responsive cards */
 .responsive-card {
-  @apply bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow;
+  @apply bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md transition-shadow;
 }
 
 /* Responsive tables */

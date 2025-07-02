@@ -51,6 +51,7 @@ import DashboardLayout from './components/DashboardLayout';
 import { Toaster } from '@/components/ui/toaster';
 import NotificationsList from './pages/communication/NotificationsList';
 import AnnouncementCreate from './pages/communication/AnnouncementCreate';
+import ContentManagement from './pages/admin/ContentManagement';
 
 function App() {
   return (
@@ -66,6 +67,9 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/help" element={<PlaceholderPage title="Ajuda do Sistema" />} />
           <Route path="/settings" element={<Settings />} />
+          
+          {/* Admin CMS */}
+          <Route path="/admin/content" element={<ContentManagement />} />
           
           {/* Notifications */}
           <Route path="/notifications" element={<NotificationsList />} />
