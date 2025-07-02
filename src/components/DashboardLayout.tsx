@@ -1,6 +1,8 @@
 
 import React from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
+import { SidebarProvider } from '@/components/ui/sidebar';
+import Sidebar from '@/components/Sidebar';
 
 const DashboardLayout: React.FC = () => {
   const userRole = localStorage.getItem('userRole');
@@ -12,11 +14,17 @@ const DashboardLayout: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 w-full">
-      <main className="w-full h-full">
-        <Outlet />
-      </main>
-    </div>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-gray-50">
+        <Sidebar 
+          userRole={userRole as 'admin' | 'instructor' | 'student'} 
+          userName={userName} 
+        />
+        <main className="flex-1">
+          <Outlet />
+        </main>
+      </div>
+    </SidebarProvider>
   );
 };
 

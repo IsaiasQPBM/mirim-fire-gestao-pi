@@ -1,8 +1,21 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+import { 
+  Sidebar as SidebarComponent,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarHeader,
+  SidebarFooter,
+  SidebarTrigger,
+  useSidebar,
+} from '@/components/ui/sidebar';
 import { 
   Home, 
   Users, 
@@ -10,7 +23,6 @@ import {
   Calendar, 
   Settings,
   Shield, 
-  LogIn,
   UserCog,
   BookPlus,
   CalendarDays,
@@ -20,32 +32,19 @@ import {
   FileText,
 } from 'lucide-react';
 import CBMEPILogo from './CBMEPILogo';
+import LogoutButton from './LogoutButton';
 
 type UserRole = 'admin' | 'instructor' | 'student';
 
 interface SidebarProps {
   userRole: UserRole;
   userName: string;
-  isCollapsed?: boolean;
-  setIsCollapsed?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ 
-  userRole, 
-  userName, 
-  isCollapsed = false, 
-  setIsCollapsed 
-}) => {
-  const [collapsed, setCollapsed] = useState(isCollapsed);
+const Sidebar: React.FC<SidebarProps> = ({ userRole, userName }) => {
   const location = useLocation();
-
-  const toggleSidebar = () => {
-    const newValue = !collapsed;
-    setCollapsed(newValue);
-    if (setIsCollapsed) {
-      setIsCollapsed(newValue);
-    }
-  };
+  const { state } = useSidebar();
+  const collapsed = state === 'collapsed';
 
   // Define navigation items based on user role
   const getNavigationItems = (role: UserRole) => {
@@ -103,66 +102,46 @@ const Sidebar: React.FC<SidebarProps> = ({
   };
 
   return (
-    <div 
-      className={cn(
-        'flex flex-col h-screen bg-sidebar transition-all duration-300 border-r border-sidebar-border',
-        collapsed ? 'w-16' : 'w-64'
-      )}
-    >
-      {/* Sidebar Header */}
-      <div className="p-4 flex justify-center border-b border-sidebar-border">
-        {collapsed ? (
-          <CBMEPILogo size="small" withText={false} />
-        ) : (
-          <CBMEPILogo size="small" withText={true} />
-        )}
-      </div>
+    <SidebarComponent collapsible="icon">
+      <SidebarHeader className="p-4 border-b">
+        <div className="flex justify-center">
+          {collapsed ? (
+            <CBMEPILogo size="small" withText={false} />
+          ) : (
+            <CBMEPILogo size="small" withText={true} />
+          )}
+        </div>
+      </SidebarHeader>
 
-      {/* Role Badge */}
-      <div className={cn(
-        'mx-4 my-2 p-2 rounded-md bg-sidebar-accent flex items-center gap-2 text-sidebar-foreground',
-        collapsed && 'justify-center'
-      )}>
-        <Shield size={18} />
-        {!collapsed && (
-          <span className="text-sm font-medium capitalize">{userRole}</span>
-        )}
-      </div>
-
-      {/* Navigation Links */}
-      <div className="flex-1 py-4 overflow-y-auto">
-        {navigationItems.map((item) => (
-          <Link
-            key={item.name}
-            to={item.path}
-            className={cn(
-              'flex items-center px-4 py-3 mx-2 rounded-md text-sidebar-foreground',
-              isActive(item.path) 
-                ? 'bg-cbmepi-orange text-white' 
-                : 'hover:bg-sidebar-accent',
-              collapsed ? 'justify-center' : 'justify-start'
-            )}
-          >
-            <item.icon size={collapsed ? 22 : 18} className={cn(!collapsed && 'mr-3')} />
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel className="flex items-center gap-2">
+            <Shield size={18} />
             {!collapsed && (
-              <span className="text-sm font-medium">{item.name}</span>
+              <span className="text-sm font-medium capitalize">{userRole}</span>
             )}
-          </Link>
-        ))}
-      </div>
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {navigationItems.map((item) => (
+                <SidebarMenuItem key={item.name}>
+                  <SidebarMenuButton asChild isActive={isActive(item.path)}>
+                    <Link to={item.path}>
+                      <item.icon size={18} />
+                      <span>{item.name}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
 
-      {/* Sidebar Footer */}
-      <div className="p-4 border-t border-sidebar-border">
-        <Button
-          variant="outline"
-          className="w-full flex items-center justify-center gap-2 bg-sidebar-accent text-sidebar-foreground hover:bg-sidebar-primary hover:text-sidebar-primary-foreground"
-          onClick={toggleSidebar}
-        >
-          {!collapsed && <span>Recolher</span>}
-          <LogIn size={18} className={cn(collapsed ? '' : 'rotate-180')} />
-        </Button>
-      </div>
-    </div>
+      <SidebarFooter className="p-4 border-t">
+        <LogoutButton />
+      </SidebarFooter>
+    </SidebarComponent>
   );
 };
 
