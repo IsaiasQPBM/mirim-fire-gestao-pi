@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
-import DashboardCharts from '@/components/dashboard/DashboardCharts';
+import { DashboardCharts } from '@/components/dashboard/DashboardCharts';
 import { 
   Users, 
   GraduationCap, 
@@ -151,7 +151,7 @@ const Dashboard: React.FC = () => {
 
           {/* Charts and Recent Activity */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <DashboardCharts />
+            <DashboardCharts userRole={userRole} />
             
             <Card className="border border-gray-200 shadow-sm">
               <CardHeader>
