@@ -111,6 +111,23 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
+  
+  /* Responsive utilities */
+  .responsive-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
+  }
+  
+  .responsive-padding {
+    @apply p-4 md:p-6 lg:p-8;
+  }
+  
+  .responsive-text {
+    @apply text-sm md:text-base lg:text-lg;
+  }
+  
+  .mobile-first-flex {
+    @apply flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-4;
+  }
 }
 
 /* Animation classes */
@@ -185,6 +202,45 @@
   box-shadow: 0 0 20px rgba(245, 166, 35, 0.4);
 }
 
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+  .mobile-hide {
+    display: none;
+  }
+  
+  .mobile-full-width {
+    width: 100%;
+  }
+  
+  .mobile-text-center {
+    text-align: center;
+  }
+  
+  .mobile-stack {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .mobile-stack > * {
+    margin-bottom: 0.5rem;
+  }
+  
+  .mobile-stack > *:last-child {
+    margin-bottom: 0;
+  }
+}
+
+/* Tablet-specific styles */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .tablet-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .tablet-hide {
+    display: none;
+  }
+}
+
 /* Animation keyframes */
 @keyframes fadeIn {
   from {
@@ -249,4 +305,38 @@
   background: linear-gradient(135deg, #E8941A 0%, #D6831A 100%);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(245, 166, 35, 0.3);
+}
+
+/* Responsive cards */
+.responsive-card {
+  @apply bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow;
+}
+
+/* Responsive tables */
+.responsive-table {
+  @apply overflow-x-auto;
+}
+
+.responsive-table table {
+  @apply min-w-full;
+}
+
+/* Focus styles for accessibility */
+.focus-outline {
+  @apply focus:outline-none focus:ring-2 focus:ring-cbmepi-orange focus:ring-offset-2;
+}
+
+/* Print styles */
+@media print {
+  .print-hide {
+    display: none !important;
+  }
+  
+  .print-show {
+    display: block !important;
+  }
+  
+  body {
+    print-color-adjust: exact;
+  }
 }

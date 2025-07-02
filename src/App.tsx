@@ -1,4 +1,3 @@
-
 import { Route, Routes } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import UsersList from './pages/users/UsersList';
@@ -50,6 +49,8 @@ import Settings from './pages/Settings';
 import PlaceholderPage from './pages/PlaceholderPage';
 import DashboardLayout from './components/DashboardLayout';
 import { Toaster } from '@/components/ui/toaster';
+import NotificationsList from './pages/communication/NotificationsList';
+import AnnouncementCreate from './pages/communication/AnnouncementCreate';
 
 function App() {
   return (
@@ -65,6 +66,9 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/help" element={<PlaceholderPage title="Ajuda do Sistema" />} />
           <Route path="/settings" element={<Settings />} />
+          
+          {/* Notifications */}
+          <Route path="/notifications" element={<NotificationsList />} />
           
           {/* Users */}
           <Route path="/users" element={<UsersList />} />
@@ -132,8 +136,8 @@ function App() {
           <Route path="/communication/messages/new" element={<MessagesNew />} />
           <Route path="/communications/announcements" element={<AnnouncementsList />} />
           <Route path="/communication/announcements" element={<AnnouncementsList />} />
-          <Route path="/communications/announcements/new" element={<PlaceholderPage title="Novo Comunicado" />} />
-          <Route path="/communication/announcements/new" element={<PlaceholderPage title="Novo Comunicado" />} />
+          <Route path="/communications/announcements/new" element={<AnnouncementCreate />} />
+          <Route path="/communication/announcements/new" element={<AnnouncementCreate />} />
           
           {/* Reports */}
           <Route path="/reports" element={<ReportsDashboard />} />

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,6 +18,7 @@ import { toast } from '@/hooks/use-toast';
 import { ChevronLeft, Users, Calendar, MapPin, Clock, User, PlusCircle, BookOpen, PenLine } from 'lucide-react';
 import { mockClasses, mockLessons } from '@/data/mockCurriculumData';
 import { Class, Lesson } from '@/data/curriculumTypes';
+import AddStudentToClassModal from '@/components/modals/AddStudentToClassModal';
 
 const ClassView: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -29,6 +29,7 @@ const ClassView: React.FC = () => {
   const [classData, setClassData] = useState<Class | null>(null);
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showAddStudentModal, setShowAddStudentModal] = useState(false);
 
   useEffect(() => {
     // Check if user is logged in
@@ -102,10 +103,7 @@ const ClassView: React.FC = () => {
   };
 
   const handleAddStudent = () => {
-    toast({
-      title: "Adicionar Aluno",
-      description: "Funcionalidade em desenvolvimento. Em breve será possível matricular alunos.",
-    });
+    setShowAddStudentModal(true);
   };
 
   const handleNewLesson = () => {
@@ -138,7 +136,7 @@ const ClassView: React.FC = () => {
         userName={userName} 
       />
       
-      <main className="flex-1 p-6 overflow-y-auto">
+      <main className="flex-1 p-4 md:p-6 overflow-y-auto">
         <div className="max-w-7xl mx-auto">
           <div className="mb-6">
             <Breadcrumb className="mb-4">
@@ -166,10 +164,13 @@ const ClassView: React.FC = () => {
               Voltar para Turmas
             </Button>
             
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-center">
                 <Users className="h-6 w-6 text-cbmepi-red mr-2" />
-                <h1 className="text-2xl font-bold text-cbmepi-black">{classData.name}</h1>
+                <div>
+                  <h1 className="text-xl md:text-2xl font-bold text-cbmepi-black">{classData.name}</h1>
+                  <p className="text-gray-600 text-sm md:text-base font-medium">{classData.courseName}</p>
+                </div>
               </div>
               
               <div className="flex items-center space-x-3">
@@ -179,6 +180,7 @@ const ClassView: React.FC = () => {
                   <Button 
                     onClick={() => navigate(`/classes/${id}/edit`)}
                     variant="outline" 
+                    size="sm"
                     className="border-cbmepi-orange text-cbmepi-orange hover:bg-cbmepi-orange hover:text-white"
                   >
                     Editar Turma
@@ -190,7 +192,7 @@ const ClassView: React.FC = () => {
             <p className="text-gray-600 mt-1 font-medium">{classData.courseName}</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-6">
             <Card className="border border-gray-200 shadow-sm">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base">Período</CardTitle>
@@ -226,22 +228,27 @@ const ClassView: React.FC = () => {
           </div>
           
           <Tabs defaultValue="students" className="space-y-6">
-            <TabsList className="bg-white border border-gray-200">
-              <TabsTrigger value="students">Alunos ({classData.studentIds.length})</TabsTrigger>
-              <TabsTrigger value="instructors">Instrutores ({classData.instructorIds.length})</TabsTrigger>
-              <TabsTrigger value="lessons">
+            <TabsList className="bg-white border border-gray-200 grid grid-cols-3 w-full md:w-auto">
+              <TabsTrigger value="students" className="text-xs md:text-sm">
+                Alunos ({classData.studentIds.length})
+              </TabsTrigger>
+              <TabsTrigger value="instructors" className="text-xs md:text-sm">
+                Instrutores ({classData.instructorIds.length})
+              </TabsTrigger>
+              <TabsTrigger value="lessons" className="text-xs md:text-sm">
                 Aulas ({lessons.length})
               </TabsTrigger>
             </TabsList>
             
             <TabsContent value="students" className="space-y-6">
-              <div className="flex justify-between items-center mb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
                 <h2 className="text-lg font-semibold text-cbmepi-black">Alunos Matriculados</h2>
                 
                 {isAdmin && (
                   <Button 
                     className="bg-cbmepi-orange hover:bg-cbmepi-orange/90 text-white"
                     onClick={handleAddStudent}
+                    size="sm"
                   >
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Adicionar Aluno
@@ -250,7 +257,7 @@ const ClassView: React.FC = () => {
               </div>
               
               {classData.studentIds.length === 0 ? (
-                <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
+                <div className="bg-white border border-gray-200 rounded-lg p-6 md:p-8 text-center">
                   <Users className="mx-auto h-12 w-12 text-gray-400" />
                   <h3 className="mt-2 text-lg font-medium text-gray-900">Nenhum aluno matriculado</h3>
                   <p className="mt-1 text-sm text-gray-500">
@@ -271,32 +278,34 @@ const ClassView: React.FC = () => {
               ) : (
                 <Card className="border border-gray-200 shadow-sm">
                   <CardContent className="p-0">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>ID</TableHead>
-                          <TableHead>Aluno</TableHead>
-                          <TableHead className="text-right">Ações</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {classData.studentIds.map((studentId) => (
-                          <TableRow key={studentId}>
-                            <TableCell className="font-medium">{studentId}</TableCell>
-                            <TableCell>Nome do Aluno (Simulado)</TableCell>
-                            <TableCell className="text-right">
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => handleViewProfile(studentId)}
-                              >
-                                Ver Perfil
-                              </Button>
-                            </TableCell>
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>ID</TableHead>
+                            <TableHead>Aluno</TableHead>
+                            <TableHead className="text-right">Ações</TableHead>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                        </TableHeader>
+                        <TableBody>
+                          {classData.studentIds.map((studentId) => (
+                            <TableRow key={studentId}>
+                              <TableCell className="font-medium">{studentId}</TableCell>
+                              <TableCell>Nome do Aluno (Simulado)</TableCell>
+                              <TableCell className="text-right">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => handleViewProfile(studentId)}
+                                >
+                                  Ver Perfil
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
                   </CardContent>
                 </Card>
               )}
@@ -462,6 +471,14 @@ const ClassView: React.FC = () => {
           </Tabs>
         </div>
       </main>
+
+      {/* Add Student Modal */}
+      <AddStudentToClassModal
+        isOpen={showAddStudentModal}
+        onClose={() => setShowAddStudentModal(false)}
+        classId={id || ''}
+        className={classData.name}
+      />
     </div>
   );
 };
