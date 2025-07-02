@@ -23,7 +23,7 @@ const Header: React.FC<HeaderProps> = ({ title, userRole, userName }) => {
       
       <div className="flex items-center gap-3">
         <GlobalSearch />
-        <NotificationsPanel />
+        <NotificationsPanel userId={userName} />
         
         <div className="flex items-center gap-2 text-sm text-gray-600">
           <User size={16} />
