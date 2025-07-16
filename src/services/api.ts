@@ -1462,3 +1462,59 @@ export const calendarService = {
     return data;
   }
 };
+
+// ===== SERVIÇOS DE AULAS =====
+export const lessonService = {
+  // Buscar todas as aulas
+  async getAll() {
+    const { data, error } = await supabase
+      .from('lessons')
+      .select('*')
+      .order('lessonDate', { ascending: true });
+    if (error) throw error;
+    return data;
+  },
+
+  // Buscar aula por ID
+  async getById(id: string) {
+    const { data, error } = await supabase
+      .from('lessons')
+      .select('*')
+      .eq('id', id)
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  // Criar aula
+  async create(lesson: any) {
+    const { data, error } = await supabase
+      .from('lessons')
+      .insert(lesson)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  // Atualizar aula
+  async update(id: string, updates: any) {
+    const { data, error } = await supabase
+      .from('lessons')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  // Deletar aula
+  async delete(id: string) {
+    const { error } = await supabase
+      .from('lessons')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
+  }
+};

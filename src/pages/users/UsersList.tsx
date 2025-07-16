@@ -34,6 +34,9 @@ import { useToast } from '@/hooks/use-toast';
 import { TableRow as TableRowType, TableUpdate } from '@/lib/supabase';
 import clsx from 'clsx';
 import { userService } from '@/services/api';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import UserEditForm from '@/components/users/UserEditForm';
+import { v4 as uuidv4 } from 'uuid';
 
 // Exemplo de dados mockados para visualização (remover ao integrar com backend)
 const users = [
@@ -97,6 +100,8 @@ export default function UsersList() {
   const navigate = useNavigate();
   const updateUserMutation = useUpdateUser();
   const { toast } = useToast();
+  const [showUserModal, setShowUserModal] = useState(false);
+  const [editingUser, setEditingUser] = useState<any | null>(null);
 
   useEffect(() => {
     async function fetchUsers() {
@@ -164,9 +169,9 @@ export default function UsersList() {
 
   const getRoleBadge = (role: string) => {
     const roleConfig = {
-      admin: { label: 'Administrador', variant: 'destructive' as const },
+      admin: { label: 'Administrador', variant: 'default' as const },
       instructor: { label: 'Instrutor', variant: 'default' as const },
-      student: { label: 'Aluno', variant: 'secondary' as const },
+      student: { label: 'Aluno', variant: 'pending' as const },
     };
     
     const config = roleConfig[role as keyof typeof roleConfig] || { label: role, variant: 'outline' as const };
@@ -225,7 +230,11 @@ export default function UsersList() {
           <h1 className="text-3xl font-extrabold text-cbmepi-black mb-1 tracking-tight">Gerenciamento de Usuários</h1>
           <p className="text-gray-500 text-base">Administre os usuários do sistema institucional com facilidade e segurança.</p>
         </div>
-        <Button className="bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-lg shadow-md px-6 py-3 flex items-center gap-2 text-lg transition-all duration-200" title="Adicionar novo usuário">
+        <Button
+          className="bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-full shadow-md px-6 py-2 flex items-center gap-2"
+          onClick={() => { setEditingUser(null); setShowUserModal(true); }}
+          aria-label="Novo Usuário"
+        >
           <Plus className="h-5 w-5" /> Novo Usuário
         </Button>
       </div>
@@ -266,7 +275,11 @@ export default function UsersList() {
       {/* Lista de usuários em cartões/linhas suaves */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredUsers.map(user => (
-          <Card key={user.id} className="rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-200">
+          <Card
+            key={user.id}
+            className="rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-200"
+            onClick={() => { setEditingUser(user); setShowUserModal(true); }}
+          >
             <CardHeader className="flex flex-row items-center gap-4 pb-2">
               <Avatar className="h-12 w-12">
                 {user.avatar || user.profile_image ? (
@@ -294,7 +307,7 @@ export default function UsersList() {
                 <DropdownMenuContent align="end" className="shadow-lg rounded-xl border border-gray-100 animate-fade-in">
                   <DropdownMenuItem
                     className="flex items-center gap-2 text-blue-600 hover:bg-blue-50"
-                    onClick={() => navigate(`/users/${user.id}`)}
+                    onClick={() => navigate(`/users/${user.id}/profile`)}
                   >
                     <Eye className="h-4 w-4" /> Ver Perfil
                   </DropdownMenuItem>
@@ -322,6 +335,52 @@ export default function UsersList() {
           </Card>
         ))}
       </div>
+      <Dialog open={showUserModal} onOpenChange={setShowUserModal}>
+        <DialogContent className="max-w-lg w-full">
+          <DialogHeader>
+            <DialogTitle>{editingUser ? 'Editar Usuário' : 'Novo Usuário'}</DialogTitle>
+          </DialogHeader>
+          <UserEditForm
+            initialValues={editingUser ? {
+              fullName: editingUser.full_name,
+              birthDate: editingUser.birth_date,
+              role: editingUser.role,
+              email: editingUser.email,
+              phone: editingUser.phone,
+              status: editingUser.status,
+            } : undefined}
+            onSubmit={async (data) => {
+              if (editingUser) {
+                await userService.update(editingUser.id, {
+                  full_name: data.fullName,
+                  birth_date: data.birthDate,
+                  role: data.role,
+                  email: data.email,
+                  phone: data.phone,
+                  status: data.status,
+                });
+                toast({ title: 'Usuário atualizado com sucesso!' });
+              } else {
+                await userService.create({
+                  id: uuidv4(),
+                  full_name: data.fullName,
+                  birth_date: data.birthDate,
+                  role: data.role,
+                  email: data.email,
+                  phone: data.phone,
+                  status: data.status,
+                });
+                toast({ title: 'Usuário criado com sucesso!' });
+              }
+              setShowUserModal(false);
+              // Atualizar lista de usuários
+              const dataList = await userService.getAll();
+              setUsers(dataList || []);
+            }}
+            submitLabel={editingUser ? 'Salvar Alterações' : 'Criar Usuário'}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

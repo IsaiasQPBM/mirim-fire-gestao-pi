@@ -15,9 +15,11 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { PlusCircle, Search, BookOpen, Clock, Eye, Edit } from 'lucide-react';
+import { PlusCircle, Search, BookOpen, Clock, Eye, Edit, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { disciplineService } from '@/services/api';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import DisciplineEditForm from '@/components/curriculum/DisciplineEditForm';
 
 const DisciplinesList: React.FC = () => {
   const [userRole, setUserRole] = useState<string>('');
@@ -31,6 +33,8 @@ const DisciplinesList: React.FC = () => {
   
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [showDisciplineModal, setShowDisciplineModal] = useState(false);
+  const [editingDiscipline, setEditingDiscipline] = useState<any | null>(null);
 
   useEffect(() => {
     // Check if user is logged in
@@ -201,11 +205,11 @@ const DisciplinesList: React.FC = () => {
               
               {isAdmin && (
                 <Button 
-                  onClick={handleCreateDiscipline}
-                  className="bg-orange-500 text-white font-semibold rounded-lg px-4 py-2 hover:bg-orange-600 transition-all duration-200 ease-in-out"
+                  onClick={() => { setEditingDiscipline(null); setShowDisciplineModal(true); }}
+                  className="bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-full shadow-md px-6 py-2 flex items-center gap-2"
+                  aria-label="Nova Disciplina"
                 >
-                  <PlusCircle className="mr-2" size={16} />
-                  Nova Disciplina
+                  <Plus className="h-5 w-5" /> Nova Disciplina
                 </Button>
               )}
             </div>
@@ -239,7 +243,7 @@ const DisciplinesList: React.FC = () => {
                 <Card 
                   key={discipline.id}
                   className="rounded-xl bg-white shadow-sm p-5 border border-gray-200 hover:shadow-md transition-all duration-200 ease-in-out cursor-pointer"
-                  onClick={() => handleViewDiscipline(discipline.id)}
+                  onClick={() => { setEditingDiscipline(discipline); setShowDisciplineModal(true); }}
                 >
                   <CardHeader className="p-0 mb-4">
                     <div className="flex justify-between items-start">
@@ -278,6 +282,19 @@ const DisciplinesList: React.FC = () => {
           )}
         </div>
       </main>
+
+      <Dialog open={showDisciplineModal} onOpenChange={setShowDisciplineModal}>
+        <DialogContent className="max-w-lg w-full">
+          <DialogHeader>
+            <DialogTitle>{editingDiscipline ? 'Editar Disciplina' : 'Nova Disciplina'}</DialogTitle>
+          </DialogHeader>
+          <DisciplineEditForm
+            discipline={editingDiscipline}
+            onSave={() => { setShowDisciplineModal(false); /* Recarregar lista de disciplinas */ }}
+            onCancel={() => setShowDisciplineModal(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

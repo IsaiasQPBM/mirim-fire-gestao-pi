@@ -11,6 +11,7 @@ import Header from '@/components/Header';
 import LessonModal from '@/components/lessons/LessonModal';
 import { useToast } from '@/hooks/use-toast';
 import { BookOpen, Calendar, Clock, Plus, Edit, Eye, Save, Search } from 'lucide-react';
+import { lessonService, classService } from '@/services/api';
 
 const LessonPlanning: React.FC = () => {
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ const LessonPlanning: React.FC = () => {
   const [userRole, setUserRole] = useState<string>('');
   const [userName, setUserName] = useState<string>('');
   const [lessons, setLessons] = useState<any[]>([]);
+  const [classes, setClasses] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterClass, setFilterClass] = useState('all');
   const [isLessonModalOpen, setIsLessonModalOpen] = useState(false);
@@ -36,36 +38,20 @@ const LessonPlanning: React.FC = () => {
 
     setUserRole(storedUserRole);
     setUserName(storedUserName);
-    
-    // Load mock lessons
-    setLessons([
-      {
-        id: 'lesson-1',
-        title: 'Introdução aos Primeiros Socorros',
-        description: 'Conceitos básicos de primeiros socorros',
-        content: 'Aula teórica sobre os fundamentos dos primeiros socorros...',
-        classId: 'class-1',
-        disciplineId: 'disc-1',
-        lessonDate: '2024-07-01',
-        startTime: '08:00',
-        endTime: '10:00',
-        status: 'planned',
-        resources: ['Projetor', 'Boneco de treino'],
-      },
-      {
-        id: 'lesson-2',
-        title: 'Prevenção de Incêndios',
-        description: 'Técnicas de prevenção e combate a incêndios',
-        content: 'Aula prática sobre uso de extintores...',
-        classId: 'class-2',
-        disciplineId: 'disc-2',
-        lessonDate: '2024-07-02',
-        startTime: '14:00',
-        endTime: '16:00',
-        status: 'completed',
-        resources: ['Extintores', 'Área de treino'],
-      },
-    ]);
+
+    // Buscar aulas e turmas reais do backend
+    Promise.all([
+      lessonService.getAll(),
+      classService.getAll()
+    ])
+      .then(([lessonsData, classesData]) => {
+        setLessons(lessonsData || []);
+        setClasses(classesData || []);
+      })
+      .catch(() => {
+        setLessons([]);
+        setClasses([]);
+      });
   }, [navigate]);
 
   const handleCreateLesson = () => {
@@ -88,11 +74,15 @@ const LessonPlanning: React.FC = () => {
     // Here you could open a detailed view modal
   };
 
-  const handleSaveLesson = (lessonData: any) => {
+  const handleSaveLesson = async (lessonData: any) => {
     if (modalMode === 'create') {
-      setLessons(prev => [...prev, lessonData]);
+      await lessonService.create(lessonData);
+      const data = await lessonService.getAll();
+      setLessons(data || []);
     } else {
-      setLessons(prev => prev.map(l => l.id === lessonData.id ? lessonData : l));
+      await lessonService.update(lessonData.id, lessonData);
+      const data = await lessonService.getAll();
+      setLessons(data || []);
     }
   };
 
@@ -106,7 +96,7 @@ const LessonPlanning: React.FC = () => {
   const filteredLessons = lessons.filter(lesson => {
     const matchesSearch = lesson.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          lesson.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesClass = filterClass === 'all' || lesson.classId === filterClass;
+    const matchesClass = filterClass === 'all' || lesson.classId === filterClass || lesson.class_id === filterClass;
     return matchesSearch && matchesClass;
   });
 
@@ -186,9 +176,9 @@ const LessonPlanning: React.FC = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todas as Turmas</SelectItem>
-                    <SelectItem value="class-1">Turma A - Manhã</SelectItem>
-                    <SelectItem value="class-2">Turma B - Tarde</SelectItem>
-                    <SelectItem value="class-3">Turma C - Noite</SelectItem>
+                    {classes.map((turma: any) => (
+                      <SelectItem key={turma.id} value={turma.id}>{turma.name}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
